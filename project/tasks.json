@@ -1,0 +1,136 @@
+{
+  "project": "IndieTix",
+  "description": "Event booking platform for the Indian market",
+  "milestones": [
+    {
+      "id": "M01",
+      "name": "Foundation & Infrastructure",
+      "description": "Core project setup, monorepo structure, and CI/CD",
+      "weight": 25,
+      "tasks": [
+        {
+          "id": "T01",
+          "name": "Repository initialization",
+          "description": "Initialize Git repository with basic configuration",
+          "status": "done",
+          "assignee": "iamjeevanh"
+        },
+        {
+          "id": "T02",
+          "name": "Turborepo monorepo setup",
+          "description": "Configure Turborepo with workspaces for apps and packages",
+          "status": "pending",
+          "assignee": "iamjeevanh"
+        },
+        {
+          "id": "T03",
+          "name": "CI/CD pipeline",
+          "description": "GitHub Actions workflows for lint, test, build",
+          "status": "pending",
+          "assignee": "iamjeevanh"
+        },
+        {
+          "id": "T04",
+          "name": "Code quality tools",
+          "description": "ESLint, Prettier, TypeScript configuration",
+          "status": "in_progress",
+          "assignee": "iamjeevanh"
+        }
+      ]
+    },
+    {
+      "id": "M02",
+      "name": "Core Packages",
+      "description": "Shared packages for UI, API, database, and utilities",
+      "weight": 30,
+      "tasks": [
+        {
+          "id": "T05",
+          "name": "UI component library",
+          "description": "Shared React components with Tailwind CSS",
+          "status": "pending",
+          "assignee": "nisha-ui"
+        },
+        {
+          "id": "T06",
+          "name": "API client package",
+          "description": "Type-safe API client with React Query integration",
+          "status": "pending",
+          "assignee": "iamjeevanh"
+        },
+        {
+          "id": "T07",
+          "name": "Database schema",
+          "description": "Prisma schema for events, users, bookings, tickets",
+          "status": "pending",
+          "assignee": "amit-ds"
+        },
+        {
+          "id": "T08",
+          "name": "Shared utilities",
+          "description": "Common utilities, validators, formatters",
+          "status": "pending",
+          "assignee": "iamjeevanh"
+        }
+      ]
+    },
+    {
+      "id": "M03",
+      "name": "Applications",
+      "description": "Web, organizer, and admin applications",
+      "weight": 30,
+      "tasks": [
+        {
+          "id": "T09",
+          "name": "Web app foundation",
+          "description": "Next.js app for end users with routing and layout",
+          "status": "pending",
+          "assignee": "nisha-ui"
+        },
+        {
+          "id": "T10",
+          "name": "Organizer app foundation",
+          "description": "Next.js app for event organizers",
+          "status": "pending",
+          "assignee": "nisha-ui"
+        },
+        {
+          "id": "T11",
+          "name": "Admin dashboard foundation",
+          "description": "Next.js app for platform administrators",
+          "status": "pending",
+          "assignee": "nisha-ui"
+        }
+      ]
+    },
+    {
+      "id": "M04",
+      "name": "Governance & Automation",
+      "description": "Code review, security scanning, progress tracking",
+      "weight": 15,
+      "tasks": [
+        {
+          "id": "T12",
+          "name": "PR templates and CODEOWNERS",
+          "description": "Standardized PR review process",
+          "status": "in_progress",
+          "assignee": "iamjeevanh"
+        },
+        {
+          "id": "T13",
+          "name": "Security scanning",
+          "description": "Gitleaks and Dependabot integration",
+          "status": "in_progress",
+          "assignee": "iamjeevanh"
+        },
+        {
+          "id": "T14",
+          "name": "Progress automation",
+          "description": "Automated progress tracking and reporting",
+          "status": "in_progress",
+          "assignee": "iamjeevanh"
+        }
+      ]
+    }
+  ]
+}

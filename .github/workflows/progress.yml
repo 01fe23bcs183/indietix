@@ -1,0 +1,55 @@
+name: Update Progress
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Run every 8 hours (at 00:00, 08:00, 16:00 UTC)
+    - cron: '0 */8 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-progress:
+    name: Update Progress Report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile || npm install
+
+      - name: Install ts-node
+        run: pnpm add -D ts-node typescript @types/node || npm install -D ts-node typescript @types/node
+
+      - name: Run progress update script
+        run: npx ts-node scripts/update-progress.ts
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --exit-code PROGRESS.md || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changes
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add PROGRESS.md
+          git commit -m "chore: update progress report [skip ci]"
+          git push
