@@ -11,15 +11,15 @@
  * 5. Generates PROGRESS.md with ASCII progress bars
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { execSync } from 'child_process';
-import { join } from 'path';
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { execSync } from "child_process";
+import { join } from "path";
 
 interface Task {
   id: string;
   name: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'done';
+  status: "pending" | "in_progress" | "done";
   assignee: string;
 }
 
@@ -37,8 +37,8 @@ interface ProjectData {
   milestones: Milestone[];
 }
 
-const TASKS_FILE = join(process.cwd(), 'project/tasks.json');
-const PROGRESS_FILE = join(process.cwd(), 'PROGRESS.md');
+const TASKS_FILE = join(process.cwd(), "project/tasks.json");
+const PROGRESS_FILE = join(process.cwd(), "PROGRESS.md");
 
 function loadTasks(): ProjectData {
   if (!existsSync(TASKS_FILE)) {
@@ -46,19 +46,19 @@ function loadTasks(): ProjectData {
     process.exit(1);
   }
 
-  const content = readFileSync(TASKS_FILE, 'utf-8');
+  const content = readFileSync(TASKS_FILE, "utf-8");
   return JSON.parse(content);
 }
 
 function getRecentCommits(limit: number = 50): string[] {
   try {
     const output = execSync(`git log -${limit} --oneline --no-merges`, {
-      encoding: 'utf-8',
+      encoding: "utf-8",
       cwd: process.cwd(),
     });
-    return output.trim().split('\n');
+    return output.trim().split("\n");
   } catch {
-    console.warn('⚠️  Could not fetch git commits, using empty list');
+    console.warn("⚠️  Could not fetch git commits, using empty list");
     return [];
   }
 }
@@ -86,7 +86,7 @@ function updateTaskStatus(
   for (const milestone of updated.milestones) {
     for (const task of milestone.tasks) {
       if (completedTokens.has(task.id)) {
-        task.status = 'done';
+        task.status = "done";
       }
     }
   }
@@ -97,7 +97,7 @@ function updateTaskStatus(
 function calculateProgress(milestone: Milestone): number {
   if (milestone.tasks.length === 0) return 0;
 
-  const doneCount = milestone.tasks.filter((t) => t.status === 'done').length;
+  const doneCount = milestone.tasks.filter((t) => t.status === "done").length;
   return Math.round((doneCount / milestone.tasks.length) * 100);
 }
 
@@ -117,25 +117,25 @@ function calculateOverallProgress(data: ProjectData): number {
 function generateProgressBar(percentage: number, width: number = 30): string {
   const filled = Math.round((percentage / 100) * width);
   const empty = width - filled;
-  return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${percentage}%`;
+  return `[${"█".repeat(filled)}${"░".repeat(empty)}] ${percentage}%`;
 }
 
 function getStatusEmoji(status: string): string {
   switch (status) {
-    case 'done':
-      return '✅';
-    case 'in_progress':
-      return '🔄';
-    case 'pending':
-      return '⏳';
+    case "done":
+      return "✅";
+    case "in_progress":
+      return "🔄";
+    case "pending":
+      return "⏳";
     default:
-      return '❓';
+      return "❓";
   }
 }
 
 function generateProgressMarkdown(data: ProjectData): string {
   const overallProgress = calculateOverallProgress(data);
-  const lastUpdated = new Date().toISOString().split('T')[0];
+  const lastUpdated = new Date().toISOString().split("T")[0];
 
   let md = `# 📊 ${data.project} - Build Progress\n\n`;
   md += `${data.description}\n\n`;
@@ -146,7 +146,7 @@ function generateProgressMarkdown(data: ProjectData): string {
 
   for (const milestone of data.milestones) {
     const progress = calculateProgress(milestone);
-    const doneCount = milestone.tasks.filter((t) => t.status === 'done').length;
+    const doneCount = milestone.tasks.filter((t) => t.status === "done").length;
     const totalCount = milestone.tasks.length;
 
     md += `## ${milestone.id}: ${milestone.name}\n\n`;
@@ -158,7 +158,7 @@ function generateProgressMarkdown(data: ProjectData): string {
 
     for (const task of milestone.tasks) {
       const emoji = getStatusEmoji(task.status);
-      const status = task.status.replace('_', ' ');
+      const status = task.status.replace("_", " ");
       md += `| ${task.id} | ${emoji} ${status} | ${task.name} | @${task.assignee} |\n`;
     }
 
@@ -177,25 +177,25 @@ function generateProgressMarkdown(data: ProjectData): string {
 }
 
 function main() {
-  console.log('🚀 Starting progress update...\n');
+  console.log("🚀 Starting progress update...\n");
 
-  console.log('📖 Loading tasks from project/tasks.json...');
+  console.log("📖 Loading tasks from project/tasks.json...");
   const data = loadTasks();
   console.log(`   Found ${data.milestones.length} milestones\n`);
 
-  console.log('🔍 Scanning recent git commits...');
+  console.log("🔍 Scanning recent git commits...");
   const commits = getRecentCommits();
   console.log(`   Analyzed ${commits.length} commits\n`);
 
   const completedTokens = extractTaskTokens(commits);
-  console.log('📝 Found completed task tokens:');
+  console.log("📝 Found completed task tokens:");
   if (completedTokens.size > 0) {
-    console.log(`   ${Array.from(completedTokens).join(', ')}\n`);
+    console.log(`   ${Array.from(completedTokens).join(", ")}\n`);
   } else {
-    console.log('   None found\n');
+    console.log("   None found\n");
   }
 
-  console.log('🔄 Updating task status...');
+  console.log("🔄 Updating task status...");
   const updatedData = updateTaskStatus(data, completedTokens);
 
   const overallProgress = calculateOverallProgress(updatedData);
@@ -206,12 +206,12 @@ function main() {
     console.log(`   ${milestone.id}: ${progress}% - ${milestone.name}`);
   }
 
-  console.log('\n📄 Generating PROGRESS.md...');
+  console.log("\n📄 Generating PROGRESS.md...");
   const markdown = generateProgressMarkdown(updatedData);
-  writeFileSync(PROGRESS_FILE, markdown, 'utf-8');
+  writeFileSync(PROGRESS_FILE, markdown, "utf-8");
   console.log(`   ✅ Written to ${PROGRESS_FILE}\n`);
 
-  console.log('✨ Progress update complete!\n');
+  console.log("✨ Progress update complete!\n");
 }
 
 main();
