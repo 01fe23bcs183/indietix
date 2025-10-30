@@ -4,6 +4,7 @@
     "plugins": [{ "name": "next" }],
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

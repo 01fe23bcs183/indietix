@@ -297,3 +297,57 @@ Updated `.github/workflows/ci.yml`:
 
 **Document Status:** In Progress - Fixing CI
 **Last Updated:** 2025-10-30 18:04 UTC
+
+## Phase 14: TypeScript Source-First Resolution ✅
+
+### Issue Identified
+
+CI typecheck failed with:
+
+```
+error TS2307: Cannot find module '@indietix/ui' or its corresponding type declarations.
+```
+
+### Root Cause
+
+- Typecheck ran BEFORE building packages in CI
+- Apps couldn't resolve workspace package types without built dist/ artifacts
+- User requirement specified CI order: install → lint → typecheck → unit tests → build
+
+### Solution Applied
+
+Implemented "source-first" package resolution:
+
+1. **Updated package.json for all packages** (ui, utils, api, db):
+   - Changed `"types": "./dist/index.d.ts"` → `"types": "./src/index.ts"`
+   - Updated exports to include source: `"types": "./src/index.ts", "import": "./src/index.ts"`
+
+2. **Updated Next.js app tsconfigs** (web, admin, organizer):
+   - Added `"baseUrl": "."` to each app's tsconfig.json
+   - Preserved `"@/*": ["./src/*"]` path alias for app-local imports
+
+3. **Reverted tsconfig.base.json**:
+   - Removed baseUrl and paths from base config
+   - Kept only shared compiler options
+
+### Result
+
+- ✅ TypeScript can now resolve workspace packages from source files
+- ✅ No build required before typecheck
+- ✅ Next.js app-local `@/` aliases still work correctly
+- ✅ `pnpm -w typecheck` passes locally (verified)
+
+### Files Modified
+
+- packages/ui/package.json
+- packages/utils/package.json
+- packages/api/package.json
+- packages/db/package.json
+- apps/web/tsconfig.json
+- apps/admin/tsconfig.json
+- apps/organizer/tsconfig.json
+
+---
+
+**Document Status:** Ready for CI verification
+**Last Updated:** 2025-10-30 18:11 UTC
