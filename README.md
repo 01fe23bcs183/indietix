@@ -14,6 +14,7 @@ All-in-one event booking platform for India (web + mobile + admin)
 Track our development progress in real-time: [**PROGRESS.md**](./PROGRESS.md)
 
 The progress report is automatically updated when code is merged to main and includes:
+
 - Overall project completion percentage
 - Progress by milestone (Foundation, Core Packages, Applications, Governance)
 - Detailed task status and assignments

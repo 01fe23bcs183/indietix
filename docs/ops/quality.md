@@ -147,6 +147,7 @@ SonarCloud provides deep code quality and security analysis.
 
 5. **Create sonar-project.properties**
    - Create file at repository root:
+
    ```properties
    sonar.projectKey=01fe23bcs183_indietix
    sonar.organization=01fe23bcs183
@@ -191,6 +192,7 @@ Codecov tracks test coverage over time.
 
 5. **Add Test Coverage Script**
    - Ensure `package.json` has a `test:coverage` script:
+
    ```json
    {
      "scripts": {

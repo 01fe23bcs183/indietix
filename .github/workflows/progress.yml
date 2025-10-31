@@ -5,7 +5,7 @@ on:
     branches: [main]
   schedule:
     # Run every 8 hours (at 00:00, 08:00, 16:00 UTC)
-    - cron: '0 */8 * * *'
+    - cron: "0 */8 * * *"
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

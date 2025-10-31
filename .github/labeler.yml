@@ -29,9 +29,9 @@ infra:
   - .github/**/*
   - turbo.json
   - pnpm-workspace.yaml
-  - '*.config.js'
-  - '*.config.ts'
+  - "*.config.js"
+  - "*.config.ts"
 
 docs:
   - docs/**/*
-  - '**/*.md'
+  - "**/*.md"
