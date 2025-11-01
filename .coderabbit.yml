@@ -1,0 +1,68 @@
+# CodeRabbit Configuration for IndieTix
+# Automated code review settings
+
+# Review strategy
+reviews:
+  # Deep analysis of code changes
+  review_strategy: deep
+
+  # Require unit tests for new features
+  require_unit_tests: true
+
+  # Maximum number of suggestions per PR
+  max_suggestions: 50
+
+  # Fail PR if secrets are detected
+  fail_on_secrets: true
+
+  # Auto-review settings
+  auto_review:
+    enabled: true
+    drafts: false
+
+  # Code quality checks
+  quality_checks:
+    - complexity
+    - duplication
+    - security
+    - performance
+    - best_practices
+
+  # Language-specific settings
+  languages:
+    typescript:
+      enabled: true
+      strict_mode: true
+    javascript:
+      enabled: true
+    python:
+      enabled: true
+
+# Path filters
+path_filters:
+  # Ignore generated files
+  ignore:
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/build/**"
+    - "**/*.min.js"
+    - "**/coverage/**"
+    - "**/.next/**"
+    - "**/.nuxt/**"
+    - "**/pnpm-lock.yaml"
+    - "**/package-lock.json"
+
+# Comment settings
+comments:
+  # Collapse resolved comments
+  collapse_resolved: true
+
+  # Minimum severity to comment
+  min_severity: medium
+
+# Integration settings
+integrations:
+  # GitHub integration
+  github:
+    enabled: true
+    auto_approve_dependabot: false

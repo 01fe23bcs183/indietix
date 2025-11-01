@@ -1,0 +1,135 @@
+# Dependabot Configuration for IndieTix
+# Automated dependency updates
+
+version: 2
+updates:
+  # npm dependencies for root workspace
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "iamjeevanh"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    versioning-strategy: increase
+
+  # npm dependencies for web app
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "nisha-ui"
+    labels:
+      - "dependencies"
+      - "web"
+      - "automated"
+
+  # npm dependencies for organizer app
+  - package-ecosystem: "npm"
+    directory: "/apps/organizer"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "nisha-ui"
+    labels:
+      - "dependencies"
+      - "organizer"
+      - "automated"
+
+  # npm dependencies for admin app
+  - package-ecosystem: "npm"
+    directory: "/apps/admin"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "nisha-ui"
+    labels:
+      - "dependencies"
+      - "admin"
+      - "automated"
+
+  # npm dependencies for API package
+  - package-ecosystem: "npm"
+    directory: "/packages/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "iamjeevanh"
+    labels:
+      - "dependencies"
+      - "api"
+      - "automated"
+
+  # npm dependencies for DB package
+  - package-ecosystem: "npm"
+    directory: "/packages/db"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "amit-ds"
+    labels:
+      - "dependencies"
+      - "db"
+      - "automated"
+
+  # npm dependencies for UI package
+  - package-ecosystem: "npm"
+    directory: "/packages/ui"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "nisha-ui"
+    labels:
+      - "dependencies"
+      - "ui"
+      - "automated"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "iamjeevanh"
+    labels:
+      - "dependencies"
+      - "infra"
+      - "automated"

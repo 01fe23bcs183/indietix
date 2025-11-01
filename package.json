@@ -1,33 +1,35 @@
 {
   "name": "indietix",
   "version": "1.0.0",
-  "private": true,
   "description": "All-in-one event booking platform for India (web + mobile + admin)",
+  "type": "module",
+  "main": "index.js",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "prepare": "husky"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "echo \"No tests yet\" && exit 0",
+    "typecheck": "tsc --noEmit",
+    "build": "echo \"No build yet\" && exit 0"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
+  "keywords": [
+    "event",
+    "booking",
+    "platform",
+    "india"
   ],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "@types/node": "^20.11.5",
-    "husky": "^9.0.10",
-    "lint-staged": "^15.2.0",
-    "prettier": "^3.2.4",
-    "turbo": "^1.12.4",
-    "typescript": "^5.3.3"
-  },
-  "packageManager": "pnpm@8.15.1",
-  "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "@eslint/js": "^9.38.0",
+    "@types/node": "^24.9.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   }
 }

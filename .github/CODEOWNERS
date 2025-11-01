@@ -1,0 +1,14 @@
+# Code Owners for IndieTix
+# These owners will be automatically requested for review when someone opens a pull request.
+
+# API and backend services
+/packages/api/* @iamjeevanh
+
+# Database schemas and migrations
+/packages/db/* @amit-ds
+
+# All applications (web, organizer, admin)
+/apps/* @nisha-ui
+
+# Default owner for everything else
+* @iamjeevanh
