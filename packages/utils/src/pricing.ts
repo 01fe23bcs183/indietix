@@ -6,6 +6,28 @@ export const FEES = {
 
 export const GST_RATE = 0.18;
 
+export async function getFeesFromSettings(prisma: any) {
+  try {
+    const setting = await prisma.platformSetting.findUnique({
+      where: { key: "fees" },
+    });
+    return setting?.value || FEES;
+  } catch {
+    return FEES;
+  }
+}
+
+export async function getGstRateFromSettings(prisma: any) {
+  try {
+    const setting = await prisma.platformSetting.findUnique({
+      where: { key: "gstRate" },
+    });
+    return setting?.value || GST_RATE;
+  } catch {
+    return GST_RATE;
+  }
+}
+
 export interface PricingBreakdown {
   subtotal: number;
   fees: number;

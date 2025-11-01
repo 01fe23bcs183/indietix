@@ -84,12 +84,14 @@ model User {
   name          String
   phone         String?
   role          Role      @default(CUSTOMER)
+  banned        Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
   sessions      Session[]
   organizer     Organizer?
   bookings      Booking[]
+  adminActions  AdminAction[]
 
   @@index([email])
   @@index([role])
@@ -109,17 +111,21 @@ model Session {
 }
 
 model Organizer {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  businessName String
-  description  String?
-  verified     Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  businessName        String
+  description         String?
+  verified            Boolean  @default(false)
+  verificationDocs    Json?
+  bankAccountMasked   String?
+  commissionOverride  Float?
+  meta                Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
   
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events       Event[]
-  payouts      Payout[]
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events              Event[]
+  payouts             Payout[]
 
   @@index([userId])
   @@index([verified])
@@ -142,6 +148,9 @@ model Event {
   allowCancellation         Boolean     @default(true)
   cancellationDeadlineHours Int         @default(24)
   cancellationFeeFlat       Int         @default(50)
+  featured                  Boolean     @default(false)
+  hidden                    Boolean     @default(false)
+  cancelReason              String?
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
   
@@ -156,6 +165,7 @@ model Event {
   @@index([category])
   @@index([date])
   @@index([status])
+  @@index([featured])
 }
 
 model EventView {
@@ -338,4 +348,27 @@ model WaitlistOffer {
   @@index([status])
   @@index([expiresAt])
   @@index([createdAt])
+}
+
+model PlatformSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model AdminAction {
+  id         String   @id @default(cuid())
+  adminId    String
+  entityType String
+  entityId   String
+  action     String
+  prev       Json?
+  next       Json?
+  ts         DateTime @default(now())
+  
+  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([adminId])
+  @@index([ts])
 }
