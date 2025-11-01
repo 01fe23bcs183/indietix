@@ -225,7 +225,7 @@ async function main() {
         quantity: 2,
         totalAmount: 5000,
         paymentStatus: "COMPLETED" as const,
-        status: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
       },
       {
         eventId: sunburnEvent.id,
@@ -233,7 +233,7 @@ async function main() {
         quantity: 1,
         totalAmount: 2500,
         paymentStatus: "COMPLETED" as const,
-        status: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
       },
       {
         eventId: sunburnEvent.id,
@@ -241,7 +241,7 @@ async function main() {
         quantity: 3,
         totalAmount: 7500,
         paymentStatus: "COMPLETED" as const,
-        status: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
       },
       {
         eventId: sunburnEvent.id,
@@ -249,7 +249,7 @@ async function main() {
         quantity: 2,
         totalAmount: 5000,
         paymentStatus: "COMPLETED" as const,
-        status: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
       },
       {
         eventId: sunburnEvent.id,
@@ -257,7 +257,7 @@ async function main() {
         quantity: 1,
         totalAmount: 2500,
         paymentStatus: "COMPLETED" as const,
-        status: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
       },
     ];
 
@@ -268,6 +268,68 @@ async function main() {
     }
     console.log(`✅ Created 5 sample bookings for ${sunburnEvent.title}`);
   }
+
+  console.log("🎫 Creating organizer-owned event with attendees for DX...");
+  const dxEvent = await prisma.event.create({
+    data: {
+      organizerId: organizer1.id,
+      title: "Bangalore Tech Meetup 2025",
+      slug: "bangalore-tech-meetup-2025",
+      description: "A networking event for tech enthusiasts and developers in Bangalore",
+      category: "TECH",
+      city: "Bengaluru",
+      venue: "Koramangala Social",
+      date: new Date("2025-12-01T18:00:00Z"),
+      price: 500,
+      totalSeats: 100,
+      status: "PUBLISHED",
+    },
+  });
+  console.log(`✅ Created DX event: ${dxEvent.title}`);
+
+  const customer3 = await prisma.user.create({
+    data: {
+      email: "customer3@example.com",
+      name: "Rajesh Kumar",
+      passwordHash: password,
+      role: "CUSTOMER",
+      phone: "+919876543215",
+    },
+  });
+
+  const dxBookings = [
+    {
+      eventId: dxEvent.id,
+      userId: customer1.id,
+      quantity: 2,
+      totalAmount: 1000,
+      paymentStatus: "COMPLETED" as const,
+      status: "CONFIRMED" as const,
+    },
+    {
+      eventId: dxEvent.id,
+      userId: customer2.id,
+      quantity: 1,
+      totalAmount: 500,
+      paymentStatus: "COMPLETED" as const,
+      status: "CONFIRMED" as const,
+    },
+    {
+      eventId: dxEvent.id,
+      userId: customer3.id,
+      quantity: 3,
+      totalAmount: 1500,
+      paymentStatus: "COMPLETED" as const,
+      status: "CONFIRMED" as const,
+    },
+  ];
+
+  for (const bookingData of dxBookings) {
+    await prisma.booking.create({
+      data: bookingData,
+    });
+  }
+  console.log(`✅ Created 3 attendees for ${dxEvent.title}`);
 
   console.log("🎉 Database seeding completed successfully!");
 }
