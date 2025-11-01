@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (event === "payment.captured") {
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: typeof prisma) => {
         const currentBooking = await tx.booking.findUnique({
           where: { id: booking.id },
         });

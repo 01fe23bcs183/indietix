@@ -1,6 +1,6 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import type { PaymentProvider, PaymentOrder, RazorpayConfig } from "./types";
+import type { PaymentProvider, PaymentOrder, RazorpayConfig, RefundResult } from "./types";
 
 export class RazorpayProvider implements PaymentProvider {
   kind: "razorpay" = "razorpay";
@@ -20,7 +20,7 @@ export class RazorpayProvider implements PaymentProvider {
     receipt: string;
   }): Promise<PaymentOrder> {
     const order = await this.client.orders.create({
-      amount: params.amountINR * 100, // Razorpay expects amount in paise
+      amount: params.amountINR * 100,
       currency: "INR",
       receipt: params.receipt,
     });
@@ -29,6 +29,24 @@ export class RazorpayProvider implements PaymentProvider {
       orderId: order.id,
       amount: params.amountINR,
       currency: "INR",
+    };
+  }
+
+  async createRefund(params: {
+    paymentId: string;
+    amountPaise: number;
+    speed?: "normal" | "optimum";
+  }): Promise<RefundResult> {
+    const refund = await this.client.payments.refund(params.paymentId, {
+      amount: params.amountPaise,
+      speed: params.speed || "normal",
+    });
+
+    return {
+      refundId: refund.id,
+      status: refund.status === "processed" ? "processed" : "pending",
+      amount: refund.amount || params.amountPaise,
+      currency: refund.currency || "INR",
     };
   }
 

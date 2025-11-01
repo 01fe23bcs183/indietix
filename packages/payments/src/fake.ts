@@ -1,5 +1,5 @@
 import { randomBytes } from "crypto";
-import type { PaymentProvider, PaymentOrder } from "./types";
+import type { PaymentProvider, PaymentOrder, RefundResult } from "./types";
 
 export class FakePaymentProvider implements PaymentProvider {
   kind: "fake" = "fake";
@@ -13,6 +13,21 @@ export class FakePaymentProvider implements PaymentProvider {
     return {
       orderId: fakeOrderId,
       amount: params.amountINR,
+      currency: "INR",
+    };
+  }
+
+  async createRefund(params: {
+    paymentId: string;
+    amountPaise: number;
+    speed?: "normal" | "optimum";
+  }): Promise<RefundResult> {
+    const fakeRefundId = `rf_fake_${randomBytes(12).toString("hex")}`;
+
+    return {
+      refundId: fakeRefundId,
+      status: "processed",
+      amount: params.amountPaise,
       currency: "INR",
     };
   }
