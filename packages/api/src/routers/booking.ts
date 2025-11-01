@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
-import { prisma } from "@indietix/db";
-import { computeBookingAmounts } from "@indietix/utils";
+import { prisma, Prisma } from "@indietix/db";
+import {
+  computeBookingAmounts,
+  createSignedTicket,
+  encodeTicketForQR,
+  hashTicketPayload,
+} from "@indietix/utils";
 import { getPaymentProvider } from "@indietix/payments";
 import { TRPCError } from "@trpc/server";
 
@@ -58,11 +63,21 @@ async function confirmBookingAndIncrementSeats(bookingId: string) {
       return booking;
     }
 
+    const ticket = createSignedTicket(
+      booking.id,
+      booking.userId,
+      booking.eventId
+    );
+    const qrCode = encodeTicketForQR(ticket);
+    const ticketPayloadHash = hashTicketPayload(ticket.payload);
+
     const updatedBooking = await tx.booking.update({
       where: { id: bookingId },
       data: {
         status: "CONFIRMED",
         paymentStatus: "COMPLETED",
+        qrCode,
+        ticketPayloadHash,
       },
     });
 

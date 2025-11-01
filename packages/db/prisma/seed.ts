@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
+import { createSignedTicket, encodeTicketForQR, hashTicketPayload } from "@indietix/utils";
 
 const prisma = new PrismaClient();
 
@@ -407,11 +408,32 @@ async function main() {
   ];
 
   for (const bookingData of dxBookings) {
-    await prisma.booking.create({
-      data: bookingData,
+    const booking = await prisma.booking.create({
+      data: {
+        ...bookingData,
+        ticketNumber: `TIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        seats: bookingData.quantity,
+        ticketPrice: dxEvent.price * bookingData.quantity,
+        convenienceFee: Math.round(dxEvent.price * bookingData.quantity * 0.05),
+        platformFee: Math.round(dxEvent.price * bookingData.quantity * 0.03),
+        finalAmount: bookingData.totalAmount,
+        holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    });
+
+    const ticket = createSignedTicket(booking.id, booking.userId, booking.eventId);
+    const qrCode = encodeTicketForQR(ticket);
+    const ticketPayloadHash = hashTicketPayload(ticket.payload);
+
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        qrCode,
+        ticketPayloadHash,
+      },
     });
   }
-  console.log(`✅ Created 3 attendees for ${dxEvent.title}`);
+  console.log(`✅ Created 3 attendees with tickets for ${dxEvent.title}`);
 
   console.log("🎉 Database seeding completed successfully!");
 }
