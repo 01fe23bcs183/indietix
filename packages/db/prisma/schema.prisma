@@ -68,6 +68,15 @@ enum WaitlistOfferStatus {
   CANCELLED
 }
 
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -197,17 +206,40 @@ model Booking {
 }
 
 model Payout {
-  id          String        @id @default(cuid())
-  organizerId String
-  amount      Int
-  status      PaymentStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id                String       @id @default(cuid())
+  organizerId       String
   
-  organizer   Organizer     @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  periodStart       DateTime
+  periodEnd         DateTime
+  
+  amount            Int          // in paise
+  currency          String       @default("INR")
+  
+  status            PayoutStatus @default(PENDING)
+  
+  // Audit fields
+  beneficiaryName   String
+  accountMasked     String?
+  breakdown         Json         // { gmv, refunds, fees, netPayable, eventCount, bookingCount }
+  
+  // Provider fields
+  provider          String?      // "FAKE" | "RAZORPAYX"
+  providerPayoutId  String?
+  providerResponse  Json?
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  approvedAt        DateTime?
+  approvedBy        String?
+  processedAt       DateTime?
+  completedAt       DateTime?
+  
+  organizer         Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  paymentEvents     PaymentEvent[]
 
   @@index([organizerId])
   @@index([status])
+  @@index([periodStart, periodEnd])
 }
 
 model PaymentEvent {
@@ -217,14 +249,17 @@ model PaymentEvent {
   providerEventType  String?
   bookingId          String?
   refundId           String?
+  payoutId           String?
   payload            Json
   createdAt          DateTime @default(now())
   
   booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   refund             Refund?  @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  payout             Payout?  @relation(fields: [payoutId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
   @@index([refundId])
+  @@index([payoutId])
   @@index([eventId])
 }
 

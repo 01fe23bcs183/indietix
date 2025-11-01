@@ -11,6 +11,13 @@ export interface RefundResult {
   currency: string;
 }
 
+export interface PayoutResult {
+  payoutId: string;
+  status: "processed" | "pending" | "failed";
+  amount: number;
+  currency: string;
+}
+
 /* eslint-disable no-unused-vars */
 export interface PaymentProvider {
   kind: "razorpay" | "fake";
@@ -23,6 +30,12 @@ export interface PaymentProvider {
     amountPaise: number;
     speed?: "normal" | "optimum";
   }): Promise<RefundResult>;
+  createPayout?(params: {
+    account: string;
+    ifsc: string;
+    amountPaise: number;
+    mode?: "NEFT" | "IMPS";
+  }): Promise<PayoutResult>;
   verifyWebhookSignature?(params: {
     body: string;
     signature: string;

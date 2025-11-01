@@ -4,7 +4,13 @@ import type { PaymentProvider } from "./types";
 
 export { RazorpayProvider } from "./razorpay";
 export { FakePaymentProvider } from "./fake";
-export type { PaymentProvider, PaymentOrder, RazorpayConfig } from "./types";
+export type {
+  PaymentProvider,
+  PaymentOrder,
+  RazorpayConfig,
+  RefundResult,
+  PayoutResult,
+} from "./types";
 
 export function getPaymentProvider(): PaymentProvider {
   const isTest = process.env.NODE_ENV === "test";

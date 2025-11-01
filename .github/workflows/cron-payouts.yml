@@ -1,0 +1,21 @@
+name: Weekly Payouts Generation
+
+on:
+  schedule:
+    # Run every Monday at 9:00 AM UTC (weekly)
+    - cron: "0 9 * * 1"
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  generate-payouts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate weekly payouts
+        run: |
+          curl -X POST "${{ secrets.CRON_ENDPOINT_URL }}/api/cron/payouts" \
+            -H "Authorization: Bearer ${{ secrets.CRON_TOKEN }}" \
+            -H "Content-Type: application/json"
+        continue-on-error: true
+
+      - name: Log completion
+        run: echo "Weekly payouts generation completed at $(date)"
