@@ -27,3 +27,13 @@ export {
   computeBookingAmounts,
 } from "./pricing";
 export type { PricingBreakdown, BookingAmounts } from "./pricing";
+export {
+  signTicketPayload,
+  verifyTicketSignature,
+  generateTicketPayload,
+  createSignedTicket,
+  encodeTicketForQR,
+  decodeTicketFromQR,
+  hashTicketPayload,
+} from "./ticket";
+export type { TicketPayload, SignedTicket } from "./ticket";
