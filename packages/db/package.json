@@ -27,7 +27,7 @@
   "devDependencies": {
     "@indietix/config": "workspace:*",
     "@types/node": "^20.11.5",
-    "prisma": "^5.8.1",
+    "prisma": "^6.18.0",
     "typescript": "^5.3.3"
   }
 }
