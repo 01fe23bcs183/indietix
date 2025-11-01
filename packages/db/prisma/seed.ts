@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
-import { createSignedTicket, encodeTicketForQR, hashTicketPayload } from "@indietix/utils";
+import {
+  createSignedTicket,
+  encodeTicketForQR,
+  hashTicketPayload,
+} from "@indietix/utils";
 
 const prisma = new PrismaClient();
 
@@ -421,7 +425,11 @@ async function main() {
       },
     });
 
-    const ticket = createSignedTicket(booking.id, booking.userId, booking.eventId);
+    const ticket = createSignedTicket(
+      booking.id,
+      booking.userId,
+      booking.eventId
+    );
     const qrCode = encodeTicketForQR(ticket);
     const ticketPayloadHash = hashTicketPayload(ticket.payload);
 

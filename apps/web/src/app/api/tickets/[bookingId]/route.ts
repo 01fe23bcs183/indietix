@@ -29,16 +29,10 @@ export async function GET(
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { error: "Booking not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    if (
-      booking.userId !== session.user.id &&
-      session.user.role !== "ADMIN"
-    ) {
+    if (booking.userId !== session.user.id && session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

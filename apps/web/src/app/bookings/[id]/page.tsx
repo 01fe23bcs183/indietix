@@ -65,7 +65,9 @@ export default function BookingTicketPage() {
           setTicket(JSON.parse(cachedTicket));
           setIsOffline(true);
         } else {
-          setError(err instanceof Error ? err.message : "Failed to load ticket");
+          setError(
+            err instanceof Error ? err.message : "Failed to load ticket"
+          );
         }
       } finally {
         setLoading(false);

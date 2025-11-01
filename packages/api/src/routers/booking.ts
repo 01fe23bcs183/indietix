@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
-import { prisma, Prisma } from "@indietix/db";
+import { prisma } from "@indietix/db";
 import {
   computeBookingAmounts,
   createSignedTicket,

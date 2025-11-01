@@ -5,6 +5,30 @@ import tsparser from "@typescript-eslint/parser";
 import prettier from "eslint-plugin-prettier";
 
 export default [
+  {
+    ignores: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.next/**",
+      "**/.turbo/**",
+      "**/coverage/**",
+      "*.config.js",
+      "*.config.ts",
+      ".eslintrc.js",
+      ".prettierrc.js",
+      ".lintstagedrc.js",
+      "apps/organizer/public/sw.js",
+      "apps/organizer/public/workbox-*.js",
+      "pnpm-lock.yaml",
+      "**/test-results/**",
+      "**/playwright-report/**",
+      "**/.cache/**",
+      "**/android/**",
+      "**/ios/**",
+      "**/.expo/**",
+    ],
+  },
   eslint.configs.recommended,
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
@@ -58,6 +82,7 @@ export default [
         clearInterval: "readonly",
         localStorage: "readonly",
         sessionStorage: "readonly",
+        AudioContext: "readonly",
         self: "readonly",
         caches: "readonly",
         importScripts: "readonly",
@@ -94,23 +119,5 @@ export default [
       "@typescript-eslint/no-unused-vars": "error",
       "@typescript-eslint/no-explicit-any": "warn",
     },
-  },
-  {
-    ignores: [
-      "node_modules/**",
-      "dist/**",
-      "build/**",
-      ".next/**",
-      ".turbo/**",
-      "coverage/**",
-      "*.config.js",
-      "*.config.ts",
-      ".eslintrc.js",
-      ".prettierrc.js",
-      ".lintstagedrc.js",
-      "apps/organizer/public/sw.js",
-      "apps/organizer/public/workbox-*.js",
-      "pnpm-lock.yaml",
-    ],
   },
 ];

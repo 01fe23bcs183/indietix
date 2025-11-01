@@ -54,8 +54,7 @@ export default function ScannerPage() {
           await handleScan(decodedText);
           await stopScanning();
         },
-        () => {
-        }
+        () => {}
       );
 
       setScanning(true);
@@ -155,7 +154,9 @@ export default function ScannerPage() {
       }
 
       const data = await response.json();
-      await handleScan(JSON.stringify({ payload: data.payload, signature: data.signature }));
+      await handleScan(
+        JSON.stringify({ payload: data.payload, signature: data.signature })
+      );
     } catch (error) {
       console.error("Manual search error:", error);
       setResult({
@@ -166,7 +167,10 @@ export default function ScannerPage() {
   };
 
   const playSuccessSound = () => {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
     const audioContext = new AudioContextClass();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -183,7 +187,10 @@ export default function ScannerPage() {
   };
 
   const playErrorSound = () => {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
     const audioContext = new AudioContextClass();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();

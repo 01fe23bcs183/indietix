@@ -61,7 +61,9 @@ export async function getAllCachedTickets(): Promise<
 > {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const ticketKeys = keys.filter((key) => key.startsWith(TICKET_CACHE_PREFIX));
+    const ticketKeys = keys.filter((key) =>
+      key.startsWith(TICKET_CACHE_PREFIX)
+    );
     const tickets = await AsyncStorage.multiGet(ticketKeys);
 
     return tickets

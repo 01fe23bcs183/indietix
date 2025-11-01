@@ -20,9 +20,7 @@ test.describe("Organizer Scanner", () => {
   test("should have manual search input", async ({ page }) => {
     await page.goto("http://localhost:3001/scanner");
 
-    const searchInput = page.locator(
-      'input[placeholder*="Booking ID"]'
-    );
+    const searchInput = page.locator('input[placeholder*="Booking ID"]');
     await expect(searchInput).toBeVisible();
 
     const searchButton = page.locator("button", { hasText: /search/i });
@@ -34,16 +32,14 @@ test.describe("Organizer Scanner", () => {
   }) => {
     await page.goto("http://localhost:3001/scanner");
 
-    const searchInput = page.locator(
-      'input[placeholder*="Booking ID"]'
-    );
+    const searchInput = page.locator('input[placeholder*="Booking ID"]');
     await searchInput.fill("invalid-booking-id");
 
     const searchButton = page.locator("button", { hasText: /search/i });
     await searchButton.click();
 
-    await expect(
-      page.locator("text=/invalid|error|not found/i")
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("text=/invalid|error|not found/i")).toBeVisible({
+      timeout: 5000,
+    });
   });
 });
