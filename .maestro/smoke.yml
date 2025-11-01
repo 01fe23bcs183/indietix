@@ -1,0 +1,6 @@
+appId: com.indietix.mobile
+---
+- launchApp
+- assertVisible: "IndieTix Mobile"
+- tapOn: "IndieTix Mobile"
+- assertVisible: "IndieTix Mobile"
