@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 vi.mock("@indietix/db", () => {
   const mockUsers = new Map<string, any>();
   const mockOrganizers = new Map<string, any>();
-  
+
   return {
     prisma: {
       user: {
@@ -15,11 +15,15 @@ vi.mock("@indietix/db", () => {
         findUnique: vi.fn(({ where, include }: any) => {
           const organizer = mockOrganizers.get(where.id);
           if (!organizer) return Promise.resolve(null);
-          
+
           if (include?.user) {
             return Promise.resolve({
               ...organizer,
-              user: mockUsers.get(organizer.userId) || { id: organizer.userId, name: "Mock User", email: "mock@test.com" }
+              user: mockUsers.get(organizer.userId) || {
+                id: organizer.userId,
+                name: "Mock User",
+                email: "mock@test.com",
+              },
             });
           }
           return Promise.resolve(organizer);
@@ -42,15 +46,21 @@ vi.mock("@indietix/db", () => {
 });
 
 const { appRouter } = await import("../index");
-const { __mockUsers, __mockOrganizers } = await import("@indietix/db") as any;
+const { __mockUsers, __mockOrganizers } = (await import("@indietix/db")) as any;
 
 describe("Admin Commission Override", () => {
   const createCaller = (userId: string | null, role: string = "ADMIN") => {
     if (userId) {
-      __mockUsers.set(userId, { id: userId, email: `${userId}@test.com`, role });
+      __mockUsers.set(userId, {
+        id: userId,
+        email: `${userId}@test.com`,
+        role,
+      });
     }
     return appRouter.createCaller({
-      session: userId ? { user: { id: userId, email: "", role: "" } } : undefined,
+      session: userId
+        ? { user: { id: userId, email: "", role: "" } }
+        : undefined,
     });
   };
 

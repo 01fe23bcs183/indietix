@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 vi.mock("@indietix/db", () => {
   const mockUsers = new Map<string, any>();
   const mockOrganizers = new Map<string, any>();
-  
+
   return {
     prisma: {
       user: {
@@ -21,7 +21,9 @@ vi.mock("@indietix/db", () => {
         }),
       },
       organizer: {
-        findMany: vi.fn(() => Promise.resolve(Array.from(mockOrganizers.values()))),
+        findMany: vi.fn(() =>
+          Promise.resolve(Array.from(mockOrganizers.values()))
+        ),
         count: vi.fn(() => Promise.resolve(mockOrganizers.size)),
       },
       event: {
@@ -42,15 +44,21 @@ vi.mock("@indietix/db", () => {
 });
 
 const { appRouter } = await import("../index");
-const { __mockUsers } = await import("@indietix/db") as any;
+const { __mockUsers } = (await import("@indietix/db")) as any;
 
 describe("Admin RBAC", () => {
   const createCaller = (userId: string | null, role: string = "ADMIN") => {
     if (userId) {
-      __mockUsers.set(userId, { id: userId, email: `${userId}@test.com`, role });
+      __mockUsers.set(userId, {
+        id: userId,
+        email: `${userId}@test.com`,
+        role,
+      });
     }
     return appRouter.createCaller({
-      session: userId ? { user: { id: userId, email: "", role: "" } } : undefined,
+      session: userId
+        ? { user: { id: userId, email: "", role: "" } }
+        : undefined,
     });
   };
 

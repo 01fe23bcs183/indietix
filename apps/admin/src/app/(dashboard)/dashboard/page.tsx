@@ -12,8 +12,9 @@ export default function DashboardPage() {
   const { data: topCities } = trpc.admin.dashboard.topCities.useQuery({
     limit: 10,
   });
-  const { data: recentActivity } =
-    trpc.admin.dashboard.recentActivity.useQuery({ limit: 20 });
+  const { data: recentActivity } = trpc.admin.dashboard.recentActivity.useQuery(
+    { limit: 20 }
+  );
 
   if (kpisLoading) {
     return <div>Loading...</div>;
@@ -60,9 +61,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {kpis?.activeUsers || 0}
-            </div>
+            <div className="text-2xl font-bold">{kpis?.activeUsers || 0}</div>
           </CardContent>
         </Card>
 
@@ -196,9 +195,9 @@ export default function DashboardPage() {
                         activity.status === "PUBLISHED"
                           ? "bg-green-100 text-green-800"
                           : activity.status === "PENDING" ||
-                            activity.status === "DRAFT"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
+                              activity.status === "DRAFT"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {activity.status}

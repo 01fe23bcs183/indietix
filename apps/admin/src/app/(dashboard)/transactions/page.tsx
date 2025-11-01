@@ -11,7 +11,11 @@ export default function TransactionsPage() {
   const { data, isLoading } = trpc.admin.transactions.list.useQuery({
     page,
     limit: 20,
-    status: (status || undefined) as "PENDING" | "CONFIRMED" | "CANCELLED" | undefined,
+    status: (status || undefined) as
+      | "PENDING"
+      | "CONFIRMED"
+      | "CANCELLED"
+      | undefined,
   });
 
   return (
@@ -77,7 +81,9 @@ export default function TransactionsPage() {
                           {booking.user.email}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm">{booking.event.title}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {booking.event.title}
+                      </td>
                       <td className="px-6 py-4 text-sm">
                         ₹{(booking.finalAmount / 100).toLocaleString()}
                       </td>
@@ -87,8 +93,8 @@ export default function TransactionsPage() {
                             booking.status === "CONFIRMED"
                               ? "bg-green-100 text-green-800"
                               : booking.status === "PENDING"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-800"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {booking.status}
@@ -109,8 +115,8 @@ export default function TransactionsPage() {
       {data && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, data.total)} of{" "}
-            {data.total} transactions
+            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, data.total)}{" "}
+            of {data.total} transactions
           </div>
           <div className="flex gap-2">
             <Button

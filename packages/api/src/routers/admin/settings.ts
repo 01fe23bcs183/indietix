@@ -113,11 +113,13 @@ export const adminSettingsRouter = router({
       where: { key: "fees" },
     });
 
-    return fees?.value || {
-      paymentGateway: 2,
-      serverMaintenance: 2,
-      platformSupport: 10,
-    };
+    return (
+      fees?.value || {
+        paymentGateway: 2,
+        serverMaintenance: 2,
+        platformSupport: 10,
+      }
+    );
   }),
 
   setFees: publicProcedure
@@ -223,10 +225,12 @@ export const adminSettingsRouter = router({
       where: { key: "cancellationDefaults" },
     });
 
-    return defaults?.value || {
-      cancellationFeeFlat: 50,
-      cancellationDeadlineHours: 24,
-    };
+    return (
+      defaults?.value || {
+        cancellationFeeFlat: 50,
+        cancellationDeadlineHours: 24,
+      }
+    );
   }),
 
   setCancellationDefaults: publicProcedure

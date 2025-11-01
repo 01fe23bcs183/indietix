@@ -19,20 +19,20 @@ export default function SettingsPage() {
 
   const setFeesMutation = trpc.admin.settings.setFees.useMutation({
     onSuccess: () => {
-      alert("Fees updated successfully");
+      console.log("Fees updated successfully");
     },
   });
 
   const setGstMutation = trpc.admin.settings.setGstRate.useMutation({
     onSuccess: () => {
-      alert("GST rate updated successfully");
+      console.log("GST rate updated successfully");
     },
   });
 
   const setCancellationMutation =
     trpc.admin.settings.setCancellationDefaults.useMutation({
       onSuccess: () => {
-        alert("Cancellation defaults updated successfully");
+        console.log("Cancellation defaults updated successfully");
       },
     });
 
@@ -122,7 +122,9 @@ export default function SettingsPage() {
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
-            <Button onClick={() => setGstMutation.mutate({ gstRate: gstValue })}>
+            <Button
+              onClick={() => setGstMutation.mutate({ gstRate: gstValue })}
+            >
               Save GST Rate
             </Button>
           </div>

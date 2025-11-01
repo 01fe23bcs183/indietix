@@ -15,7 +15,7 @@ test.describe("Admin Panel", () => {
 
   test("should show dashboard after admin login", async ({ page }) => {
     await page.goto("/auth/signin");
-    
+
     await page.fill('input[type="email"]', "admin@test.com");
     await page.fill('input[type="password"]', "password");
     await page.click('button[type="submit"]');
@@ -26,7 +26,7 @@ test.describe("Admin Panel", () => {
 
   test("should display KPI cards on dashboard", async ({ page }) => {
     await page.goto("/dashboard");
-    
+
     await expect(page.locator("text=GMV Today")).toBeVisible();
     await expect(page.locator("text=Revenue Today")).toBeVisible();
     await expect(page.locator("text=Active Users")).toBeVisible();
@@ -37,7 +37,7 @@ test.describe("Admin Panel", () => {
   test("should navigate to users page", async ({ page }) => {
     await page.goto("/dashboard");
     await page.click("text=Users");
-    
+
     await expect(page).toHaveURL(/\/users/);
     await expect(page.locator("h1")).toContainText("Users");
   });
@@ -45,7 +45,7 @@ test.describe("Admin Panel", () => {
   test("should navigate to organizers page", async ({ page }) => {
     await page.goto("/dashboard");
     await page.click("text=Organizers");
-    
+
     await expect(page).toHaveURL(/\/organizers/);
     await expect(page.locator("h1")).toContainText("Organizers");
   });
@@ -53,7 +53,7 @@ test.describe("Admin Panel", () => {
   test("should navigate to settings page", async ({ page }) => {
     await page.goto("/dashboard");
     await page.click("text=Settings");
-    
+
     await expect(page).toHaveURL(/\/settings/);
     await expect(page.locator("h1")).toContainText("Platform Settings");
   });

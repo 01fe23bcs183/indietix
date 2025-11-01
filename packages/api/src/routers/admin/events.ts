@@ -261,10 +261,17 @@ export const adminEventsRouter = router({
         },
       });
 
-      await logAdminAction(ctx.session?.user?.id, "EVENT", input.id, "CANCEL", prev, {
-        status: "CANCELLED",
-        cancelReason: input.reason,
-      });
+      await logAdminAction(
+        ctx.session?.user?.id,
+        "EVENT",
+        input.id,
+        "CANCEL",
+        prev,
+        {
+          status: "CANCELLED",
+          cancelReason: input.reason,
+        }
+      );
 
       return event;
     }),

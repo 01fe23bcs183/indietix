@@ -99,88 +99,6 @@ export default function OrganizersPage() {
                   </thead>
                   <tbody className="divide-y">
                     {queueData.organizers.map((organizer) => (
-                    <tr key={organizer.id}>
-                      <td className="px-6 py-4 text-sm">
-                        {organizer.businessName}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div>{organizer.user.name}</div>
-                        <div className="text-xs text-gray-500">
-                          {organizer.user.email}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`rounded px-2 py-1 text-xs ${
-                            organizer.verified
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {organizer.verified ? "Verified" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {organizer._count.events}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <div className="flex gap-2">
-                          {!organizer.verified && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  approveMutation.mutate({ id: organizer.id })
-                                }
-                              >
-                                Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  rejectMutation.mutate({ id: organizer.id })
-                                }
-                              >
-                                Reject
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
-          ) : (
-            !listData ? (
-              <div className="p-8 text-center">Loading...</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="border-b bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                        Business Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                        Contact
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                        Events
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {listData.organizers.map((organizer) => (
                       <tr key={organizer.id}>
                         <td className="px-6 py-4 text-sm">
                           {organizer.businessName}
@@ -236,6 +154,86 @@ export default function OrganizersPage() {
                 </table>
               </div>
             )
+          ) : !listData ? (
+            <div className="p-8 text-center">Loading...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                      Business Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                      Contact
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                      Events
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {listData.organizers.map((organizer) => (
+                    <tr key={organizer.id}>
+                      <td className="px-6 py-4 text-sm">
+                        {organizer.businessName}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div>{organizer.user.name}</div>
+                        <div className="text-xs text-gray-500">
+                          {organizer.user.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`rounded px-2 py-1 text-xs ${
+                            organizer.verified
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {organizer.verified ? "Verified" : "Pending"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {organizer._count.events}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex gap-2">
+                          {!organizer.verified && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  approveMutation.mutate({ id: organizer.id })
+                                }
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  rejectMutation.mutate({ id: organizer.id })
+                                }
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -243,8 +241,9 @@ export default function OrganizersPage() {
       {showQueue && queueData && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, queueData.total)} of{" "}
-            {queueData.total} organizers
+            Showing {(page - 1) * 20 + 1} to{" "}
+            {Math.min(page * 20, queueData.total)} of {queueData.total}{" "}
+            organizers
           </div>
           <div className="flex gap-2">
             <Button
@@ -264,12 +263,12 @@ export default function OrganizersPage() {
           </div>
         </div>
       )}
-      
+
       {!showQueue && listData && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, listData.total)} of{" "}
-            {listData.total} organizers
+            Showing {(page - 1) * 20 + 1} to{" "}
+            {Math.min(page * 20, listData.total)} of {listData.total} organizers
           </div>
           <div className="flex gap-2">
             <Button

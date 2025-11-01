@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 vi.mock("@indietix/db", () => {
   const mockSettings = new Map<string, any>();
   const mockUsers = new Map<string, any>();
-  
+
   return {
     prisma: {
       platformSetting: {
@@ -40,7 +40,7 @@ vi.mock("@indietix/db", () => {
 });
 
 const { appRouter } = await import("../index");
-const { __mockSettings, __mockUsers } = await import("@indietix/db") as any;
+const { __mockSettings, __mockUsers } = (await import("@indietix/db")) as any;
 
 describe("Admin Settings Router", () => {
   const createCaller = (userId: string | null, role: string = "ADMIN") => {
@@ -48,7 +48,9 @@ describe("Admin Settings Router", () => {
       __mockUsers.set(userId, { id: userId, role });
     }
     return appRouter.createCaller({
-      session: userId ? { user: { id: userId, email: "", role: "" } } : undefined,
+      session: userId
+        ? { user: { id: userId, email: "", role: "" } }
+        : undefined,
     });
   };
 
@@ -107,8 +109,8 @@ describe("Admin Settings Router", () => {
   it("should reject unauthenticated users", async () => {
     const caller = createCaller(null);
 
-    await expect(
-      caller.admin.settings.getFees()
-    ).rejects.toThrow("UNAUTHORIZED");
+    await expect(caller.admin.settings.getFees()).rejects.toThrow(
+      "UNAUTHORIZED"
+    );
   });
 });

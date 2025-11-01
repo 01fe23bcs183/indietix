@@ -11,7 +11,13 @@ export default function EventsPage() {
   const { data, isLoading, refetch } = trpc.admin.events.list.useQuery({
     page,
     limit: 20,
-    status: (status || undefined) as "DRAFT" | "PUBLISHED" | "CANCELLED" | "SOLD_OUT" | "COMPLETED" | undefined,
+    status: (status || undefined) as
+      | "DRAFT"
+      | "PUBLISHED"
+      | "CANCELLED"
+      | "SOLD_OUT"
+      | "COMPLETED"
+      | undefined,
   });
 
   const featureMutation = trpc.admin.events.feature.useMutation({
@@ -81,7 +87,9 @@ export default function EventsPage() {
                       <td className="px-6 py-4 text-sm">
                         <div>{event.title}</div>
                         {event.featured && (
-                          <span className="text-xs text-blue-600">Featured</span>
+                          <span className="text-xs text-blue-600">
+                            Featured
+                          </span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm">
@@ -138,8 +146,8 @@ export default function EventsPage() {
       {data && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, data.total)} of{" "}
-            {data.total} events
+            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, data.total)}{" "}
+            of {data.total} events
           </div>
           <div className="flex gap-2">
             <Button

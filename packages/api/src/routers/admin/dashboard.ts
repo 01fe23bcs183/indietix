@@ -25,7 +25,11 @@ export const adminDashboardRouter = router({
     await requireAdmin(ctx.session?.user?.id);
 
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
     const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
     const [gmvToday, revenueToday, activeUsers, bookingsLastHour] =

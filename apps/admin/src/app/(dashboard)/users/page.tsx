@@ -7,7 +7,9 @@ import { Button, Card, CardContent, CardHeader, CardTitle } from "@indietix/ui";
 export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [role, setRole] = useState<"CUSTOMER" | "ORGANIZER" | "ADMIN" | undefined>();
+  const [role, setRole] = useState<
+    "CUSTOMER" | "ORGANIZER" | "ADMIN" | undefined
+  >();
 
   const { data, isLoading, refetch } = trpc.admin.users.list.useQuery({
     page,
@@ -42,7 +44,15 @@ export default function UsersPage() {
             />
             <select
               value={role || ""}
-              onChange={(e) => setRole((e.target.value || undefined) as "CUSTOMER" | "ORGANIZER" | "ADMIN" | undefined)}
+              onChange={(e) =>
+                setRole(
+                  (e.target.value || undefined) as
+                    | "CUSTOMER"
+                    | "ORGANIZER"
+                    | "ADMIN"
+                    | undefined
+                )
+              }
               className="rounded-md border border-gray-300 px-3 py-2"
             >
               <option value="">All Roles</option>
@@ -104,7 +114,9 @@ export default function UsersPage() {
                           {user.banned ? "Banned" : "Active"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm">{user._count.bookings}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {user._count.bookings}
+                      </td>
                       <td className="px-6 py-4 text-sm">
                         <div className="flex gap-2">
                           <Button
@@ -133,8 +145,8 @@ export default function UsersPage() {
       {data && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, data.total)} of{" "}
-            {data.total} users
+            Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, data.total)}{" "}
+            of {data.total} users
           </div>
           <div className="flex gap-2">
             <Button
