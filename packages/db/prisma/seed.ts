@@ -1,0 +1,282 @@
+import { PrismaClient } from "@prisma/client";
+import { hash } from "bcrypt";
+
+const prisma = new PrismaClient();
+
+const SALT_ROUNDS = 10;
+
+async function main() {
+  console.log("🌱 Starting database seed...");
+
+  const password = await hash("password123", SALT_ROUNDS);
+
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@indietix.com" },
+    update: {},
+    create: {
+      email: "admin@indietix.com",
+      name: "Admin User",
+      passwordHash: password,
+      role: "ADMIN",
+      phone: "+919876543210",
+    },
+  });
+  console.log("✅ Created ADMIN user:", admin.email);
+
+  const organizer1User = await prisma.user.upsert({
+    where: { email: "organizer1@indietix.com" },
+    update: {},
+    create: {
+      email: "organizer1@indietix.com",
+      name: "Ravi Kumar",
+      passwordHash: password,
+      role: "ORGANIZER",
+      phone: "+919876543211",
+    },
+  });
+
+  const organizer1 = await prisma.organizer.upsert({
+    where: { userId: organizer1User.id },
+    update: {},
+    create: {
+      userId: organizer1User.id,
+      businessName: "EventPro India",
+      description: "Leading event management company in India",
+      verified: true,
+    },
+  });
+  console.log("✅ Created ORGANIZER 1:", organizer1.businessName);
+
+  const organizer2User = await prisma.user.upsert({
+    where: { email: "organizer2@indietix.com" },
+    update: {},
+    create: {
+      email: "organizer2@indietix.com",
+      name: "Priya Sharma",
+      passwordHash: password,
+      role: "ORGANIZER",
+      phone: "+919876543212",
+    },
+  });
+
+  const organizer2 = await prisma.organizer.upsert({
+    where: { userId: organizer2User.id },
+    update: {},
+    create: {
+      userId: organizer2User.id,
+      businessName: "Mumbai Events Co",
+      description: "Premium event experiences in Mumbai",
+      verified: true,
+    },
+  });
+  console.log("✅ Created ORGANIZER 2:", organizer2.businessName);
+
+  const events = [
+    {
+      organizerId: organizer1.id,
+      title: "Sunburn Festival 2025",
+      slug: "sunburn-festival-2025-bengaluru",
+      description: "Asia's biggest electronic music festival returns to Bengaluru",
+      category: "MUSIC" as const,
+      city: "Bengaluru",
+      venue: "Jayamahal Palace Grounds",
+      date: new Date("2025-12-15T18:00:00Z"),
+      price: 2500,
+      totalSeats: 5000,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Stand-Up Comedy Night with Zakir Khan",
+      slug: "zakir-khan-comedy-bengaluru",
+      description: "An evening of laughter with India's favorite comedian",
+      category: "COMEDY" as const,
+      city: "Bengaluru",
+      venue: "Chowdiah Memorial Hall",
+      date: new Date("2025-11-20T19:30:00Z"),
+      price: 800,
+      totalSeats: 1200,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "IPL 2025: Mumbai Indians vs RCB",
+      slug: "ipl-2025-mi-vs-rcb",
+      description: "Witness the clash of titans at Wankhede Stadium",
+      category: "SPORTS" as const,
+      city: "Mumbai",
+      venue: "Wankhede Stadium",
+      date: new Date("2025-04-10T19:30:00Z"),
+      price: 1500,
+      totalSeats: 33000,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "TechCrunch Disrupt Mumbai 2025",
+      slug: "techcrunch-disrupt-mumbai-2025",
+      description: "India's premier startup and technology conference",
+      category: "TECH" as const,
+      city: "Mumbai",
+      venue: "Jio World Convention Centre",
+      date: new Date("2025-09-25T09:00:00Z"),
+      price: 5000,
+      totalSeats: 2000,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Delhi Food Festival 2025",
+      slug: "delhi-food-festival-2025",
+      description: "Celebrate India's culinary diversity",
+      category: "FOOD" as const,
+      city: "Delhi",
+      venue: "Jawaharlal Nehru Stadium",
+      date: new Date("2025-11-05T11:00:00Z"),
+      price: 500,
+      totalSeats: 10000,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "India Art Fair 2025",
+      slug: "india-art-fair-2025-delhi",
+      description: "South Asia's leading international art fair",
+      category: "ART" as const,
+      city: "Delhi",
+      venue: "NSIC Exhibition Grounds",
+      date: new Date("2025-02-08T10:00:00Z"),
+      price: 1200,
+      totalSeats: 5000,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "NH7 Weekender Bengaluru",
+      slug: "nh7-weekender-bengaluru-2025",
+      description: "India's happiest music festival",
+      category: "MUSIC" as const,
+      city: "Bengaluru",
+      venue: "Backyard Sports Club",
+      date: new Date("2025-11-28T14:00:00Z"),
+      price: 3500,
+      totalSeats: 8000,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "Mumbai Marathon 2025",
+      slug: "mumbai-marathon-2025",
+      description: "Asia's largest marathon event",
+      category: "SPORTS" as const,
+      city: "Mumbai",
+      venue: "Chhatrapati Shivaji Terminus",
+      date: new Date("2025-01-19T06:00:00Z"),
+      price: 1000,
+      totalSeats: 50000,
+      status: "PUBLISHED" as const,
+    },
+  ];
+
+  console.log("🎉 Creating events...");
+  const createdEvents = [];
+  for (const eventData of events) {
+    const event = await prisma.event.upsert({
+      where: { slug: eventData.slug },
+      update: {},
+      create: eventData,
+    });
+    createdEvents.push(event);
+    console.log(`✅ Created event: ${event.title}`);
+  }
+
+  const customer1 = await prisma.user.upsert({
+    where: { email: "customer1@example.com" },
+    update: {},
+    create: {
+      email: "customer1@example.com",
+      name: "Amit Patel",
+      passwordHash: password,
+      role: "CUSTOMER",
+      phone: "+919876543213",
+    },
+  });
+
+  const customer2 = await prisma.user.upsert({
+    where: { email: "customer2@example.com" },
+    update: {},
+    create: {
+      email: "customer2@example.com",
+      name: "Neha Singh",
+      passwordHash: password,
+      role: "CUSTOMER",
+      phone: "+919876543214",
+    },
+  });
+
+  console.log("🎫 Creating sample bookings...");
+  const sunburnEvent = createdEvents[0];
+  
+  if (sunburnEvent) {
+    const bookings = [
+      {
+        eventId: sunburnEvent.id,
+        userId: customer1.id,
+        quantity: 2,
+        totalAmount: 5000,
+        paymentStatus: "COMPLETED" as const,
+        status: "COMPLETED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer2.id,
+        quantity: 1,
+        totalAmount: 2500,
+        paymentStatus: "COMPLETED" as const,
+        status: "COMPLETED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer1.id,
+        quantity: 3,
+        totalAmount: 7500,
+        paymentStatus: "COMPLETED" as const,
+        status: "COMPLETED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer2.id,
+        quantity: 2,
+        totalAmount: 5000,
+        paymentStatus: "COMPLETED" as const,
+        status: "COMPLETED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer1.id,
+        quantity: 1,
+        totalAmount: 2500,
+        paymentStatus: "COMPLETED" as const,
+        status: "COMPLETED" as const,
+      },
+    ];
+
+    for (const bookingData of bookings) {
+      await prisma.booking.create({
+        data: bookingData,
+      });
+    }
+    console.log(`✅ Created 5 sample bookings for ${sunburnEvent.title}`);
+  }
+
+  console.log("🎉 Database seeding completed successfully!");
+}
+
+main()
+  .catch((e) => {
+    console.error("❌ Error seeding database:", e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

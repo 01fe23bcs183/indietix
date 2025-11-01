@@ -82,6 +82,7 @@ indietix/
 
 - Node.js >= 18.0.0
 - pnpm >= 8.0.0
+- PostgreSQL database (Supabase recommended for production)
 
 ### Installation
 
@@ -89,15 +90,71 @@ indietix/
 # Install dependencies
 pnpm install
 
-# Setup Prisma
+# Setup Database
 cd packages/db
 cp .env.example .env
-pnpm prisma:gen
+# Edit .env and add your DATABASE_URL
+# For development: postgresql://postgres:[PASSWORD]@db.kzthzbncfftjggfvuage.supabase.co:5432/postgres
+# For testing: file:./tmp/test.db (SQLite)
 cd ../..
+
+# Generate Prisma client
+pnpm db:gen
+
+# Run database migrations
+pnpm db:dev
+
+# Seed the database with demo data
+pnpm db:seed
 
 # Setup Husky hooks
 pnpm prepare
 ```
+
+### How to Run DB Locally
+
+#### Development (PostgreSQL via Supabase)
+
+1. Create a `.env` file in the root directory with your Supabase credentials:
+```env
+DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.kzthzbncfftjggfvuage.supabase.co:5432/postgres"
+```
+
+2. Also create `packages/db/.env` with the same DATABASE_URL
+
+3. Generate Prisma client:
+```bash
+pnpm db:gen
+```
+
+4. Run migrations:
+```bash
+pnpm db:dev
+```
+
+5. Seed the database:
+```bash
+pnpm db:seed
+```
+
+This will create:
+- 1 ADMIN user (admin@indietix.com / password123)
+- 2 ORGANIZER users with organizer profiles
+- 8 events across Bengaluru, Mumbai, and Delhi
+- 5 sample completed bookings
+
+#### Testing (SQLite)
+
+Tests automatically use SQLite to avoid requiring network access or Supabase credentials in CI.
+
+The test setup (`tests/prisma-test-setup.ts`) automatically:
+1. Sets `DATABASE_URL=file:./tmp/test.db`
+2. Runs `prisma db push` to create the schema
+3. Seeds a test user
+4. Runs tests
+5. Cleans up
+
+No manual configuration needed for running tests!
 
 ### Development
 
@@ -209,17 +266,38 @@ Mobile app builds are skipped in CI for now.
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and configure as needed:
+### Root `.env`
 
-```bash
-cp .env.example .env
+```env
+DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.kzthzbncfftjggfvuage.supabase.co:5432/postgres"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="[GENERATE_RANDOM_SECRET]"
 ```
 
-For packages/db, also create a local .env:
+### `packages/db/.env`
+
+```env
+DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.kzthzbncfftjggfvuage.supabase.co:5432/postgres"
+```
+
+### Testing Environment
+
+Tests automatically use SQLite (`file:./tmp/test.db`) and do not require Supabase credentials.
+
+## Database Scripts
 
 ```bash
-cd packages/db
-cp .env.example .env
+# Generate Prisma client
+pnpm db:gen
+
+# Run migrations (development)
+pnpm db:dev
+
+# Deploy migrations (production)
+pnpm db:migrate
+
+# Seed database with demo data
+pnpm db:seed
 ```
 
 ## Contributing
