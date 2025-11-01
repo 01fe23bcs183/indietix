@@ -76,7 +76,8 @@ async function main() {
       organizerId: organizer1.id,
       title: "Sunburn Festival 2025",
       slug: "sunburn-festival-2025-bengaluru",
-      description: "Asia's biggest electronic music festival returns to Bengaluru",
+      description:
+        "Asia's biggest electronic music festival returns to Bengaluru",
       category: "MUSIC" as const,
       city: "Bengaluru",
       venue: "Jayamahal Palace Grounds",
@@ -216,7 +217,7 @@ async function main() {
 
   console.log("🎫 Creating sample bookings...");
   const sunburnEvent = createdEvents[0];
-  
+
   if (sunburnEvent) {
     const bookings = [
       {
@@ -275,7 +276,8 @@ async function main() {
       organizerId: organizer1.id,
       title: "Bangalore Tech Meetup 2025",
       slug: "bangalore-tech-meetup-2025",
-      description: "A networking event for tech enthusiasts and developers in Bangalore",
+      description:
+        "A networking event for tech enthusiasts and developers in Bangalore",
       category: "TECH",
       city: "Bengaluru",
       venue: "Koramangala Social",

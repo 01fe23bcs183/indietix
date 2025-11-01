@@ -7,7 +7,15 @@ import { slugify } from "@indietix/utils";
 const eventInputSchema = z.object({
   title: z.string().min(3).max(200),
   description: z.string().min(10),
-  category: z.enum(["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"]),
+  category: z.enum([
+    "MUSIC",
+    "COMEDY",
+    "SPORTS",
+    "TECH",
+    "FOOD",
+    "ART",
+    "OTHER",
+  ]),
   city: z.string().min(2),
   venue: z.string().min(3),
   date: z.coerce.date(),
@@ -16,7 +24,9 @@ const eventInputSchema = z.object({
   imageUrl: z.string().url().optional(),
 });
 
-const requireAuth = (ctx: { session?: { user?: { id: string; email: string; role: string } } }) => {
+const requireAuth = (ctx: {
+  session?: { user?: { id: string; email: string; role: string } };
+}) => {
   if (!ctx.session?.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -42,7 +52,11 @@ const requireOrganizer = async (userId: string) => {
   return user.organizer;
 };
 
-const checkEventOwnership = async (eventId: string, organizerId: string, userRole: string) => {
+const checkEventOwnership = async (
+  eventId: string,
+  organizerId: string,
+  userRole: string
+) => {
   if (userRole === "ADMIN") {
     return;
   }
@@ -86,9 +100,13 @@ export const organizerEventsRouter = router({
       z.object({
         page: z.number().min(1).default(1),
         q: z.string().optional(),
-        status: z.enum(["DRAFT", "PUBLISHED", "CANCELLED", "SOLD_OUT", "COMPLETED"]).optional(),
+        status: z
+          .enum(["DRAFT", "PUBLISHED", "CANCELLED", "SOLD_OUT", "COMPLETED"])
+          .optional(),
         city: z.string().optional(),
-        category: z.enum(["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"]).optional(),
+        category: z
+          .enum(["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"])
+          .optional(),
       })
     )
     .query(async ({ input, ctx }) => {
@@ -103,7 +121,14 @@ export const organizerEventsRouter = router({
         title?: { contains: string; mode: "insensitive" };
         status?: "DRAFT" | "PUBLISHED" | "CANCELLED" | "SOLD_OUT" | "COMPLETED";
         city?: string;
-        category?: "MUSIC" | "COMEDY" | "SPORTS" | "TECH" | "FOOD" | "ART" | "OTHER";
+        category?:
+          | "MUSIC"
+          | "COMEDY"
+          | "SPORTS"
+          | "TECH"
+          | "FOOD"
+          | "ART"
+          | "OTHER";
       } = {
         organizerId: organizer.id,
       };
@@ -236,7 +261,13 @@ export const organizerEventsRouter = router({
     .input(
       z.object({
         id: z.string(),
-        status: z.enum(["DRAFT", "PUBLISHED", "CANCELLED", "SOLD_OUT", "COMPLETED"]),
+        status: z.enum([
+          "DRAFT",
+          "PUBLISHED",
+          "CANCELLED",
+          "SOLD_OUT",
+          "COMPLETED",
+        ]),
       })
     )
     .mutation(async ({ input, ctx }) => {
