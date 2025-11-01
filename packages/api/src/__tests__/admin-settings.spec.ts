@@ -62,7 +62,9 @@ vi.mock("@indietix/db", () => {
 });
 
 const { appRouter } = await import("../index");
-const { __mockSettings, __mockUsers } = (await import("@indietix/db")) as unknown as {
+const { __mockSettings, __mockUsers } = (await import(
+  "@indietix/db"
+)) as unknown as {
   __mockSettings: Map<string, MockSetting>;
   __mockUsers: Map<string, MockUser>;
 };
@@ -70,7 +72,11 @@ const { __mockSettings, __mockUsers } = (await import("@indietix/db")) as unknow
 describe("Admin Settings Router", () => {
   const createCaller = (userId: string | null, role: string = "ADMIN") => {
     if (userId) {
-      __mockUsers.set(userId, { id: userId, email: `${userId}@test.com`, role });
+      __mockUsers.set(userId, {
+        id: userId,
+        email: `${userId}@test.com`,
+        role,
+      });
     }
     return appRouter.createCaller({
       session: userId
