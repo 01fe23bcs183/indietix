@@ -1,32 +1,54 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
+interface MockSetting {
+  key: string;
+  value: unknown;
+  updatedAt: Date;
+}
+
+interface MockUser {
+  id: string;
+  email: string;
+  role: string;
+}
+
 vi.mock("@indietix/db", () => {
-  const mockSettings = new Map<string, any>();
-  const mockUsers = new Map<string, any>();
+  const mockSettings = new Map<string, MockSetting>();
+  const mockUsers = new Map<string, MockUser>();
 
   return {
     prisma: {
       platformSetting: {
-        findUnique: vi.fn(({ where }: any) => {
+        findUnique: vi.fn(({ where }: { where: { key: string } }) => {
           return Promise.resolve(mockSettings.get(where.key) || null);
         }),
-        upsert: vi.fn(({ where, create, update }: any) => {
-          const existing = mockSettings.get(where.key);
-          const setting = {
-            key: where.key,
-            value: existing ? update.value : create.value,
-            updatedAt: new Date(),
-          };
-          mockSettings.set(where.key, setting);
-          return Promise.resolve(setting);
-        }),
+        upsert: vi.fn(
+          ({
+            where,
+            create,
+            update,
+          }: {
+            where: { key: string };
+            create: { key: string; value: unknown };
+            update: { value: unknown };
+          }) => {
+            const existing = mockSettings.get(where.key);
+            const setting: MockSetting = {
+              key: where.key,
+              value: existing ? update.value : create.value,
+              updatedAt: new Date(),
+            };
+            mockSettings.set(where.key, setting);
+            return Promise.resolve(setting);
+          }
+        ),
         deleteMany: vi.fn(() => {
           mockSettings.clear();
           return Promise.resolve({ count: 0 });
         }),
       },
       user: {
-        findUnique: vi.fn(({ where }: any) => {
+        findUnique: vi.fn(({ where }: { where: { id: string } }) => {
           return Promise.resolve(mockUsers.get(where.id) || null);
         }),
       },
@@ -40,12 +62,15 @@ vi.mock("@indietix/db", () => {
 });
 
 const { appRouter } = await import("../index");
-const { __mockSettings, __mockUsers } = (await import("@indietix/db")) as any;
+const { __mockSettings, __mockUsers } = (await import("@indietix/db")) as unknown as {
+  __mockSettings: Map<string, MockSetting>;
+  __mockUsers: Map<string, MockUser>;
+};
 
 describe("Admin Settings Router", () => {
   const createCaller = (userId: string | null, role: string = "ADMIN") => {
     if (userId) {
-      __mockUsers.set(userId, { id: userId, role });
+      __mockUsers.set(userId, { id: userId, email: `${userId}@test.com`, role });
     }
     return appRouter.createCaller({
       session: userId

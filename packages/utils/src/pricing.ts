@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export const FEES = {
   paymentGateway: 2,
   serverMaintenance: 2,
@@ -6,7 +7,15 @@ export const FEES = {
 
 export const GST_RATE = 0.18;
 
-export async function getFeesFromSettings(prisma: any) {
+interface PrismaClient {
+  platformSetting: {
+    findUnique: (args: {
+      where: { key: string };
+    }) => Promise<{ key: string; value: unknown } | null>;
+  };
+}
+
+export async function getFeesFromSettings(prisma: PrismaClient) {
   try {
     const setting = await prisma.platformSetting.findUnique({
       where: { key: "fees" },
@@ -17,7 +26,7 @@ export async function getFeesFromSettings(prisma: any) {
   }
 }
 
-export async function getGstRateFromSettings(prisma: any) {
+export async function getGstRateFromSettings(prisma: PrismaClient) {
   try {
     const setting = await prisma.platformSetting.findUnique({
       where: { key: "gstRate" },

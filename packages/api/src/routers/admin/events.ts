@@ -61,6 +61,7 @@ export const adminEventsRouter = router({
       }
       await requireAdmin(ctx.session?.user?.id);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const where: any = {};
 
       if (input.status) {
