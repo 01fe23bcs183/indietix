@@ -84,6 +84,21 @@ async function main() {
       date: new Date("2025-12-15T18:00:00Z"),
       price: 2500,
       totalSeats: 5000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Booking Test Event - Future Date",
+      slug: "booking-test-event-future",
+      description: "Test event for booking system with 100 available seats",
+      category: "TECH" as const,
+      city: "Bengaluru",
+      venue: "Test Venue",
+      date: new Date("2026-06-15T18:00:00Z"),
+      price: 500,
+      totalSeats: 100,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -97,6 +112,7 @@ async function main() {
       date: new Date("2025-11-20T19:30:00Z"),
       price: 800,
       totalSeats: 1200,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -110,6 +126,7 @@ async function main() {
       date: new Date("2025-04-10T19:30:00Z"),
       price: 1500,
       totalSeats: 33000,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -123,6 +140,7 @@ async function main() {
       date: new Date("2025-09-25T09:00:00Z"),
       price: 5000,
       totalSeats: 2000,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -136,6 +154,7 @@ async function main() {
       date: new Date("2025-11-05T11:00:00Z"),
       price: 500,
       totalSeats: 10000,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -149,6 +168,7 @@ async function main() {
       date: new Date("2025-02-08T10:00:00Z"),
       price: 1200,
       totalSeats: 5000,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -162,6 +182,7 @@ async function main() {
       date: new Date("2025-11-28T14:00:00Z"),
       price: 3500,
       totalSeats: 8000,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -175,19 +196,22 @@ async function main() {
       date: new Date("2025-01-19T06:00:00Z"),
       price: 1000,
       totalSeats: 50000,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
       organizerId: organizer1.id,
       title: "Photography Workshop with Raghu Rai",
       slug: "photography-workshop-delhi-2025",
-      description: "Learn the art of photography from India's legendary photographer",
+      description:
+        "Learn the art of photography from India's legendary photographer",
       category: "OTHER" as const,
       city: "Delhi",
       venue: "India Habitat Centre",
       date: new Date("2025-03-15T10:00:00Z"),
       price: 2000,
       totalSeats: 50,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -201,6 +225,7 @@ async function main() {
       date: new Date("2025-05-20T20:00:00Z"),
       price: 999,
       totalSeats: 800,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -214,6 +239,7 @@ async function main() {
       date: new Date("2025-06-10T19:00:00Z"),
       price: 1999,
       totalSeats: 15000,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
     {
@@ -227,6 +253,7 @@ async function main() {
       date: new Date("2025-07-05T09:30:00Z"),
       price: 1500,
       totalSeats: 100,
+      bookedSeats: 0,
       status: "PUBLISHED" as const,
     },
   ];
@@ -336,6 +363,7 @@ async function main() {
       date: new Date("2025-12-01T18:00:00Z"),
       price: 500,
       totalSeats: 100,
+      bookedSeats: 0,
       status: "PUBLISHED",
     },
   });

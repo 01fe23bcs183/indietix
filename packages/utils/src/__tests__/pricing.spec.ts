@@ -4,7 +4,7 @@ import { computeTotals, FEES, GST_RATE } from "../pricing";
 describe("computeTotals", () => {
   it("calculates correct totals for ₹199 ticket", () => {
     const result = computeTotals(199);
-    
+
     expect(result.subtotal).toBe(199);
     expect(result.fees).toBe(14);
     expect(result.breakdown.paymentGateway).toBe(2);
@@ -16,7 +16,7 @@ describe("computeTotals", () => {
 
   it("calculates correct totals for ₹500 ticket", () => {
     const result = computeTotals(500);
-    
+
     expect(result.subtotal).toBe(500);
     expect(result.fees).toBe(14);
     expect(result.breakdown.paymentGateway).toBe(2);
@@ -28,7 +28,7 @@ describe("computeTotals", () => {
 
   it("calculates correct totals for ₹999 ticket", () => {
     const result = computeTotals(999);
-    
+
     expect(result.subtotal).toBe(999);
     expect(result.fees).toBe(14);
     expect(result.breakdown.paymentGateway).toBe(2);
@@ -41,7 +41,7 @@ describe("computeTotals", () => {
   it("rounds GST correctly", () => {
     const result = computeTotals(1000);
     const expectedGst = Math.round(14 * 0.18);
-    
+
     expect(result.gst).toBe(expectedGst);
     expect(result.gst).toBe(3);
   });
@@ -56,11 +56,12 @@ describe("computeTotals", () => {
   it("calculates correct total formula", () => {
     const basePrice = 1500;
     const result = computeTotals(basePrice);
-    
-    const expectedFees = FEES.paymentGateway + FEES.serverMaintenance + FEES.platformSupport;
+
+    const expectedFees =
+      FEES.paymentGateway + FEES.serverMaintenance + FEES.platformSupport;
     const expectedGst = Math.round(expectedFees * GST_RATE);
     const expectedTotal = basePrice + expectedFees + expectedGst;
-    
+
     expect(result.fees).toBe(expectedFees);
     expect(result.gst).toBe(expectedGst);
     expect(result.total).toBe(expectedTotal);

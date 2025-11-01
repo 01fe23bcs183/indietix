@@ -79,9 +79,7 @@ export default function EventsPage(): JSX.Element {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Max Price
-            </label>
+            <label className="block text-sm font-medium mb-2">Max Price</label>
             <input
               type="number"
               value={priceLte}
