@@ -164,7 +164,10 @@ describe("Analytics Helpers", () => {
     it("should sum seats correctly", () => {
       const bookings = [{ seats: 2 }, { seats: 3 }, { seats: 1 }];
 
-      const totalSeats = bookings.reduce((sum, booking) => sum + booking.seats, 0);
+      const totalSeats = bookings.reduce(
+        (sum, booking) => sum + booking.seats,
+        0
+      );
 
       expect(totalSeats).toBe(6);
     });

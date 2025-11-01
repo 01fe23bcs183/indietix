@@ -23,7 +23,7 @@ test.describe("Analytics Dashboard", () => {
   });
 
   test("should have date range filters", async ({ page }) => {
-    const dateRangeSelect = page.locator('select').first();
+    const dateRangeSelect = page.locator("select").first();
     await expect(dateRangeSelect).toBeVisible();
 
     const options = await dateRangeSelect.locator("option").allTextContents();
@@ -36,7 +36,7 @@ test.describe("Analytics Dashboard", () => {
   test("should show custom date inputs when custom is selected", async ({
     page,
   }) => {
-    const dateRangeSelect = page.locator('select').first();
+    const dateRangeSelect = page.locator("select").first();
     await dateRangeSelect.selectOption("custom");
 
     await expect(page.locator('input[type="date"]').first()).toBeVisible();
@@ -74,8 +74,8 @@ test.describe("Analytics Dashboard", () => {
   });
 
   test("should change data when date range is changed", async ({ page }) => {
-    const dateRangeSelect = page.locator('select').first();
-    
+    const dateRangeSelect = page.locator("select").first();
+
     await dateRangeSelect.selectOption("7");
     await page.waitForTimeout(1000);
 

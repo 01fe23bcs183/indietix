@@ -74,12 +74,14 @@ export const organizerAnalyticsRouter = router({
       });
 
       const revenue = confirmedBookings.reduce(
-        (sum: number, booking: { finalAmount: number; seats: number }) => sum + booking.finalAmount,
+        (sum: number, booking: { finalAmount: number; seats: number }) =>
+          sum + booking.finalAmount,
         0
       );
       const bookings = confirmedBookings.length;
       const seatsSold = confirmedBookings.reduce(
-        (sum: number, booking: { finalAmount: number; seats: number }) => sum + booking.seats,
+        (sum: number, booking: { finalAmount: number; seats: number }) =>
+          sum + booking.seats,
         0
       );
       const avgTicket = bookings > 0 ? Math.round(revenue / bookings) : 0;
@@ -217,7 +219,9 @@ export const organizerAnalyticsRouter = router({
         },
       });
 
-      const eventIds = bookingsByEvent.map((b: { eventId: string }) => b.eventId);
+      const eventIds = bookingsByEvent.map(
+        (b: { eventId: string }) => b.eventId
+      );
       const events = await prisma.event.findMany({
         where: {
           id: {
@@ -246,30 +250,37 @@ export const organizerAnalyticsRouter = router({
       );
 
       const topEvents = bookingsByEvent
-        .map((booking: {
-          eventId: string;
-          _sum: { finalAmount: number | null; seats: number | null };
-          _count: { id: number };
-        }) => {
-          const event = eventMap.get(booking.eventId);
-          return {
-            eventId: booking.eventId,
-            eventTitle: event?.title || "Unknown",
-            eventDate: event?.date?.toISOString() || "",
-            city: event?.city || "",
-            category: event?.category || "",
-            revenue: booking._sum.finalAmount || 0,
-            attendance: booking._sum.seats || 0,
-            bookings: booking._count.id,
-          };
-        })
-        .sort((a: { revenue: number; attendance: number }, b: { revenue: number; attendance: number }) => {
-          if (input.by === "revenue") {
-            return b.revenue - a.revenue;
-          } else {
-            return b.attendance - a.attendance;
+        .map(
+          (booking: {
+            eventId: string;
+            _sum: { finalAmount: number | null; seats: number | null };
+            _count: { id: number };
+          }) => {
+            const event = eventMap.get(booking.eventId);
+            return {
+              eventId: booking.eventId,
+              eventTitle: event?.title || "Unknown",
+              eventDate: event?.date?.toISOString() || "",
+              city: event?.city || "",
+              category: event?.category || "",
+              revenue: booking._sum.finalAmount || 0,
+              attendance: booking._sum.seats || 0,
+              bookings: booking._count.id,
+            };
           }
-        })
+        )
+        .sort(
+          (
+            a: { revenue: number; attendance: number },
+            b: { revenue: number; attendance: number }
+          ) => {
+            if (input.by === "revenue") {
+              return b.revenue - a.revenue;
+            } else {
+              return b.attendance - a.attendance;
+            }
+          }
+        )
         .slice(0, input.limit);
 
       return topEvents;
@@ -386,21 +397,26 @@ export const organizerAnalyticsRouter = router({
         currentDate.setDate(currentDate.getDate() + 1);
       }
 
-      bookings.forEach((booking: { createdAt: Date; finalAmount: number; seats: number }) => {
-        const key = getBucketKey(booking.createdAt);
-        const bucket = buckets.get(key);
-        if (bucket) {
-          bucket.revenue += booking.finalAmount;
-          bucket.bookings += 1;
-          bucket.seats += booking.seats;
+      bookings.forEach(
+        (booking: { createdAt: Date; finalAmount: number; seats: number }) => {
+          const key = getBucketKey(booking.createdAt);
+          const bucket = buckets.get(key);
+          if (bucket) {
+            bucket.revenue += booking.finalAmount;
+            bucket.bookings += 1;
+            bucket.seats += booking.seats;
+          }
         }
-      });
+      );
 
       const timeseries = Array.from(buckets.values()).sort((a, b) =>
         a.date.localeCompare(b.date)
       );
 
-      const totalRevenue = timeseries.reduce((sum, row) => sum + row.revenue, 0);
+      const totalRevenue = timeseries.reduce(
+        (sum, row) => sum + row.revenue,
+        0
+      );
       const totalBookings = timeseries.reduce(
         (sum, row) => sum + row.bookings,
         0

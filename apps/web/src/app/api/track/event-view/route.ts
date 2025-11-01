@@ -12,10 +12,7 @@ export async function POST(request: NextRequest) {
     const { eventId } = body;
 
     if (!eventId || typeof eventId !== "string") {
-      return NextResponse.json(
-        { error: "Invalid eventId" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid eventId" }, { status: 400 });
     }
 
     const session = await auth();

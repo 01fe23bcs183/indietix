@@ -277,25 +277,30 @@ export default function AnalyticsPage() {
                   </thead>
                   <tbody>
                     {topEvents && topEvents.length > 0 ? (
-                      topEvents.map((event: {
-                        eventId: string;
-                        eventTitle: string;
-                        revenue: number;
-                        attendance: number;
-                      }) => (
-                        <tr key={event.eventId} className="border-b">
-                          <td className="py-2 text-sm">{event.eventTitle}</td>
-                          <td className="text-right py-2 text-sm">
-                            {formatINR(event.revenue)}
-                          </td>
-                          <td className="text-right py-2 text-sm">
-                            {event.attendance}
-                          </td>
-                        </tr>
-                      ))
+                      topEvents.map(
+                        (event: {
+                          eventId: string;
+                          eventTitle: string;
+                          revenue: number;
+                          attendance: number;
+                        }) => (
+                          <tr key={event.eventId} className="border-b">
+                            <td className="py-2 text-sm">{event.eventTitle}</td>
+                            <td className="text-right py-2 text-sm">
+                              {formatINR(event.revenue)}
+                            </td>
+                            <td className="text-right py-2 text-sm">
+                              {event.attendance}
+                            </td>
+                          </tr>
+                        )
+                      )
                     ) : (
                       <tr>
-                        <td colSpan={3} className="py-4 text-center text-sm text-muted-foreground">
+                        <td
+                          colSpan={3}
+                          className="py-4 text-center text-sm text-muted-foreground"
+                        >
                           No events found for this period
                         </td>
                       </tr>
