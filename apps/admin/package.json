@@ -15,7 +15,7 @@
     "@indietix/db": "workspace:*",
     "@indietix/ui": "workspace:*",
     "@indietix/utils": "workspace:*",
-    "@trpc/client": "^10.45.0",
+    "@trpc/client": "^11.7.1",
     "@trpc/next": "^10.45.0",
     "@trpc/react-query": "^10.45.0",
     "@trpc/server": "^10.45.0",
