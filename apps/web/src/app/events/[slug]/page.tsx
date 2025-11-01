@@ -206,8 +206,7 @@ export default function EventDetailPage(): JSX.Element {
                   </h4>
                   <p className="text-xs text-muted-foreground">
                     We believe in complete transparency. All fees are clearly
-                    broken down so you know exactly what you&apos;re paying
-                    for.
+                    broken down so you know exactly what you&apos;re paying for.
                   </p>
                 </div>
               </div>

@@ -4,6 +4,7 @@ export interface PaymentOrder {
   currency: string;
 }
 
+/* eslint-disable no-unused-vars */
 export interface PaymentProvider {
   kind: "razorpay" | "fake";
   createOrder(params: {
@@ -16,6 +17,7 @@ export interface PaymentProvider {
     secret: string;
   }): boolean;
 }
+/* eslint-enable no-unused-vars */
 
 export interface RazorpayConfig {
   keyId: string;

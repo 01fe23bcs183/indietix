@@ -74,7 +74,8 @@ export default function CheckoutPage() {
             <p className="text-sm text-yellow-800">
               Your seats are on hold for:{" "}
               <span className="font-bold">
-                {minutesRemaining}:{secondsRemaining.toString().padStart(2, "0")}
+                {minutesRemaining}:
+                {secondsRemaining.toString().padStart(2, "0")}
               </span>
             </p>
           </div>
@@ -84,15 +85,16 @@ export default function CheckoutPage() {
             <h2 className="text-lg font-semibold mb-3">Event Details</h2>
             <div className="space-y-2">
               <p>
-                <span className="font-medium">Event:</span> {booking.event.title}
+                <span className="font-medium">Event:</span>{" "}
+                {booking.event.title}
               </p>
               <p>
                 <span className="font-medium">Date:</span>{" "}
                 {new Date(booking.event.date).toLocaleDateString()}
               </p>
               <p>
-                <span className="font-medium">Venue:</span> {booking.event.venue},{" "}
-                {booking.event.city}
+                <span className="font-medium">Venue:</span>{" "}
+                {booking.event.venue}, {booking.event.city}
               </p>
               <p>
                 <span className="font-medium">Ticket Number:</span>{" "}
@@ -127,8 +129,8 @@ export default function CheckoutPage() {
                   booking.status === "CONFIRMED"
                     ? "bg-green-100 text-green-800"
                     : booking.status === "PENDING"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-red-100 text-red-800"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-red-100 text-red-800"
                 }`}
               >
                 {booking.status}
@@ -138,8 +140,8 @@ export default function CheckoutPage() {
                   booking.paymentStatus === "COMPLETED"
                     ? "bg-green-100 text-green-800"
                     : booking.paymentStatus === "PENDING"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-red-100 text-red-800"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-red-100 text-red-800"
                 }`}
               >
                 Payment: {booking.paymentStatus}

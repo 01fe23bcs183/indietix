@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeBookingAmounts, FEES, GST_RATE } from "../pricing";
+import { computeBookingAmounts, FEES } from "../pricing";
 
 describe("computeBookingAmounts", () => {
   it("should compute correct amounts for 1 ticket", () => {

@@ -16,5 +16,4 @@ export class FakePaymentProvider implements PaymentProvider {
       currency: "INR",
     };
   }
-
 }

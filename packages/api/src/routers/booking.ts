@@ -93,9 +93,7 @@ export const bookingRouter = router({
 
       const amounts = computeBookingAmounts(event.price, input.quantity);
 
-      const holdExpiresAt = new Date(
-        Date.now() + HOLD_TTL_MINUTES * 60 * 1000
-      );
+      const holdExpiresAt = new Date(Date.now() + HOLD_TTL_MINUTES * 60 * 1000);
 
       const ticketNumber = generateTicketNumber();
 

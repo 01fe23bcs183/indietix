@@ -8,10 +8,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-razorpay-signature");
 
     if (!signature) {
-      return NextResponse.json(
-        { error: "Missing signature" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing signature" }, { status: 400 });
     }
 
     const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -35,10 +32,7 @@ export async function POST(request: NextRequest) {
 
     if (!isValid) {
       console.error("Invalid webhook signature");
-      return NextResponse.json(
-        { error: "Invalid signature" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
     const payload = JSON.parse(body);
@@ -61,10 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (!booking) {
       console.error(`Booking not found for order ${orderId}`);
-      return NextResponse.json(
-        { error: "Booking not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
     const existingEvent = await prisma.paymentEvent.findUnique({
