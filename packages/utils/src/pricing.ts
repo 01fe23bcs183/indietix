@@ -18,6 +18,21 @@ export interface PricingBreakdown {
   };
 }
 
+export interface BookingAmounts {
+  ticketPrice: number;
+  seats: number;
+  subtotal: number;
+  convenienceFee: number;
+  platformFee: number;
+  gst: number;
+  finalAmount: number;
+  breakdown: {
+    paymentGateway: number;
+    serverMaintenance: number;
+    platformSupport: number;
+  };
+}
+
 export function computeTotals(basePrice: number): PricingBreakdown {
   const subtotal = basePrice;
   const fees =
@@ -34,6 +49,33 @@ export function computeTotals(basePrice: number): PricingBreakdown {
       paymentGateway: FEES.paymentGateway,
       serverMaintenance: FEES.serverMaintenance,
       platformSupport: FEES.platformSupport,
+    },
+  };
+}
+
+export function computeBookingAmounts(
+  ticketPrice: number,
+  quantity: number
+): BookingAmounts {
+  const subtotal = ticketPrice * quantity;
+  const feesPerTicket =
+    FEES.paymentGateway + FEES.serverMaintenance + FEES.platformSupport;
+  const totalFees = feesPerTicket * quantity;
+  const gst = Math.round(totalFees * GST_RATE);
+  const finalAmount = subtotal + totalFees + gst;
+
+  return {
+    ticketPrice,
+    seats: quantity,
+    subtotal,
+    convenienceFee: feesPerTicket * quantity,
+    platformFee: totalFees,
+    gst,
+    finalAmount,
+    breakdown: {
+      paymentGateway: FEES.paymentGateway * quantity,
+      serverMaintenance: FEES.serverMaintenance * quantity,
+      platformSupport: FEES.platformSupport * quantity,
     },
   };
 }

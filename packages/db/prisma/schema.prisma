@@ -105,6 +105,7 @@ model Event {
   date        DateTime
   price       Int
   totalSeats  Int
+  bookedSeats Int         @default(0)
   status      EventStatus @default(DRAFT)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -121,23 +122,34 @@ model Event {
 }
 
 model Booking {
-  id            String        @id @default(cuid())
-  eventId       String
-  userId        String
-  quantity      Int
-  totalAmount   Int
-  paymentStatus PaymentStatus @default(PENDING)
-  status        BookingStatus @default(PENDING)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  eventId            String
+  userId             String
+  ticketNumber       String        @unique
+  seats              Int
+  ticketPrice        Int
+  convenienceFee     Int
+  platformFee        Int
+  finalAmount        Int
+  paymentStatus      PaymentStatus @default(PENDING)
+  status             BookingStatus @default(PENDING)
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  holdExpiresAt      DateTime
+  cancelledAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
   
-  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event              Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentEvents      PaymentEvent[]
 
   @@index([eventId])
   @@index([userId])
   @@index([paymentStatus])
   @@index([status])
+  @@index([holdExpiresAt])
+  @@index([ticketNumber])
 }
 
 model Payout {
@@ -152,4 +164,18 @@ model Payout {
 
   @@index([organizerId])
   @@index([status])
+}
+
+model PaymentEvent {
+  id        String   @id @default(cuid())
+  provider  String
+  eventId   String   @unique
+  bookingId String
+  payload   Json
+  createdAt DateTime @default(now())
+  
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([eventId])
 }

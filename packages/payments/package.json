@@ -1,5 +1,5 @@
 {
-  "name": "@indietix/api",
+  "name": "@indietix/payments",
   "version": "0.0.0",
   "private": true,
   "main": "./dist/index.js",
@@ -16,25 +16,15 @@
     "dev": "tsc --watch",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@auth/core": "^0.34.3",
-    "@indietix/db": "workspace:*",
-    "@indietix/payments": "workspace:*",
-    "@indietix/utils": "workspace:*",
-    "@trpc/server": "^10.45.0",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "next-auth": "5.0.0-beta.30",
-    "zod": "^3.22.4"
+    "razorpay": "^2.9.2"
   },
   "devDependencies": {
     "@indietix/config": "workspace:*",
-    "@types/bcrypt": "^6.0.0",
-    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20.11.5",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.1"
+    "vitest": "^1.6.1"
   }
 }

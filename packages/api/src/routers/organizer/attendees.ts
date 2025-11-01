@@ -121,28 +121,18 @@ export const organizerAttendeesRouter = router({
       ]);
 
       return {
-        attendees: bookings.map(
-          (booking: {
-            id: string;
-            user: { name: string; email: string; phone: string | null };
-            quantity: number;
-            status: string;
-            paymentStatus: string;
-            updatedAt: Date;
-            createdAt: Date;
-          }) => ({
-            ticketNumber: booking.id,
-            userName: booking.user.name,
-            userEmail: booking.user.email,
-            userPhone: booking.user.phone,
-            seats: booking.quantity,
-            status: booking.status,
-            paymentStatus: booking.paymentStatus,
-            paidAt:
-              booking.paymentStatus === "COMPLETED" ? booking.updatedAt : null,
-            createdAt: booking.createdAt,
-          })
-        ),
+        attendees: bookings.map((booking) => ({
+          ticketNumber: booking.ticketNumber || booking.id,
+          userName: booking.user.name,
+          userEmail: booking.user.email,
+          userPhone: booking.user.phone,
+          seats: booking.seats,
+          status: booking.status,
+          paymentStatus: booking.paymentStatus,
+          paidAt:
+            booking.paymentStatus === "COMPLETED" ? booking.updatedAt : null,
+          createdAt: booking.createdAt,
+        })),
         total,
         page: input.page,
         totalPages: Math.ceil(total / limit),
@@ -182,28 +172,18 @@ export const organizerAttendeesRouter = router({
         "createdAt",
       ];
 
-      const rows = bookings.map(
-        (booking: {
-          id: string;
-          user: { name: string; email: string; phone: string | null };
-          quantity: number;
-          status: string;
-          paymentStatus: string;
-          updatedAt: Date;
-          createdAt: Date;
-        }) => [
-          booking.id,
-          booking.user.name,
-          booking.user.email,
-          booking.user.phone || "",
-          booking.quantity.toString(),
-          booking.status,
-          booking.paymentStatus === "COMPLETED"
-            ? booking.updatedAt.toISOString()
-            : "",
-          booking.createdAt.toISOString(),
-        ]
-      );
+      const rows = bookings.map((booking) => [
+        booking.ticketNumber || booking.id,
+        booking.user.name,
+        booking.user.email,
+        booking.user.phone || "",
+        booking.seats.toString(),
+        booking.status,
+        booking.paymentStatus === "COMPLETED"
+          ? booking.updatedAt.toISOString()
+          : "",
+        booking.createdAt.toISOString(),
+      ]);
 
       const csvContent = [
         headers.join(","),

@@ -20,5 +20,5 @@ export function truncate(text: string, maxLength: number): string {
 }
 
 export { formatINR } from "./format";
-export { FEES, GST_RATE, computeTotals } from "./pricing";
-export type { PricingBreakdown } from "./pricing";
+export { FEES, GST_RATE, computeTotals, computeBookingAmounts } from "./pricing";
+export type { PricingBreakdown, BookingAmounts } from "./pricing";
