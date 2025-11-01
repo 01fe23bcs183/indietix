@@ -44,4 +44,8 @@ export {
 } from "./refund";
 export type { RefundPolicy, RefundCalculation } from "./refund";
 export { computePayoutAmount, formatPayoutForCSV } from "./payout";
-export type { PayoutBreakdown, PayoutCalculationParams } from "./payout";
+export type {
+  PayoutBreakdown,
+  PayoutCalculationParams,
+  PrismaClient,
+} from "./payout";

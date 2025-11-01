@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@indietix/db";
-import { computePayoutAmount } from "@indietix/utils";
+import { computePayoutAmount, type PrismaClient } from "@indietix/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
             periodStart,
             periodEnd,
           },
-          prisma
+          prisma as unknown as PrismaClient
         );
 
         if (breakdown.netPayable > 0) {

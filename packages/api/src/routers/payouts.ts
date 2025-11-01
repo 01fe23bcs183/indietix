@@ -2,7 +2,11 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import { prisma } from "@indietix/db";
 import { TRPCError } from "@trpc/server";
-import { computePayoutAmount, formatPayoutForCSV } from "@indietix/utils";
+import {
+  computePayoutAmount,
+  formatPayoutForCSV,
+  type PrismaClient,
+} from "@indietix/utils";
 import { getPaymentProvider } from "@indietix/payments";
 
 const requireAuth = (ctx: {
@@ -84,7 +88,7 @@ export const payoutsRouter = router({
             periodStart: input.periodStart,
             periodEnd: input.periodEnd,
           },
-          prisma
+          prisma as unknown as PrismaClient
         );
 
         if (breakdown.netPayable <= 0) {

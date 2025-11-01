@@ -1,9 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { computePayoutAmount, formatPayoutForCSV } from "../payout";
+import {
+  computePayoutAmount,
+  formatPayoutForCSV,
+  type PrismaClient,
+} from "../payout";
 
 describe("Payout Calculations", () => {
   describe("computePayoutAmount", () => {
-    let mockPrisma: any;
+    let mockPrisma: {
+      event: { findMany: ReturnType<typeof vi.fn> };
+      booking: { findMany: ReturnType<typeof vi.fn> };
+    };
 
     beforeEach(() => {
       mockPrisma = {
@@ -45,7 +52,7 @@ describe("Payout Calculations", () => {
           periodStart: new Date("2024-01-01"),
           periodEnd: new Date("2024-01-31"),
         },
-        mockPrisma
+        mockPrisma as unknown as PrismaClient
       );
 
       expect(result.gmv).toBe(2500); // (1000*2) + (500*1)
@@ -82,7 +89,7 @@ describe("Payout Calculations", () => {
           periodStart: new Date("2024-01-01"),
           periodEnd: new Date("2024-01-31"),
         },
-        mockPrisma
+        mockPrisma as unknown as PrismaClient
       );
 
       expect(result.gmv).toBe(2000); // 1000*2
@@ -101,7 +108,7 @@ describe("Payout Calculations", () => {
           periodStart: new Date("2024-01-01"),
           periodEnd: new Date("2024-01-31"),
         },
-        mockPrisma
+        mockPrisma as unknown as PrismaClient
       );
 
       expect(result.gmv).toBe(0);
@@ -138,7 +145,7 @@ describe("Payout Calculations", () => {
           periodStart: new Date("2024-01-01"),
           periodEnd: new Date("2024-01-31"),
         },
-        mockPrisma
+        mockPrisma as unknown as PrismaClient
       );
 
       expect(result.netPayable).toBe(0);
@@ -174,7 +181,7 @@ describe("Payout Calculations", () => {
           periodStart: new Date("2024-01-01"),
           periodEnd: new Date("2024-01-31"),
         },
-        mockPrisma
+        mockPrisma as unknown as PrismaClient
       );
 
       expect(result.refunds).toBe(300); // Only SUCCEEDED refunds

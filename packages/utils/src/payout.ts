@@ -14,6 +14,32 @@ export interface PayoutCalculationParams {
   periodEnd: Date;
 }
 
+export type ConfirmedBooking = {
+  ticketPrice: number;
+  seats: number;
+  convenienceFee: number;
+  platformFee: number;
+  eventId: string;
+};
+
+export type RefundedBooking = {
+  refunds: Array<{
+    status: string;
+    amount: number;
+  }>;
+};
+
+export type PrismaClient = {
+  event: {
+    // eslint-disable-next-line no-unused-vars
+    findMany: (args: unknown) => Promise<Array<{ id: string }>>;
+  };
+  booking: {
+    // eslint-disable-next-line no-unused-vars
+    findMany: (args: unknown) => Promise<unknown>;
+  };
+};
+
 /**
  * Compute payout amount for an organizer for a given period
  * Formula: GMV_confirmed - refunds_confirmed - fees_kept = net_payable
@@ -23,7 +49,7 @@ export interface PayoutCalculationParams {
  */
 export async function computePayoutAmount(
   params: PayoutCalculationParams,
-  prisma: any
+  prisma: PrismaClient
 ): Promise<PayoutBreakdown> {
   const { organizerId, periodStart, periodEnd } = params;
 
@@ -32,7 +58,7 @@ export async function computePayoutAmount(
     select: { id: true },
   });
 
-  const eventIds = events.map((e: { id: string }) => e.id);
+  const eventIds = events.map((e) => e.id);
 
   if (eventIds.length === 0) {
     return {
@@ -46,7 +72,7 @@ export async function computePayoutAmount(
     };
   }
 
-  const confirmedBookings = await prisma.booking.findMany({
+  const confirmedBookings = (await prisma.booking.findMany({
     where: {
       eventId: { in: eventIds },
       status: "CONFIRMED",
@@ -61,10 +87,11 @@ export async function computePayoutAmount(
       seats: true,
       convenienceFee: true,
       platformFee: true,
+      eventId: true,
     },
-  });
+  })) as ConfirmedBooking[];
 
-  const refundedBookings = await prisma.booking.findMany({
+  const refundedBookings = (await prisma.booking.findMany({
     where: {
       eventId: { in: eventIds },
       status: "CANCELLED",
@@ -81,32 +108,28 @@ export async function computePayoutAmount(
         },
       },
     },
-  });
+  })) as RefundedBooking[];
 
-  const gmv = confirmedBookings.reduce((sum: number, booking: any) => {
+  const gmv = confirmedBookings.reduce((sum, booking) => {
     return sum + booking.ticketPrice * booking.seats;
   }, 0);
 
-  const refunds = refundedBookings.reduce((sum: number, booking: any) => {
+  const refunds = refundedBookings.reduce((sum, booking) => {
     const successfulRefunds = booking.refunds.filter(
-      (r: { status: string }) => r.status === "SUCCEEDED"
+      (r) => r.status === "SUCCEEDED"
     );
     return (
-      sum +
-      successfulRefunds.reduce(
-        (refundSum: number, r: { amount: number }) => refundSum + r.amount,
-        0
-      )
+      sum + successfulRefunds.reduce((refundSum, r) => refundSum + r.amount, 0)
     );
   }, 0);
 
-  const feesKept = confirmedBookings.reduce((sum: number, booking: any) => {
+  const feesKept = confirmedBookings.reduce((sum, booking) => {
     return sum + booking.convenienceFee + booking.platformFee;
   }, 0);
 
   const netPayable = gmv - refunds - feesKept;
 
-  const uniqueEventIds = new Set(confirmedBookings.map((b: any) => b.eventId));
+  const uniqueEventIds = new Set(confirmedBookings.map((b) => b.eventId));
 
   return {
     gmv,
