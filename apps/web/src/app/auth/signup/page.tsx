@@ -124,7 +124,10 @@ export default function SignUpPage() {
             </button>
           </div>
           <div className="text-center">
-            <a href="/auth/signin" className="text-blue-600 hover:text-blue-500">
+            <a
+              href="/auth/signin"
+              className="text-blue-600 hover:text-blue-500"
+            >
               Already have an account? Sign in
             </a>
           </div>

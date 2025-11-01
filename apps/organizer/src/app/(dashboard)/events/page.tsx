@@ -8,7 +8,9 @@ import Link from "next/link";
 export default function EventsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"DRAFT" | "PUBLISHED" | "CANCELLED" | "SOLD_OUT" | "COMPLETED" | "">("");
+  const [statusFilter, setStatusFilter] = useState<
+    "DRAFT" | "PUBLISHED" | "CANCELLED" | "SOLD_OUT" | "COMPLETED" | ""
+  >("");
   const [cityFilter, setCityFilter] = useState("");
 
   const { data, isLoading, error } = trpc.organizer.events.list.useQuery({
@@ -21,7 +23,10 @@ export default function EventsPage() {
   const setStatusMutation = trpc.organizer.events.setStatus.useMutation();
   const duplicateMutation = trpc.organizer.events.duplicate.useMutation();
 
-  const handleStatusChange = async (id: string, status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "SOLD_OUT" | "COMPLETED") => {
+  const handleStatusChange = async (
+    id: string,
+    status: "DRAFT" | "PUBLISHED" | "CANCELLED" | "SOLD_OUT" | "COMPLETED"
+  ) => {
     await setStatusMutation.mutateAsync({ id, status });
   };
 
@@ -56,7 +61,9 @@ export default function EventsPage() {
         />
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as typeof statusFilter)
+          }
           className="border rounded px-4 py-2"
         >
           <option value="">All Status</option>
@@ -101,10 +108,10 @@ export default function EventsPage() {
                       event.status === "PUBLISHED"
                         ? "bg-green-100 text-green-800"
                         : event.status === "DRAFT"
-                        ? "bg-gray-100 text-gray-800"
-                        : event.status === "CANCELLED"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800"
+                          ? "bg-gray-100 text-gray-800"
+                          : event.status === "CANCELLED"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-blue-100 text-blue-800"
                     }`}
                   >
                     {event.status}
@@ -133,7 +140,9 @@ export default function EventsPage() {
                     {event.status === "DRAFT" && (
                       <Button
                         size="sm"
-                        onClick={() => handleStatusChange(event.id, "PUBLISHED")}
+                        onClick={() =>
+                          handleStatusChange(event.id, "PUBLISHED")
+                        }
                       >
                         Publish
                       </Button>
@@ -142,7 +151,9 @@ export default function EventsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleStatusChange(event.id, "CANCELLED")}
+                        onClick={() =>
+                          handleStatusChange(event.id, "CANCELLED")
+                        }
                       >
                         Cancel
                       </Button>

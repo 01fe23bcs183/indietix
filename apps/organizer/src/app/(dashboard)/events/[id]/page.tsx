@@ -10,7 +10,9 @@ export default function EditEventPage() {
   const router = useRouter();
   const eventId = params.id as string;
 
-  const { data: event, isLoading } = trpc.organizer.events.get.useQuery({ id: eventId });
+  const { data: event, isLoading } = trpc.organizer.events.get.useQuery({
+    id: eventId,
+  });
   const updateMutation = trpc.organizer.events.update.useMutation({
     onSuccess: () => {
       router.push("/events");
@@ -187,7 +189,9 @@ export default function EditEventPage() {
         </div>
 
         <div>
-          <label className="block mb-2 font-semibold">Image URL (optional)</label>
+          <label className="block mb-2 font-semibold">
+            Image URL (optional)
+          </label>
           <input
             type="url"
             value={formData.imageUrl}

@@ -179,7 +179,9 @@ export default function NewEventPage() {
               <input
                 type="number"
                 value={formData.totalSeats}
-                onChange={(e) => updateField("totalSeats", Number(e.target.value))}
+                onChange={(e) =>
+                  updateField("totalSeats", Number(e.target.value))
+                }
                 className="w-full border rounded px-4 py-2"
                 required
                 min={1}

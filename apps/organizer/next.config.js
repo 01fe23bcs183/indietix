@@ -13,7 +13,7 @@ const nextConfig = {
   ],
   webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals.push('bcrypt');
+      config.externals.push("bcrypt");
     }
     return config;
   },
