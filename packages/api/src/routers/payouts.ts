@@ -434,7 +434,9 @@ export const payoutsRouter = router({
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message:
-              error instanceof Error ? error.message : "Failed to process payout",
+              error instanceof Error
+                ? error.message
+                : "Failed to process payout",
           });
         }
       }),
@@ -458,7 +460,13 @@ export const payoutsRouter = router({
 
         const csvData = formatPayoutForCSV(payout);
 
-        const headers = ["beneficiary_name", "account", "ifsc", "amount", "utr"];
+        const headers = [
+          "beneficiary_name",
+          "account",
+          "ifsc",
+          "amount",
+          "utr",
+        ];
         const values = [
           csvData.beneficiary_name,
           csvData.account,

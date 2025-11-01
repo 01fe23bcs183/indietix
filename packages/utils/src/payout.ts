@@ -17,7 +17,7 @@ export interface PayoutCalculationParams {
 /**
  * Compute payout amount for an organizer for a given period
  * Formula: GMV_confirmed - refunds_confirmed - fees_kept = net_payable
- * 
+ *
  * Only considers CONFIRMED bookings within the specified window
  * REFUNDED bookings subtract appropriately
  */
@@ -93,7 +93,10 @@ export async function computePayoutAmount(
     );
     return (
       sum +
-      successfulRefunds.reduce((refundSum: number, r: { amount: number }) => refundSum + r.amount, 0)
+      successfulRefunds.reduce(
+        (refundSum: number, r: { amount: number }) => refundSum + r.amount,
+        0
+      )
     );
   }, 0);
 
@@ -103,9 +106,7 @@ export async function computePayoutAmount(
 
   const netPayable = gmv - refunds - feesKept;
 
-  const uniqueEventIds = new Set(
-    confirmedBookings.map((b: any) => b.eventId)
-  );
+  const uniqueEventIds = new Set(confirmedBookings.map((b: any) => b.eventId));
 
   return {
     gmv,

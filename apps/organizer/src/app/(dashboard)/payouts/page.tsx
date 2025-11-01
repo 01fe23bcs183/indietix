@@ -6,7 +6,9 @@ import { Button } from "@indietix/ui";
 import { formatINR } from "@indietix/utils";
 
 export default function PayoutsPage() {
-  const [activeTab, setActiveTab] = useState<"pending" | "completed">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "completed">(
+    "pending"
+  );
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
@@ -33,7 +35,7 @@ export default function PayoutsPage() {
 
   const handleRequestPayout = () => {
     if (!periodStart || !periodEnd) {
-      alert("Please select both start and end dates");
+      window.alert("Please select both start and end dates");
       return;
     }
 
@@ -110,8 +112,8 @@ export default function PayoutsPage() {
                     {formatINR(payout.amount / 100)}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Period: {new Date(payout.periodStart).toLocaleDateString()} -{" "}
-                    {new Date(payout.periodEnd).toLocaleDateString()}
+                    Period: {new Date(payout.periodStart).toLocaleDateString()}{" "}
+                    - {new Date(payout.periodEnd).toLocaleDateString()}
                   </p>
                   <p className="text-sm text-gray-600">
                     {breakdown.eventCount} events, {breakdown.bookingCount}{" "}
@@ -124,12 +126,12 @@ export default function PayoutsPage() {
                       payout.status === "COMPLETED"
                         ? "bg-green-100 text-green-800"
                         : payout.status === "PENDING"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : payout.status === "APPROVED"
-                        ? "bg-blue-100 text-blue-800"
-                        : payout.status === "PROCESSING"
-                        ? "bg-purple-100 text-purple-800"
-                        : "bg-gray-100 text-gray-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : payout.status === "APPROVED"
+                            ? "bg-blue-100 text-blue-800"
+                            : payout.status === "PROCESSING"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {payout.status}
