@@ -1,6 +1,11 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import type { PaymentProvider, PaymentOrder, RazorpayConfig, RefundResult } from "./types";
+import type {
+  PaymentProvider,
+  PaymentOrder,
+  RazorpayConfig,
+  RefundResult,
+} from "./types";
 
 export class RazorpayProvider implements PaymentProvider {
   kind: "razorpay" = "razorpay";

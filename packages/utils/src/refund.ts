@@ -47,8 +47,9 @@ export function computeRefund(params: {
     deadlineHours,
   } = params;
 
-  const hoursUntilEvent = (eventStart.getTime() - now.getTime()) / (1000 * 60 * 60);
-  
+  const hoursUntilEvent =
+    (eventStart.getTime() - now.getTime()) / (1000 * 60 * 60);
+
   if (hoursUntilEvent < 0) {
     return {
       refundableAmount: 0,
@@ -57,7 +58,13 @@ export function computeRefund(params: {
         paymentGateway: feesConfig.paymentGateway * qty,
         serverMaintenance: feesConfig.serverMaintenance * qty,
         platformSupport: feesConfig.platformSupport * qty,
-        gst: Math.round((feesConfig.paymentGateway + feesConfig.serverMaintenance + feesConfig.platformSupport) * qty * gstRate),
+        gst: Math.round(
+          (feesConfig.paymentGateway +
+            feesConfig.serverMaintenance +
+            feesConfig.platformSupport) *
+            qty *
+            gstRate
+        ),
       },
       message: "Event has already started. No refund available.",
     };
@@ -71,14 +78,23 @@ export function computeRefund(params: {
         paymentGateway: feesConfig.paymentGateway * qty,
         serverMaintenance: feesConfig.serverMaintenance * qty,
         platformSupport: feesConfig.platformSupport * qty,
-        gst: Math.round((feesConfig.paymentGateway + feesConfig.serverMaintenance + feesConfig.platformSupport) * qty * gstRate),
+        gst: Math.round(
+          (feesConfig.paymentGateway +
+            feesConfig.serverMaintenance +
+            feesConfig.platformSupport) *
+            qty *
+            gstRate
+        ),
       },
       message: `Past cancellation deadline (${deadlineHours} hours before event). No refund available.`,
     };
   }
 
   const subtotal = baseTicketPrice * qty;
-  const feesPerTicket = feesConfig.paymentGateway + feesConfig.serverMaintenance + feesConfig.platformSupport;
+  const feesPerTicket =
+    feesConfig.paymentGateway +
+    feesConfig.serverMaintenance +
+    feesConfig.platformSupport;
   const totalFees = feesPerTicket * qty;
   const gst = Math.round(totalFees * gstRate);
 
@@ -89,7 +105,9 @@ export function computeRefund(params: {
     refundableAmount = subtotal - policy.cancellationFeeFlat;
     message = `Refund: ₹${(refundableAmount / 100).toFixed(2)} (ticket price minus ₹${(policy.cancellationFeeFlat / 100).toFixed(2)} cancellation fee)`;
   } else if (policy.allowLateRefundPercent) {
-    const lateRefundAmount = Math.round(subtotal * (policy.allowLateRefundPercent / 100));
+    const lateRefundAmount = Math.round(
+      subtotal * (policy.allowLateRefundPercent / 100)
+    );
     refundableAmount = lateRefundAmount - policy.cancellationFeeFlat;
     message = `Late refund: ₹${(refundableAmount / 100).toFixed(2)} (${policy.allowLateRefundPercent}% of ticket price minus ₹${(policy.cancellationFeeFlat / 100).toFixed(2)} cancellation fee)`;
   } else {
@@ -129,7 +147,8 @@ export function canCancelBooking(params: {
     };
   }
 
-  const hoursUntilEvent = (eventStart.getTime() - now.getTime()) / (1000 * 60 * 60);
+  const hoursUntilEvent =
+    (eventStart.getTime() - now.getTime()) / (1000 * 60 * 60);
 
   if (hoursUntilEvent < 0) {
     return {

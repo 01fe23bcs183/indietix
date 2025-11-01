@@ -10,7 +10,11 @@ export default function WaitlistOfferPage() {
   const offerId = params.offerId as string;
   const [timeRemaining, setTimeRemaining] = useState<string>("");
 
-  const { data: offer, isLoading, error } = trpc.waitlist.getOffer.useQuery({
+  const {
+    data: offer,
+    isLoading,
+    error,
+  } = trpc.waitlist.getOffer.useQuery({
     offerId,
   });
 
@@ -19,7 +23,7 @@ export default function WaitlistOfferPage() {
       router.push(`/events/${data.eventId}`);
     },
     onError: (error) => {
-      alert(error.message);
+      window.alert(error.message);
     },
   });
 
@@ -64,9 +68,7 @@ export default function WaitlistOfferPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
-          <p className="text-gray-600">
-            {error?.message || "Offer not found"}
-          </p>
+          <p className="text-gray-600">{error?.message || "Offer not found"}</p>
         </div>
       </div>
     );
@@ -281,9 +283,9 @@ export default function WaitlistOfferPage() {
 
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Important:</strong> Click the button above to claim
-                your seat and proceed to checkout. You must complete the
-                payment before the timer expires.
+                <strong>Important:</strong> Click the button above to claim your
+                seat and proceed to checkout. You must complete the payment
+                before the timer expires.
               </p>
             </div>
           </div>

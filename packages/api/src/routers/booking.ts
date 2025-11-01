@@ -270,7 +270,10 @@ export const bookingRouter = router({
         });
       }
 
-      if (booking.status !== "CONFIRMED" || booking.paymentStatus !== "COMPLETED") {
+      if (
+        booking.status !== "CONFIRMED" ||
+        booking.paymentStatus !== "COMPLETED"
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Only confirmed bookings can be cancelled with refund",
@@ -291,7 +294,9 @@ export const bookingRouter = router({
         });
       }
 
-      const { computeRefund, canCancelBooking } = await import("@indietix/utils");
+      const { computeRefund, canCancelBooking } = await import(
+        "@indietix/utils"
+      );
 
       const now = new Date();
       const canCancel = canCancelBooking({
@@ -390,7 +395,8 @@ export const bookingRouter = router({
             data: {
               status: "FAILED",
               failedAt: new Date(),
-              failureReason: error instanceof Error ? error.message : "Unknown error",
+              failureReason:
+                error instanceof Error ? error.message : "Unknown error",
             },
           });
 
@@ -413,7 +419,10 @@ export const bookingRouter = router({
             where: { id: input.bookingId },
             data: {
               status: "CANCELLED",
-              paymentStatus: refundCalc.refundableAmount > 0 ? "REFUNDED" : booking.paymentStatus,
+              paymentStatus:
+                refundCalc.refundableAmount > 0
+                  ? "REFUNDED"
+                  : booking.paymentStatus,
               cancelledAt: new Date(),
             },
           });
@@ -459,7 +468,9 @@ export const bookingRouter = router({
         });
       }
 
-      const { computeRefund, canCancelBooking } = await import("@indietix/utils");
+      const { computeRefund, canCancelBooking } = await import(
+        "@indietix/utils"
+      );
 
       const now = new Date();
       const canCancel = canCancelBooking({

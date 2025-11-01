@@ -78,7 +78,7 @@ export default function AttendeesPage() {
             </tr>
           </thead>
           <tbody>
-            {data?.attendees.map((attendee: typeof data.attendees[0]) => (
+            {data?.attendees.map((attendee: (typeof data.attendees)[0]) => (
               <tr key={attendee.ticketNumber}>
                 <td className="border p-2">{attendee.ticketNumber}</td>
                 <td className="border p-2">{attendee.userName}</td>

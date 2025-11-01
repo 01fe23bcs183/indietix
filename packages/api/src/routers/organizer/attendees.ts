@@ -121,7 +121,7 @@ export const organizerAttendeesRouter = router({
       ]);
 
       return {
-        attendees: bookings.map((booking: typeof bookings[0]) => ({
+        attendees: bookings.map((booking: (typeof bookings)[0]) => ({
           ticketNumber: booking.ticketNumber || booking.id,
           userName: booking.user.name,
           userEmail: booking.user.email,
@@ -172,7 +172,7 @@ export const organizerAttendeesRouter = router({
         "createdAt",
       ];
 
-      const rows = bookings.map((booking: typeof bookings[0]) => [
+      const rows = bookings.map((booking: (typeof bookings)[0]) => [
         booking.ticketNumber || booking.id,
         booking.user.name,
         booking.user.email,

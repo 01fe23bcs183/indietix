@@ -21,7 +21,9 @@ export async function issueWaitlistOffers(
     return;
   }
 
-  const expiresAt = new Date(Date.now() + WAITLIST_OFFER_TTL_MINUTES * 60 * 1000);
+  const expiresAt = new Date(
+    Date.now() + WAITLIST_OFFER_TTL_MINUTES * 60 * 1000
+  );
 
   for (const entry of activeEntries) {
     await prisma.$transaction(async (tx: typeof prisma) => {
