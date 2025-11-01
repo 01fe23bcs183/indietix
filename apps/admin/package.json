@@ -15,7 +15,7 @@
     "@indietix/db": "workspace:*",
     "@indietix/ui": "workspace:*",
     "@indietix/utils": "workspace:*",
-    "@tanstack/react-query": "^4.36.1",
+    "@tanstack/react-query": "^5.90.5",
     "@trpc/client": "^10.45.0",
     "@trpc/next": "^10.45.0",
     "@trpc/react-query": "^10.45.0",
