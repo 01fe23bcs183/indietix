@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
-import { prisma } from "@indietix/db";
+import { prisma, Prisma } from "@indietix/db";
 import { TRPCError } from "@trpc/server";
 
 export const waitlistRouter = router({
@@ -149,7 +149,7 @@ export const waitlistRouter = router({
 
       const now = new Date();
       if (now > offer.expiresAt) {
-        await prisma.$transaction(async (tx: typeof prisma) => {
+        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
           await tx.waitlistOffer.update({
             where: { id: offer.id },
             data: {
@@ -173,7 +173,7 @@ export const waitlistRouter = router({
         });
       }
 
-      await prisma.$transaction(async (tx: typeof prisma) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         await tx.waitlistOffer.update({
           where: { id: offer.id },
           data: {

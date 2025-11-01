@@ -1,4 +1,4 @@
-import { prisma } from "@indietix/db";
+import { prisma, Prisma } from "@indietix/db";
 
 const WAITLIST_OFFER_TTL_MINUTES = 30;
 
@@ -26,7 +26,7 @@ export async function issueWaitlistOffers(
   );
 
   for (const entry of activeEntries) {
-    await prisma.$transaction(async (tx: typeof prisma) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.waitlistEntry.update({
         where: { id: entry.id },
         data: {
@@ -66,7 +66,7 @@ export async function expireWaitlistOffers(): Promise<number> {
   let expiredCount = 0;
 
   for (const offer of expiredOffers) {
-    await prisma.$transaction(async (tx: typeof prisma) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.waitlistOffer.update({
         where: { id: offer.id },
         data: {

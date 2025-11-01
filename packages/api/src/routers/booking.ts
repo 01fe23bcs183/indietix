@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
-import { prisma } from "@indietix/db";
+import { prisma, Prisma } from "@indietix/db";
 import {
   computeBookingAmounts,
   createSignedTicket,
@@ -19,7 +19,7 @@ function generateTicketNumber(): string {
 }
 
 async function reserveSeats(eventId: string, quantity: number) {
-  return await prisma.$transaction(async (tx: typeof prisma) => {
+  return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const event = await tx.event.findUnique({
       where: { id: eventId },
     });
@@ -43,7 +43,7 @@ async function reserveSeats(eventId: string, quantity: number) {
 }
 
 async function confirmBookingAndIncrementSeats(bookingId: string) {
-  return await prisma.$transaction(async (tx: typeof prisma) => {
+  return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const booking = await tx.booking.findUnique({
       where: { id: bookingId },
       include: { event: true },
@@ -351,7 +351,7 @@ export const bookingRouter = router({
             speed: "normal",
           });
 
-          await prisma.$transaction(async (tx: typeof prisma) => {
+          await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             await tx.refund.update({
               where: { id: refund.id },
               data: {
@@ -406,7 +406,7 @@ export const bookingRouter = router({
           });
         }
       } else {
-        await prisma.$transaction(async (tx: typeof prisma) => {
+        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
           await tx.refund.update({
             where: { id: refund.id },
             data: {

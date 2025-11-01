@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@indietix/db";
+import { prisma, Prisma } from "@indietix/db";
 import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (event === "payment.captured") {
-      await prisma.$transaction(async (tx: typeof prisma) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const currentBooking = await tx.booking.findUnique({
           where: { id: booking.id },
         });
