@@ -45,6 +45,29 @@ enum BookingStatus {
   ATTENDED
 }
 
+enum RefundStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REJECTED
+}
+
+enum WaitlistStatus {
+  ACTIVE
+  INVITED
+  CLAIMED
+  EXPIRED
+}
+
+enum WaitlistOfferStatus {
+  PENDING
+  CLAIMED
+  EXPIRED
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -94,24 +117,28 @@ model Organizer {
 }
 
 model Event {
-  id          String      @id @default(cuid())
-  organizerId String
-  title       String
-  slug        String      @unique
-  description String
-  category    Category
-  city        String
-  venue       String
-  date        DateTime
-  price       Int
-  totalSeats  Int
-  bookedSeats Int         @default(0)
-  status      EventStatus @default(DRAFT)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                        String      @id @default(cuid())
+  organizerId               String
+  title                     String
+  slug                      String      @unique
+  description               String
+  category                  Category
+  city                      String
+  venue                     String
+  date                      DateTime
+  price                     Int
+  totalSeats                Int
+  bookedSeats               Int         @default(0)
+  status                    EventStatus @default(DRAFT)
+  allowCancellation         Boolean     @default(true)
+  cancellationDeadlineHours Int         @default(24)
+  cancellationFeeFlat       Int         @default(50)
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
   
-  organizer   Organizer   @relation(fields: [organizerId], references: [id], onDelete: Cascade)
-  bookings    Booking[]
+  organizer                 Organizer        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  bookings                  Booking[]
+  waitlistEntries           WaitlistEntry[]
 
   @@index([slug])
   @@index([organizerId])
@@ -147,6 +174,7 @@ model Booking {
   user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   paymentEvents      PaymentEvent[]
   scanLogs           ScanLog[]
+  refunds            Refund[]
 
   @@index([eventId])
   @@index([userId])
@@ -171,16 +199,20 @@ model Payout {
 }
 
 model PaymentEvent {
-  id        String   @id @default(cuid())
-  provider  String
-  eventId   String   @unique
-  bookingId String
-  payload   Json
-  createdAt DateTime @default(now())
+  id                 String   @id @default(cuid())
+  provider           String
+  eventId            String   @unique
+  providerEventType  String?
+  bookingId          String?
+  refundId           String?
+  payload            Json
+  createdAt          DateTime @default(now())
   
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  refund             Refund?  @relation(fields: [refundId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
+  @@index([refundId])
   @@index([eventId])
 }
 
@@ -197,4 +229,66 @@ model ScanLog {
 
   @@index([bookingId, createdAt])
   @@index([organizerId])
+}
+
+model Refund {
+  id                String       @id @default(cuid())
+  bookingId         String
+  amount            Int
+  currency          String       @default("INR")
+  status            RefundStatus @default(PENDING)
+  reason            String?
+  provider          String
+  providerRefundId  String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  processedAt       DateTime?
+  failedAt          DateTime?
+  failureReason     String?
+  
+  booking           Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  paymentEvents     PaymentEvent[]
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model WaitlistEntry {
+  id         String         @id @default(cuid())
+  eventId    String
+  userId     String?
+  email      String
+  phone      String?
+  status     WaitlistStatus @default(ACTIVE)
+  createdAt  DateTime       @default(now())
+  invitedAt  DateTime?
+  claimedAt  DateTime?
+  expiredAt  DateTime?
+  
+  event      Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  offers     WaitlistOffer[]
+
+  @@index([eventId, status])
+  @@index([email])
+  @@index([createdAt])
+}
+
+model WaitlistOffer {
+  id         String              @id @default(cuid())
+  eventId    String
+  entryId    String
+  quantity   Int                 @default(1)
+  expiresAt  DateTime
+  status     WaitlistOfferStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  claimedAt  DateTime?
+  expiredAt  DateTime?
+  
+  entry      WaitlistEntry       @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@index([entryId])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
 }

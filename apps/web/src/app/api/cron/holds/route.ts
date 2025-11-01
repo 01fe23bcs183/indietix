@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     console.log(`Found ${expiredBookings.length} expired bookings to clean up`);
 
     const results = await Promise.all(
-      expiredBookings.map(async (booking) => {
+      expiredBookings.map(async (booking: (typeof expiredBookings)[0]) => {
         try {
           await prisma.booking.update({
             where: { id: booking.id },

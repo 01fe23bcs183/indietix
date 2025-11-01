@@ -95,7 +95,7 @@ export default function EventsPage() {
             </tr>
           </thead>
           <tbody>
-            {data?.events.map((event) => (
+            {data?.events.map((event: (typeof data.events)[0]) => (
               <tr key={event.id}>
                 <td className="border p-2">{event.title}</td>
                 <td className="border p-2">{event.city}</td>

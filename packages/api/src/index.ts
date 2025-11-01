@@ -4,6 +4,7 @@ import { authRouter } from "./routers/auth";
 import { eventsRouter } from "./routers/events";
 import { searchRouter } from "./routers/search";
 import { bookingRouter } from "./routers/booking";
+import { waitlistRouter } from "./routers/waitlist";
 import { organizerEventsRouter } from "./routers/organizer/events";
 import { organizerAttendeesRouter } from "./routers/organizer/attendees";
 
@@ -13,6 +14,7 @@ export const appRouter = router({
   events: eventsRouter,
   search: searchRouter,
   booking: bookingRouter,
+  waitlist: waitlistRouter,
   organizer: router({
     events: organizerEventsRouter,
     attendees: organizerAttendeesRouter,
@@ -22,3 +24,4 @@ export const appRouter = router({
 export type AppRouter = typeof appRouter;
 export { router, publicProcedure } from "./trpc";
 export { hashPassword, verifyPassword } from "./lib/auth";
+export { expireWaitlistOffers, issueWaitlistOffers } from "./lib/waitlist";
