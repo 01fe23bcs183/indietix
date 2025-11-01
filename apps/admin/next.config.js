@@ -6,6 +6,12 @@ const nextConfig = {
     "@indietix/db",
     "@indietix/utils",
   ],
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('bcrypt');
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;

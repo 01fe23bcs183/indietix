@@ -12,7 +12,11 @@
     "format:check": "prettier --check .",
     "test": "turbo run test",
     "typecheck": "tsc --noEmit",
-    "build": "turbo run build"
+    "build": "turbo run build",
+    "db:migrate": "dotenv -e .env -- pnpm --filter @indietix/db exec prisma migrate deploy",
+    "db:dev": "dotenv -e .env -- pnpm --filter @indietix/db exec prisma migrate dev",
+    "db:gen": "pnpm --filter @indietix/db exec prisma generate",
+    "db:seed": "dotenv -e .env -- tsx packages/db/prisma/seed.ts"
   },
   "keywords": [
     "event",
@@ -37,5 +41,9 @@
     "turbo": "^2.6.0",
     "typescript": "^5.9.3",
     "vitest": "^1.2.1"
+  },
+  "dependencies": {
+    "dotenv-cli": "^11.0.0",
+    "tsx": "^4.20.6"
   }
 }
