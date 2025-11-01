@@ -443,6 +443,106 @@ async function main() {
   }
   console.log(`✅ Created 3 attendees with tickets for ${dxEvent.title}`);
 
+  console.log("📊 Creating synthetic analytics data (30 days)...");
+
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const organizer1Events = createdEvents.filter(
+    (e) => e.organizerId === organizer1.id
+  );
+  const organizer2Events = createdEvents.filter(
+    (e) => e.organizerId === organizer2.id
+  );
+
+  let totalViews = 0;
+  let totalBookings = 0;
+
+  for (let day = 0; day < 30; day++) {
+    const date = new Date(thirtyDaysAgo);
+    date.setDate(date.getDate() + day);
+
+    for (const event of [...organizer1Events, ...organizer2Events]) {
+      const viewsPerDay = Math.floor(Math.random() * 50) + 10;
+
+      for (let i = 0; i < viewsPerDay; i++) {
+        const viewTime = new Date(date);
+        viewTime.setHours(Math.floor(Math.random() * 24));
+        viewTime.setMinutes(Math.floor(Math.random() * 60));
+
+        await prisma.eventView.create({
+          data: {
+            eventId: event.id,
+            userId: Math.random() > 0.5 ? customer1.id : null,
+            createdAt: viewTime,
+          },
+        });
+        totalViews++;
+      }
+
+      const bookingsPerDay = Math.floor(Math.random() * 5);
+
+      for (let i = 0; i < bookingsPerDay; i++) {
+        const bookingTime = new Date(date);
+        bookingTime.setHours(Math.floor(Math.random() * 24));
+        bookingTime.setMinutes(Math.floor(Math.random() * 60));
+
+        const quantity = Math.floor(Math.random() * 3) + 1;
+        const ticketPrice = event.price * quantity;
+        const convenienceFee = Math.round(ticketPrice * 0.05);
+        const platformFee = Math.round(ticketPrice * 0.03);
+        const finalAmount = ticketPrice + convenienceFee + platformFee;
+
+        const booking = await prisma.booking.create({
+          data: {
+            eventId: event.id,
+            userId: Math.random() > 0.5 ? customer1.id : customer2.id,
+            ticketNumber: `TIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+            seats: quantity,
+            ticketPrice,
+            convenienceFee,
+            platformFee,
+            finalAmount,
+            paymentStatus: "COMPLETED",
+            status: "CONFIRMED",
+            holdExpiresAt: new Date(bookingTime.getTime() + 15 * 60 * 1000),
+            createdAt: bookingTime,
+          },
+        });
+
+        const ticket = createSignedTicket(
+          booking.id,
+          booking.userId,
+          booking.eventId
+        );
+        const qrCode = encodeTicketForQR(ticket);
+        const ticketPayloadHash = hashTicketPayload(ticket.payload);
+
+        await prisma.booking.update({
+          where: { id: booking.id },
+          data: {
+            qrCode,
+            ticketPayloadHash,
+          },
+        });
+
+        await prisma.event.update({
+          where: { id: event.id },
+          data: {
+            bookedSeats: {
+              increment: quantity,
+            },
+          },
+        });
+
+        totalBookings++;
+      }
+    }
+  }
+
+  console.log(`✅ Created ${totalViews} synthetic event views across 30 days`);
+  console.log(`✅ Created ${totalBookings} synthetic bookings across 30 days`);
   console.log("🎉 Database seeding completed successfully!");
 }
 

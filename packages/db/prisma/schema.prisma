@@ -139,6 +139,7 @@ model Event {
   organizer                 Organizer        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   bookings                  Booking[]
   waitlistEntries           WaitlistEntry[]
+  views                     EventView[]
 
   @@index([slug])
   @@index([organizerId])
@@ -146,6 +147,17 @@ model Event {
   @@index([category])
   @@index([date])
   @@index([status])
+}
+
+model EventView {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String?
+  createdAt DateTime @default(now())
+  
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, createdAt])
 }
 
 model Booking {

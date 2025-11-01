@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "../../../lib/trpc";
 import { Button, PriceBreakdown } from "@indietix/ui";
 import { formatINR, FEES, GST_RATE } from "@indietix/utils";
@@ -15,6 +15,20 @@ export default function EventDetailPage(): JSX.Element {
   const { data: event, isLoading } = trpc.events.getBySlug.useQuery({
     slug,
   });
+
+  useEffect(() => {
+    if (event?.id) {
+      fetch("/api/track/event-view", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId: event.id }),
+      }).catch((error) => {
+        console.error("Failed to track event view:", error);
+      });
+    }
+  }, [event?.id]);
 
   if (isLoading) {
     return (

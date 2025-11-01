@@ -7,6 +7,7 @@ import { bookingRouter } from "./routers/booking";
 import { waitlistRouter } from "./routers/waitlist";
 import { organizerEventsRouter } from "./routers/organizer/events";
 import { organizerAttendeesRouter } from "./routers/organizer/attendees";
+import { organizerAnalyticsRouter } from "./routers/organizer/analytics";
 
 export const appRouter = router({
   health: healthRouter,
@@ -18,6 +19,7 @@ export const appRouter = router({
   organizer: router({
     events: organizerEventsRouter,
     attendees: organizerAttendeesRouter,
+    analytics: organizerAnalyticsRouter,
   }),
 });
 
