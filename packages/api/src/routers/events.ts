@@ -8,17 +8,29 @@ export const eventsRouter = router({
     .input(
       z.object({
         city: z.string().optional(),
-        category: z.enum(["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"]).optional(),
+        category: z
+          .enum(["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"])
+          .optional(),
         priceLte: z.number().optional(),
         dateFrom: z.date().optional(),
         dateTo: z.date().optional(),
-        orderBy: z.enum(["date_asc", "date_desc", "price_asc", "price_desc"]).optional().default("date_asc"),
+        orderBy: z
+          .enum(["date_asc", "date_desc", "price_asc", "price_desc"])
+          .optional()
+          .default("date_asc"),
       })
     )
     .query(async ({ input }) => {
       const where: {
         city?: string;
-        category?: "MUSIC" | "COMEDY" | "SPORTS" | "TECH" | "FOOD" | "ART" | "OTHER";
+        category?:
+          | "MUSIC"
+          | "COMEDY"
+          | "SPORTS"
+          | "TECH"
+          | "FOOD"
+          | "ART"
+          | "OTHER";
         price?: { lte: number };
         date?: { gte?: Date; lte?: Date };
         status: "PUBLISHED";
@@ -49,7 +61,7 @@ export const eventsRouter = router({
       }
 
       let orderBy: { date?: "asc" | "desc"; price?: "asc" | "desc" } = {};
-      
+
       switch (input.orderBy) {
         case "date_asc":
           orderBy = { date: "asc" };
