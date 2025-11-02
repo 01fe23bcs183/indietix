@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  buildSegmentWhereClause,
-  validateSegmentQuery,
-} from "../segments";
+import { buildSegmentWhereClause, validateSegmentQuery } from "../segments";
 
 describe("Segment Query Engine", () => {
   describe("buildSegmentWhereClause", () => {
@@ -43,11 +40,12 @@ describe("Segment Query Engine", () => {
       const query = { attended_in_last_days: 180 };
       const where = buildSegmentWhereClause(query, { now });
 
-      const expectedCutoff = new Date("2025-05-06"); // 180 days before
-
       expect(where).toHaveProperty("bookings");
       expect(where.bookings).toHaveProperty("some");
-      const some = (where.bookings as { some: unknown }).some as Record<string, unknown>;
+      const some = (where.bookings as { some: unknown }).some as Record<
+        string,
+        unknown
+      >;
       expect(some.status).toBe("CONFIRMED");
       expect(some.event).toHaveProperty("date");
     });

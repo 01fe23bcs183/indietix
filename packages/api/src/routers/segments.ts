@@ -2,10 +2,7 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import { prisma, Prisma } from "@indietix/db";
 import { TRPCError } from "@trpc/server";
-import {
-  validateSegmentQuery,
-  estimateSegmentSize,
-} from "@indietix/marketing";
+import { validateSegmentQuery, estimateSegmentSize } from "@indietix/marketing";
 
 const createSegmentSchema = z.object({
   name: z.string().min(1),
@@ -81,7 +78,9 @@ export const segmentsRouter = router({
         where: { id: input.id },
         data: {
           name: input.name,
-          query: input.query ? (input.query as Prisma.InputJsonValue) : undefined,
+          query: input.query
+            ? (input.query as Prisma.InputJsonValue)
+            : undefined,
         },
       });
 

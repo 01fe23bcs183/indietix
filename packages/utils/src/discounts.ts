@@ -1,4 +1,4 @@
-import type { PromoCode, PromoCodeType } from "@prisma/client";
+import type { PromoCode } from "@prisma/client";
 
 export interface ApplyPromoResult {
   success: boolean;
@@ -29,7 +29,6 @@ export function validatePromoCode(params: ValidatePromoParams): {
   const {
     code,
     basePrice,
-    quantity,
     now,
     eventId,
     eventCategory,
@@ -100,10 +99,7 @@ export function validatePromoCode(params: ValidatePromoParams): {
 /**
  * Calculates the discount amount based on promo code type
  */
-export function calculateDiscount(
-  code: PromoCode,
-  subtotal: number
-): number {
+export function calculateDiscount(code: PromoCode, subtotal: number): number {
   if (code.type === "PERCENT") {
     const discountPercent = code.value / 100;
     return Math.round(subtotal * discountPercent);

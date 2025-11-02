@@ -166,7 +166,11 @@ describe("Discount Utilities", () => {
 
   describe("calculateDiscount", () => {
     it("should calculate percentage discount correctly", () => {
-      const percentCode = { ...basePromoCode, type: "PERCENT" as const, value: 20 };
+      const percentCode = {
+        ...basePromoCode,
+        type: "PERCENT" as const,
+        value: 20,
+      };
       const discount = calculateDiscount(percentCode, 100000);
 
       expect(discount).toBe(20000); // 20% of 100000
@@ -180,7 +184,11 @@ describe("Discount Utilities", () => {
     });
 
     it("should not exceed subtotal for flat discount", () => {
-      const flatCode = { ...basePromoCode, type: "FLAT" as const, value: 150000 };
+      const flatCode = {
+        ...basePromoCode,
+        type: "FLAT" as const,
+        value: 150000,
+      };
       const discount = calculateDiscount(flatCode, 100000);
 
       expect(discount).toBe(100000); // Capped at subtotal

@@ -36,7 +36,8 @@ export const pricingRouter = router({
           (!phase.startsAt || now >= phase.startsAt) &&
           (!phase.endsAt || now <= phase.endsAt);
 
-        const seatsValid = !phase.maxSeats || event.bookedSeats < phase.maxSeats;
+        const seatsValid =
+          !phase.maxSeats || event.bookedSeats < phase.maxSeats;
 
         if (timeValid && seatsValid) {
           activePhase = phase;
@@ -95,10 +96,7 @@ export const pricingRouter = router({
         });
       }
 
-      if (
-        user.role !== "ADMIN" &&
-        event.organizerId !== user.organizer?.id
-      ) {
+      if (user.role !== "ADMIN" && event.organizerId !== user.organizer?.id) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 

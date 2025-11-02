@@ -1,8 +1,8 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 /**
  * Segment Query DSL
- * 
+ *
  * Examples:
  * - { city: "Bengaluru" }
  * - { categories: ["COMEDY", "MUSIC"] }
@@ -139,11 +139,7 @@ export function validateSegmentQuery(query: unknown): {
  * Estimates the size of a segment
  */
 export async function estimateSegmentSize(
-  prisma: {
-    user: {
-      count: (args: { where: Prisma.UserWhereInput }) => Promise<number>;
-    };
-  },
+  prisma: Pick<PrismaClient, "user">,
   query: SegmentQuery,
   context: SegmentExecutorContext = {}
 ): Promise<number> {
