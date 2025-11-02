@@ -3,7 +3,7 @@ import { prisma } from "@indietix/db";
 
 /**
  * Campaign tracking: Click redirect
- * 
+ *
  * Usage: <a href="/api/trk/c?rid={recipientId}&url={encodedUrl}">Click here</a>
  */
 export async function GET(request: NextRequest) {
@@ -12,7 +12,9 @@ export async function GET(request: NextRequest) {
   const targetUrl = searchParams.get("url");
 
   if (!recipientId || !targetUrl) {
-    return new NextResponse("Missing recipient ID or target URL", { status: 400 });
+    return new NextResponse("Missing recipient ID or target URL", {
+      status: 400,
+    });
   }
 
   try {
@@ -54,7 +56,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(redirectUrl.toString());
   } catch (error) {
     console.error("Error tracking click:", error);
-    
+
     try {
       const redirectUrl = new URL(targetUrl);
       return NextResponse.redirect(redirectUrl.toString());

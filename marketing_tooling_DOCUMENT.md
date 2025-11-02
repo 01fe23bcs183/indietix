@@ -1,7 +1,9 @@
 # Marketing Tooling Implementation Document
 
 ## Overview
+
 Implementing first-class marketing tooling for IndieTix including:
+
 1. Promo codes (organizer/admin scoped)
 2. Price phases (early bird/last minute)
 3. Email campaigns with segments
@@ -11,14 +13,17 @@ Implementing first-class marketing tooling for IndieTix including:
 ## Implementation Log
 
 ### 2025-11-02 03:43:51 UTC - Project Initialization
+
 **Action**: Created documentation files and todo list
 **Details**:
+
 - Pulled latest changes from main (now at commit 6ab2cc8)
 - Created this document for detailed implementation notes
 - Created comprehensive 24-item todo list covering all aspects of the feature
 - Repository is clean and up to date with origin/main
 
 **Next Steps**:
+
 - Explore existing Prisma schema to understand current data models
 - Review existing API router structure
 - Understand current pricing logic in packages/utils/pricing.ts
@@ -60,6 +65,7 @@ Implementing first-class marketing tooling for IndieTix including:
    - Timestamps: `createdAt`, `updatedAt`
 
 **Booking Model Extensions:**
+
 - Add `promoCodeId?` (optional relation to PromoCode)
 - Add `campaignId?` (optional, for attribution via UTM)
 - Add `discountAmount?` (amount saved via promo)
@@ -83,6 +89,7 @@ Implementing first-class marketing tooling for IndieTix including:
    - `create`, `update`, `list`, `get`, `testQuery({ query })`
 
 **Integration Points:**
+
 - Modify `booking.start` to accept optional `promoCode` parameter
 - Integrate discount logic into `computeBookingAmounts`
 - Add tracking pixel and click redirect routes
@@ -90,22 +97,27 @@ Implementing first-class marketing tooling for IndieTix including:
 ### UI/UX Approach
 
 **Organizer App:**
+
 - `/promos` - List/create/edit promo codes with event/category filters
 - `/campaigns` - Campaign wizard (segment → template → schedule)
 - `/campaigns/[id]` - Campaign detail with metrics (opens, clicks, conversions)
 
 **Web App:**
+
 - Event page: Show price phase badge ("Early bird ends in 2d 3h")
 - Checkout: Promo code input with real-time validation and discount preview
 - Attribution: Capture UTM parameters from campaign links
 
 **Admin App:**
+
 - Oversight for all promos/campaigns
 - Ability to force-disable abusive codes
 - System-wide campaign analytics
 
 ## Challenges & Solutions
+
 (To be documented as issues arise)
 
 ## Testing Strategy
+
 (To be documented during test implementation)

@@ -3,7 +3,7 @@ import { prisma } from "@indietix/db";
 
 /**
  * Campaign tracking: Open pixel
- * 
+ *
  * Usage: <img src="/api/trk/open?rid={recipientId}" width="1" height="1" />
  */
 export async function GET(request: NextRequest) {
@@ -39,13 +39,13 @@ export async function GET(request: NextRequest) {
       headers: {
         "Content-Type": "image/gif",
         "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
+        Pragma: "no-cache",
+        Expires: "0",
       },
     });
   } catch (error) {
     console.error("Error tracking email open:", error);
-    
+
     const transparentGif = Buffer.from(
       "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
       "base64"

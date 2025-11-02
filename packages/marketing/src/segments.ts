@@ -1,8 +1,8 @@
 /**
  * Segment query engine for IndieTix marketing campaigns
- * 
+ *
  * Translates JSON DSL queries into Prisma where clauses for user targeting
- * 
+ *
  * Example queries:
  * - { city: "Bengaluru" }
  * - { categories: ["COMEDY", "MUSIC"] }
@@ -10,7 +10,7 @@
  * - { price_ceiling: 600 }
  */
 
-import { Prisma } from "@indietix/db";
+import { Prisma, PrismaClient, Category } from "@indietix/db";
 
 export interface SegmentQuery {
   city?: string;
@@ -25,7 +25,7 @@ export interface SegmentQuery {
  * Execute a segment query and return matching user IDs
  */
 export async function executeSegmentQuery(
-  prisma: any,
+  prisma: PrismaClient,
   query: SegmentQuery
 ): Promise<Array<{ id: string; email: string; phone: string | null }>> {
   const where: Prisma.UserWhereInput = {};
@@ -44,7 +44,7 @@ export async function executeSegmentQuery(
     bookingConditions.push({
       event: {
         category: {
-          in: query.categories as any[],
+          in: query.categories as unknown as Category[],
         },
       },
     });
@@ -53,7 +53,7 @@ export async function executeSegmentQuery(
   if (query.attended_in_last_days) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - query.attended_in_last_days);
-    
+
     bookingConditions.push({
       attendedAt: {
         gte: cutoffDate,
@@ -97,21 +97,20 @@ export async function executeSegmentQuery(
   }
 
   if (query.min_bookings !== undefined && query.min_bookings > 0) {
-    const userBookingCounts = await prisma.booking.groupBy({
+    const groups = await prisma.booking.groupBy({
       by: ["userId"],
       where: {
         status: "CONFIRMED",
       },
-      _count: true,
-      having: {
-        _count: {
-          gte: query.min_bookings,
-        },
+      _count: {
+        _all: true,
       },
     });
 
-    const userIds = userBookingCounts.map((u: any) => u.userId);
-    
+    const userIds = groups
+      .filter((g) => g._count._all >= query.min_bookings!)
+      .map((g) => g.userId);
+
     if (userIds.length === 0) {
       return [];
     }
@@ -137,7 +136,7 @@ export async function executeSegmentQuery(
  * Preview segment query results (count only)
  */
 export async function previewSegmentQuery(
-  prisma: any,
+  prisma: PrismaClient,
   query: SegmentQuery
 ): Promise<number> {
   const where: Prisma.UserWhereInput = {};
@@ -156,7 +155,7 @@ export async function previewSegmentQuery(
     bookingConditions.push({
       event: {
         category: {
-          in: query.categories as any[],
+          in: query.categories as unknown as Category[],
         },
       },
     });
@@ -165,7 +164,7 @@ export async function previewSegmentQuery(
   if (query.attended_in_last_days) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - query.attended_in_last_days);
-    
+
     bookingConditions.push({
       attendedAt: {
         gte: cutoffDate,
@@ -209,21 +208,20 @@ export async function previewSegmentQuery(
   }
 
   if (query.min_bookings !== undefined && query.min_bookings > 0) {
-    const userBookingCounts = await prisma.booking.groupBy({
+    const groups = await prisma.booking.groupBy({
       by: ["userId"],
       where: {
         status: "CONFIRMED",
       },
-      _count: true,
-      having: {
-        _count: {
-          gte: query.min_bookings,
-        },
+      _count: {
+        _all: true,
       },
     });
 
-    const userIds = userBookingCounts.map((u: any) => u.userId);
-    
+    const userIds = groups
+      .filter((g) => g._count._all >= query.min_bookings!)
+      .map((g) => g.userId);
+
     if (userIds.length === 0) {
       return 0;
     }
@@ -264,7 +262,10 @@ export function validateSegmentQuery(query: unknown): {
   }
 
   if (q.attended_in_last_days !== undefined) {
-    if (typeof q.attended_in_last_days !== "number" || q.attended_in_last_days < 0) {
+    if (
+      typeof q.attended_in_last_days !== "number" ||
+      q.attended_in_last_days < 0
+    ) {
       errors.push("attended_in_last_days must be a positive number");
     }
   }

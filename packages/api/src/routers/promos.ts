@@ -4,7 +4,9 @@ import { prisma } from "@indietix/db";
 import { applyPromo } from "@indietix/utils";
 import { TRPCError } from "@trpc/server";
 
-function requireAuth(ctx: { session?: { user?: { id: string; role: string } } }) {
+function requireAuth(ctx: {
+  session?: { user?: { id: string; role: string } };
+}) {
   if (!ctx.session?.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -27,7 +29,11 @@ export const promosRouter = router({
   create: publicProcedure
     .input(
       z.object({
-        code: z.string().min(3).max(50).transform((s) => s.toUpperCase()),
+        code: z
+          .string()
+          .min(3)
+          .max(50)
+          .transform((s) => s.toUpperCase()),
         type: z.enum(["PERCENT", "FLAT"]),
         value: z.number().int().positive(),
         startAt: z.string().datetime().optional(),

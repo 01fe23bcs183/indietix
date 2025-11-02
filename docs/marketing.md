@@ -11,10 +11,12 @@ IndieTix's marketing tooling provides first-class support for promotional campai
 Promo codes allow organizers and admins to offer discounts to customers.
 
 **Types:**
+
 - **PERCENT**: Percentage discount (e.g., 20% off)
 - **FLAT**: Fixed amount discount (e.g., ₹50 off)
 
 **Constraints:**
+
 - Time-based: `startAt` and `endAt` dates
 - Usage limits: Total usage limit and per-user limit
 - Minimum purchase: `minPrice` requirement
@@ -22,12 +24,14 @@ Promo codes allow organizers and admins to offer discounts to customers.
 - Ownership: Organizer-scoped or admin-scoped (global)
 
 **Rules:**
+
 - No promo stacking allowed (one promo per booking)
 - Discounts apply to subtotal BEFORE fees
 - Fees are computed on the discounted subtotal
 - Admins can force-disable any promo code
 
 **API Endpoints:**
+
 - `promos.create` - Create a new promo code
 - `promos.update` - Update promo code constraints
 - `promos.disable` - Deactivate a promo code
@@ -36,6 +40,7 @@ Promo codes allow organizers and admins to offer discounts to customers.
 - `promos.validate` - Validate promo code for a booking (public)
 
 **Example Usage:**
+
 ```typescript
 // Create a promo code
 const promo = await trpc.promos.create.mutate({
@@ -64,20 +69,24 @@ const validation = await trpc.promos.validate.query({
 Price phases enable dynamic pricing based on time and seat availability.
 
 **Model:**
+
 - `EventPricePhase` with fields: `name`, `startsAt`, `endsAt`, `maxSeats`, `price`
 - Multiple phases can be defined per event
 - Phases are evaluated in priority order (time-based first, then seat-based)
 
 **Effective Price Logic:**
+
 1. Check all price phases for the event
 2. Find the first active phase (time and seat constraints met)
 3. Return phase price if active, otherwise return base event price
 4. Generate user-friendly message (e.g., "Early bird ends in 2d 3h")
 
 **API Endpoints:**
+
 - `pricing.effectivePrice` - Get current effective price for an event
 
 **Example Usage:**
+
 ```typescript
 // Get effective price
 const pricing = await trpc.pricing.effectivePrice.query({
@@ -95,6 +104,7 @@ const pricing = await trpc.pricing.effectivePrice.query({
 ```
 
 **UI Integration:**
+
 - Event pages show strikethrough base price with active phase price
 - Display countdown message for time-based phases
 - Show "X seats left" for seat-based phases
@@ -104,11 +114,13 @@ const pricing = await trpc.pricing.effectivePrice.query({
 Campaigns enable targeted communication with customers.
 
 **Entities:**
+
 - **Campaign**: Main campaign entity with status tracking
 - **Segment**: User targeting criteria (JSON DSL)
 - **CampaignRecipient**: Individual recipient with tracking status
 
 **Campaign Statuses:**
+
 - `DRAFT` - Being created/edited
 - `SCHEDULED` - Scheduled for future send
 - `SENDING` - Currently being sent
@@ -116,6 +128,7 @@ Campaigns enable targeted communication with customers.
 - `FAILED` - Send failed
 
 **Recipient Statuses:**
+
 - `PENDING` - Not yet sent
 - `SENT` - Successfully sent
 - `OPENED` - Email opened (tracked via pixel)
@@ -123,6 +136,7 @@ Campaigns enable targeted communication with customers.
 - `BOUNCED` - Delivery failed
 
 **Workflow:**
+
 1. Create campaign with name, channel, and template
 2. Select segment (or all users)
 3. Preview recipient count
@@ -132,6 +146,7 @@ Campaigns enable targeted communication with customers.
 7. Track opens/clicks via tracking routes
 
 **API Endpoints:**
+
 - `campaigns.create` - Create new campaign
 - `campaigns.update` - Update draft campaign
 - `campaigns.schedule` - Schedule campaign and materialize recipients
@@ -141,6 +156,7 @@ Campaigns enable targeted communication with customers.
 - `campaigns.preview` - Preview recipient count for segment
 
 **Example Usage:**
+
 ```typescript
 // Create campaign
 const campaign = await trpc.campaigns.create.mutate({
@@ -170,18 +186,20 @@ const detail = await trpc.campaigns.detail.query({
 Segments define user targeting criteria using a JSON DSL.
 
 **Query DSL:**
+
 ```typescript
 interface SegmentQuery {
-  city?: string;                    // Users who booked in this city
-  categories?: string[];            // Users who booked these categories
-  attended_in_last_days?: number;   // Users who attended in last N days
-  price_ceiling?: number;           // Users who booked events under this price
-  has_booked?: boolean;             // Users who have/haven't booked
-  min_bookings?: number;            // Users with at least N bookings
+  city?: string; // Users who booked in this city
+  categories?: string[]; // Users who booked these categories
+  attended_in_last_days?: number; // Users who attended in last N days
+  price_ceiling?: number; // Users who booked events under this price
+  has_booked?: boolean; // Users who have/haven't booked
+  min_bookings?: number; // Users with at least N bookings
 }
 ```
 
 **Examples:**
+
 ```json
 // Comedy fans in Bengaluru
 {
@@ -206,6 +224,7 @@ interface SegmentQuery {
 ```
 
 **API Endpoints:**
+
 - `segments.create` - Create new segment
 - `segments.update` - Update segment query
 - `segments.list` - List all segments
@@ -213,6 +232,7 @@ interface SegmentQuery {
 - `segments.testQuery` - Test query and get count
 
 **Example Usage:**
+
 ```typescript
 // Create segment
 const segment = await trpc.segments.create.mutate({
@@ -238,29 +258,35 @@ const test = await trpc.segments.testQuery.query({
 Campaign tracking enables measurement of email engagement and attribution.
 
 **Open Tracking:**
+
 - Endpoint: `/api/trk/open?rid={recipientId}`
 - Returns 1x1 transparent GIF
 - Updates recipient status to `OPENED`
 - Records `openedAt` timestamp
 
 **Click Tracking:**
+
 - Endpoint: `/api/trk/c?rid={recipientId}&url={encodedUrl}`
 - Updates recipient status to `CLICKED`
 - Records `clickedAt` timestamp
 - Redirects to target URL
 
 **UTM Attribution:**
+
 - Campaign links include UTM parameters
 - Bookings capture `campaignId` from UTM
 - Enables conversion tracking and ROI calculation
 
 **Example Email Template:**
+
 ```html
 <html>
   <body>
     <h1>Special Offer!</h1>
     <p>Get 20% off comedy shows this month.</p>
-    <a href="/api/trk/c?rid={{recipientId}}&url={{eventUrl}}?utm_campaign={{campaignId}}">
+    <a
+      href="/api/trk/c?rid={{recipientId}}&url={{eventUrl}}?utm_campaign={{campaignId}}"
+    >
       View Events
     </a>
     <img src="/api/trk/open?rid={{recipientId}}" width="1" height="1" />
@@ -273,6 +299,7 @@ Campaign tracking enables measurement of email engagement and attribution.
 Campaign and promo code reports provide insights into marketing effectiveness.
 
 **Campaign Metrics:**
+
 - Total recipients
 - Sent count
 - Open rate (%)
@@ -281,18 +308,21 @@ Campaign and promo code reports provide insights into marketing effectiveness.
 - Conversion rate (%)
 
 **Promo Code Metrics:**
+
 - Total redemptions
 - GMV driven (gross merchandise value)
 - Breakage rate (unused codes)
 - Usage by event/category/city
 
 **Access:**
+
 - Organizers see their own campaigns/promos
 - Admins see all campaigns/promos system-wide
 
 ## Database Schema
 
 ### PromoCode
+
 ```prisma
 model PromoCode {
   id                    String         @id @default(cuid())
@@ -317,6 +347,7 @@ model PromoCode {
 ```
 
 ### EventPricePhase
+
 ```prisma
 model EventPricePhase {
   id        String    @id @default(cuid())
@@ -333,6 +364,7 @@ model EventPricePhase {
 ```
 
 ### Campaign
+
 ```prisma
 model Campaign {
   id          String              @id @default(cuid())
@@ -353,6 +385,7 @@ model Campaign {
 ```
 
 ### Segment
+
 ```prisma
 model Segment {
   id        String     @id @default(cuid())
@@ -366,6 +399,7 @@ model Segment {
 ```
 
 ### CampaignRecipient
+
 ```prisma
 model CampaignRecipient {
   id         String                  @id @default(cuid())
@@ -383,6 +417,7 @@ model CampaignRecipient {
 ```
 
 ### Booking Extensions
+
 ```prisma
 model Booking {
   // ... existing fields ...

@@ -1,6 +1,6 @@
 /**
  * Discount and promo code logic for IndieTix marketing features
- * 
+ *
  * Rules:
  * - No promo stacking allowed
  * - Discounts apply to subtotal BEFORE fees
@@ -50,7 +50,16 @@ export function validatePromoCode(params: ValidatePromoParams): {
   valid: boolean;
   reason?: string;
 } {
-  const { code, basePrice, qty, now, eventId, eventCategory, eventCity, userUsageCount } = params;
+  const {
+    code,
+    basePrice,
+    qty,
+    now,
+    eventId,
+    eventCategory,
+    eventCity,
+    userUsageCount,
+  } = params;
 
   if (!code.active) {
     return { valid: false, reason: "Promo code is no longer active" };
@@ -68,25 +77,56 @@ export function validatePromoCode(params: ValidatePromoParams): {
     return { valid: false, reason: "Promo code usage limit reached" };
   }
 
-  if (code.perUserLimit !== null && userUsageCount !== undefined && userUsageCount >= code.perUserLimit) {
-    return { valid: false, reason: "You have reached the usage limit for this promo code" };
+  if (
+    code.perUserLimit !== null &&
+    userUsageCount !== undefined &&
+    userUsageCount >= code.perUserLimit
+  ) {
+    return {
+      valid: false,
+      reason: "You have reached the usage limit for this promo code",
+    };
   }
 
   const subtotal = basePrice * qty;
   if (code.minPrice !== null && subtotal < code.minPrice) {
-    return { valid: false, reason: `Minimum purchase amount is ₹${code.minPrice / 100}` };
+    return {
+      valid: false,
+      reason: `Minimum purchase amount is ₹${code.minPrice / 100}`,
+    };
   }
 
-  if (eventId && code.applicableEvents.length > 0 && !code.applicableEvents.includes(eventId)) {
-    return { valid: false, reason: "Promo code is not applicable to this event" };
+  if (
+    eventId &&
+    code.applicableEvents.length > 0 &&
+    !code.applicableEvents.includes(eventId)
+  ) {
+    return {
+      valid: false,
+      reason: "Promo code is not applicable to this event",
+    };
   }
 
-  if (eventCategory && code.applicableCategories.length > 0 && !code.applicableCategories.includes(eventCategory)) {
-    return { valid: false, reason: "Promo code is not applicable to this event category" };
+  if (
+    eventCategory &&
+    code.applicableCategories.length > 0 &&
+    !code.applicableCategories.includes(eventCategory)
+  ) {
+    return {
+      valid: false,
+      reason: "Promo code is not applicable to this event category",
+    };
   }
 
-  if (eventCity && code.applicableCities.length > 0 && !code.applicableCities.includes(eventCity)) {
-    return { valid: false, reason: "Promo code is not applicable to events in this city" };
+  if (
+    eventCity &&
+    code.applicableCities.length > 0 &&
+    !code.applicableCities.includes(eventCity)
+  ) {
+    return {
+      valid: false,
+      reason: "Promo code is not applicable to events in this city",
+    };
   }
 
   return { valid: true };
@@ -155,14 +195,14 @@ export function getEffectivePrice(
   const sortedPhases = [...phases].sort((a, b) => {
     const aHasTime = a.startsAt !== null || a.endsAt !== null;
     const bHasTime = b.startsAt !== null || b.endsAt !== null;
-    
+
     if (aHasTime && !bHasTime) return -1;
     if (!aHasTime && bHasTime) return 1;
-    
+
     if (a.startsAt && b.startsAt) {
       return a.startsAt.getTime() - b.startsAt.getTime();
     }
-    
+
     return 0;
   });
 
@@ -185,8 +225,10 @@ export function getEffectivePrice(
       if (phase.endsAt) {
         const timeRemaining = phase.endsAt.getTime() - now.getTime();
         const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-        const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        
+        const hoursRemaining = Math.floor(
+          (timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+
         if (daysRemaining > 0) {
           message = `${phase.name} ends in ${daysRemaining}d ${hoursRemaining}h`;
         } else if (hoursRemaining > 0) {

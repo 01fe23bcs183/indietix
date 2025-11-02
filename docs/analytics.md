@@ -9,6 +9,7 @@ The IndieTix Analytics system provides comprehensive insights into event perform
 ### Data Model
 
 #### EventView
+
 Tracks individual page views for events to measure engagement and calculate conversion funnels.
 
 ```prisma
@@ -17,7 +18,7 @@ model EventView {
   eventId   String
   userId    String?  // Optional: tracks authenticated users
   createdAt DateTime @default(now())
-  
+
   event     Event    @relation(fields: [eventId], references: [id])
 
   @@index([eventId, createdAt])  // Optimized for time-range queries
@@ -25,6 +26,7 @@ model EventView {
 ```
 
 **Key Features:**
+
 - Composite index on `(eventId, createdAt)` for efficient time-range queries
 - Optional `userId` field tracks both authenticated and anonymous users
 - Automatic timestamp tracking with `createdAt`
@@ -34,9 +36,11 @@ model EventView {
 All analytics endpoints are available under `organizer.analytics.*` in the tRPC router.
 
 #### 1. Summary Metrics
+
 **Endpoint:** `organizer.analytics.summary`
 
 **Input:**
+
 ```typescript
 {
   from: string;        // ISO 8601 datetime
@@ -46,26 +50,30 @@ All analytics endpoints are available under `organizer.analytics.*` in the tRPC 
 ```
 
 **Output:**
+
 ```typescript
 {
-  revenue: number;      // Total revenue in rupees
-  bookings: number;     // Total confirmed bookings
-  avgTicket: number;    // Average ticket price (rounded)
-  seatsSold: number;    // Total seats sold
-  eventsLive: number;   // Currently published events with future dates
+  revenue: number; // Total revenue in rupees
+  bookings: number; // Total confirmed bookings
+  avgTicket: number; // Average ticket price (rounded)
+  seatsSold: number; // Total seats sold
+  eventsLive: number; // Currently published events with future dates
 }
 ```
 
 **Business Logic:**
+
 - Only counts CONFIRMED bookings
 - Revenue calculated from `finalAmount` (includes all fees)
 - Average ticket rounded to nearest rupee
 - Events live counts PUBLISHED events with `date >= now()`
 
 #### 2. Time-Series Data
+
 **Endpoint:** `organizer.analytics.timeseries`
 
 **Input:**
+
 ```typescript
 {
   from: string;
@@ -75,34 +83,39 @@ All analytics endpoints are available under `organizer.analytics.*` in the tRPC 
 ```
 
 **Output:**
+
 ```typescript
 Array<{
-  t: string;          // ISO date string (YYYY-MM-DD)
-  revenue: number;    // Revenue for this bucket
-  bookings: number;   // Bookings count for this bucket
-}>
+  t: string; // ISO date string (YYYY-MM-DD)
+  revenue: number; // Revenue for this bucket
+  bookings: number; // Bookings count for this bucket
+}>;
 ```
 
 **Bucketing Logic:**
+
 - **Day:** Groups by calendar date (YYYY-MM-DD)
 - **Week:** Groups by week start (Sunday = day 0)
 - Empty buckets filled with zero values for continuous charts
 - Sorted chronologically
 
 #### 3. Top Events
+
 **Endpoint:** `organizer.analytics.topEvents`
 
 **Input:**
+
 ```typescript
 {
   from: string;
   to: string;
   by: "revenue" | "attendance";
-  limit: number;  // 1-50, default 10
+  limit: number; // 1-50, default 10
 }
 ```
 
 **Output:**
+
 ```typescript
 Array<{
   eventId: string;
@@ -111,19 +124,22 @@ Array<{
   city: string;
   category: string;
   revenue: number;
-  attendance: number;  // Total seats sold
-  bookings: number;    // Number of bookings
-}>
+  attendance: number; // Total seats sold
+  bookings: number; // Number of bookings
+}>;
 ```
 
 **Sorting:**
+
 - `by: "revenue"` - Descending by total revenue
 - `by: "attendance"` - Descending by total seats sold
 
 #### 4. Conversion Funnel
+
 **Endpoint:** `organizer.analytics.funnel`
 
 **Input:**
+
 ```typescript
 {
   from: string;
@@ -132,16 +148,18 @@ Array<{
 ```
 
 **Output:**
+
 ```typescript
 {
-  views: number;        // Total EventView records
-  detailViews: number;  // Same as views (all views are detail views)
-  addToCart: number;    // Total bookings (all statuses)
-  bookings: number;     // Total bookings (all statuses)
+  views: number; // Total EventView records
+  detailViews: number; // Same as views (all views are detail views)
+  addToCart: number; // Total bookings (all statuses)
+  bookings: number; // Total bookings (all statuses)
 }
 ```
 
 **Conversion Stages:**
+
 1. **Views:** User lands on event detail page
 2. **Detail Views:** Same as views (simplified funnel)
 3. **Add to Cart:** User initiates booking
@@ -150,9 +168,11 @@ Array<{
 **Note:** Currently `addToCart` and `bookings` are identical. Future enhancement could track cart abandonment separately.
 
 #### 5. CSV Export
+
 **Endpoint:** `organizer.analytics.exportCsv`
 
 **Input:**
+
 ```typescript
 {
   from: string;
@@ -161,10 +181,12 @@ Array<{
 ```
 
 **Output:** CSV string with:
+
 - Daily time-series data (date, revenue, bookings, seats)
 - Summary section (total revenue, bookings, seats, avg ticket)
 
 **CSV Format:**
+
 ```csv
 date,revenue,bookings,seats
 2025-01-01,10000,5,12
@@ -181,11 +203,13 @@ Average Ticket,2500
 ### Event View Tracking
 
 #### Web App Integration
+
 Event views are tracked automatically when users visit event detail pages.
 
 **Endpoint:** `POST /api/track/event-view`
 
 **Request Body:**
+
 ```json
 {
   "eventId": "clx123..."
@@ -193,6 +217,7 @@ Event views are tracked automatically when users visit event detail pages.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -201,6 +226,7 @@ Event views are tracked automatically when users visit event detail pages.
 ```
 
 **Implementation Details:**
+
 - Triggered via `useEffect` hook on event detail page load
 - Tracks authenticated user ID when available
 - Skips tracking when `NODE_ENV=test` (CI-friendly)
@@ -210,12 +236,14 @@ Event views are tracked automatically when users visit event detail pages.
 ### Authorization
 
 All analytics endpoints require:
+
 1. **Authentication:** Valid session with authenticated user
 2. **Organizer Role:** User must have an associated Organizer record
 3. **Ownership:** Organizer can only access their own analytics
 4. **Admin Override:** Users with ADMIN role can access any organizer's analytics
 
 **Authorization Flow:**
+
 ```typescript
 1. requireAuth(ctx) → validates session
 2. requireOrganizer(userId) → validates organizer role
@@ -225,11 +253,13 @@ All analytics endpoints require:
 ## UI Dashboard
 
 ### Location
+
 `/organizer/analytics` (requires organizer authentication)
 
 ### Components
 
 #### Summary Cards (5)
+
 - **Total Revenue:** Formatted as ₹X,XXX
 - **Bookings:** Integer count
 - **Avg Ticket Price:** Formatted as ₹X,XXX
@@ -239,22 +269,26 @@ All analytics endpoints require:
 #### Charts
 
 **1. Revenue Over Time (Line Chart)**
+
 - X-axis: Date
 - Y-axis: Revenue (₹)
 - Tooltip: Formatted currency
 - Data: From timeseries endpoint
 
 **2. Bookings Over Time (Line Chart)**
+
 - X-axis: Date
 - Y-axis: Bookings count
 - Data: From timeseries endpoint
 
 **3. Conversion Funnel (Bar Chart)**
+
 - Stages: Views → Detail Views → Add to Cart → Bookings
 - Shows conversion rate percentage
 - Data: From funnel endpoint
 
 **4. Top Events Table**
+
 - Columns: Event, Revenue, Attendance
 - Sorted by revenue (descending)
 - Shows top 10 events
@@ -263,12 +297,14 @@ All analytics endpoints require:
 #### Filters
 
 **Date Range Selector:**
+
 - Last 7 days
 - Last 30 days (default)
 - Last 90 days
 - Custom (shows date pickers)
 
 **Custom Date Range:**
+
 - From: Date picker
 - To: Date picker
 - Applied on selection
@@ -276,11 +312,13 @@ All analytics endpoints require:
 #### Export
 
 **CSV Export Button:**
+
 - Downloads CSV file with naming: `analytics-{from}-to-{to}.csv`
 - Includes daily time-series + summary
 - Automatic browser download
 
 ### Technology Stack
+
 - **Charts:** Recharts 2.10.3
 - **Styling:** Tailwind CSS
 - **Data Fetching:** tRPC + React Query
@@ -289,7 +327,9 @@ All analytics endpoints require:
 ## Data Definitions
 
 ### Revenue
+
 Total amount paid by customers including:
+
 - Base ticket price × quantity
 - Convenience fee
 - Platform fee
@@ -298,24 +338,30 @@ Total amount paid by customers including:
 **Source:** `Booking.finalAmount` where `status = CONFIRMED`
 
 ### Bookings
+
 Count of booking records with `status = CONFIRMED`
 
 **Note:** One booking can contain multiple seats.
 
 ### Average Ticket
+
 `Math.round(totalRevenue / totalBookings)`
 
 Returns 0 when no bookings exist.
 
 ### Seats Sold
+
 Sum of `Booking.seats` where `status = CONFIRMED`
 
 ### Events Live
+
 Count of events where:
+
 - `status = PUBLISHED`
 - `date >= now()`
 
 ### Views
+
 Count of `EventView` records within date range.
 
 **Tracking Method:** Client-side POST request on event detail page load.
@@ -325,17 +371,20 @@ Count of `EventView` records within date range.
 ### View Tracking
 
 **No Duplicate Prevention:**
+
 - Each page load creates a new view record
 - Browser refresh = new view
 - Same user visiting multiple times = multiple views
 - Bot traffic not filtered
 
 **Recommendation:** For production, consider:
+
 - Session-based deduplication (1 view per session per event)
 - IP-based rate limiting
 - User-agent filtering for bots
 
 **Test Environment:**
+
 - Views NOT tracked when `NODE_ENV=test`
 - Prevents CI test pollution
 - Seed data includes synthetic views for testing
@@ -343,11 +392,13 @@ Count of `EventView` records within date range.
 ### Time Zones
 
 **All timestamps stored in UTC:**
+
 - Database: UTC timestamps
 - API: ISO 8601 strings
 - UI: Browser local time for display
 
 **Date Range Queries:**
+
 - Inclusive of start date (>=)
 - Inclusive of end date (<=)
 - Bucketing uses UTC dates
@@ -355,11 +406,13 @@ Count of `EventView` records within date range.
 ### Performance
 
 **Optimizations:**
+
 - Composite index on `(eventId, createdAt)` for EventView
 - Existing indexes on Booking for time-range queries
 - Aggregations performed at database level
 
 **Scaling Considerations:**
+
 - Large date ranges (>90 days) may be slow with many events
 - Consider pagination for top events with >1000 events
 - EventView table grows unbounded (consider archival strategy)
@@ -367,6 +420,7 @@ Count of `EventView` records within date range.
 ### Data Accuracy
 
 **Booking Status:**
+
 - Only CONFIRMED bookings counted in revenue/seats
 - PENDING/CANCELLED bookings excluded
 - Refunded bookings still counted (status remains CONFIRMED)
@@ -374,6 +428,7 @@ Count of `EventView` records within date range.
 **Future Enhancement:** Track refunds separately to show net revenue.
 
 **Event Views:**
+
 - Anonymous views tracked (userId = null)
 - No session deduplication
 - Includes organizer's own views
@@ -381,9 +436,11 @@ Count of `EventView` records within date range.
 ## Testing
 
 ### Unit Tests
+
 Location: `packages/api/src/__tests__/analytics.spec.ts`
 
 Tests cover:
+
 - Time-series bucketing (day/week)
 - Average ticket calculation
 - Conversion rate calculation
@@ -392,9 +449,11 @@ Tests cover:
 - Revenue/seats aggregation
 
 ### E2E Tests
+
 Location: `apps/organizer/e2e/analytics.spec.ts`
 
 Tests cover:
+
 - Dashboard page load
 - Summary cards display
 - Charts rendering
@@ -404,7 +463,9 @@ Tests cover:
 - Top events table
 
 ### Seed Data
+
 Synthetic analytics data included in `packages/db/prisma/seed.ts`:
+
 - 30 days of event views (10-60 per event per day)
 - 30 days of bookings (0-5 per event per day)
 - Data for both test organizers
@@ -413,6 +474,7 @@ Synthetic analytics data included in `packages/db/prisma/seed.ts`:
 ## Future Enhancements
 
 ### Planned Features
+
 1. **City/Category Filters:** Filter analytics by event location or type
 2. **Bookings by Category Chart:** Bar chart showing distribution
 3. **Session-Based View Tracking:** Deduplicate views per session
@@ -425,6 +487,7 @@ Synthetic analytics data included in `packages/db/prisma/seed.ts`:
 10. **Export Formats:** PDF reports, Excel files
 
 ### Database Optimizations
+
 1. **Materialized Views:** Pre-aggregate daily/weekly stats
 2. **Partitioning:** Partition EventView by date for faster queries
 3. **Archival:** Move old EventView records to cold storage
@@ -433,24 +496,28 @@ Synthetic analytics data included in `packages/db/prisma/seed.ts`:
 ## Troubleshooting
 
 ### No Data Showing
+
 1. Check date range includes booking dates
 2. Verify organizer has events with confirmed bookings
 3. Check browser console for API errors
 4. Verify authentication (organizer role required)
 
 ### View Tracking Not Working
+
 1. Check `NODE_ENV` is not set to "test"
 2. Verify `/api/track/event-view` endpoint accessible
 3. Check browser console for fetch errors
 4. Verify EventView table exists in database
 
 ### CSV Export Fails
+
 1. Check date range is valid
 2. Verify organizer has data in range
 3. Check browser allows downloads
 4. Verify tRPC endpoint accessible
 
 ### Performance Issues
+
 1. Reduce date range (try 30 days instead of 90)
 2. Check database indexes exist
 3. Monitor database query performance
@@ -459,6 +526,7 @@ Synthetic analytics data included in `packages/db/prisma/seed.ts`:
 ## API Examples
 
 ### Fetch Summary (cURL)
+
 ```bash
 curl -X POST https://indietix.com/api/trpc/organizer.analytics.summary \
   -H "Content-Type: application/json" \
@@ -470,17 +538,19 @@ curl -X POST https://indietix.com/api/trpc/organizer.analytics.summary \
 ```
 
 ### Track Event View (JavaScript)
+
 ```javascript
-fetch('/api/track/event-view', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ eventId: 'clx123...' })
+fetch("/api/track/event-view", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ eventId: "clx123..." }),
 });
 ```
 
 ## Support
 
 For issues or questions:
+
 - Check this documentation first
 - Review test files for usage examples
 - Check tRPC router implementation for business logic

@@ -4,7 +4,9 @@ import { prisma } from "@indietix/db";
 import { executeSegmentQuery, type SegmentQuery } from "@indietix/marketing";
 import { TRPCError } from "@trpc/server";
 
-function requireAuth(ctx: { session?: { user?: { id: string; role: string } } }) {
+function requireAuth(ctx: {
+  session?: { user?: { id: string; role: string } };
+}) {
   if (!ctx.session?.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -168,18 +170,24 @@ export const campaignsRouter = router({
         });
       }
 
-      let recipients: Array<{ email: string; phone: string | null; userId: string }> = [];
+      let recipients: Array<{
+        email: string;
+        phone: string | null;
+        userId: string;
+      }> = [];
 
       if (campaign.segment) {
         const users = await executeSegmentQuery(
           prisma,
           campaign.segment.query as SegmentQuery
         );
-        recipients = users.map((u: { id: string; email: string; phone: string | null }) => ({
-          email: u.email,
-          phone: u.phone,
-          userId: u.id,
-        }));
+        recipients = users.map(
+          (u: { id: string; email: string; phone: string | null }) => ({
+            email: u.email,
+            phone: u.phone,
+            userId: u.id,
+          })
+        );
       } else {
         const users = await prisma.user.findMany({
           select: {
@@ -359,14 +367,23 @@ export const campaignsRouter = router({
       }
 
       const totalRecipients = campaign.recipients.length;
-      const sentCount = campaign.recipients.filter((r) => r.status === "SENT").length;
-      const openedCount = campaign.recipients.filter((r) => r.openedAt !== null).length;
-      const clickedCount = campaign.recipients.filter((r) => r.clickedAt !== null).length;
+      const sentCount = campaign.recipients.filter(
+        (r) => r.status === "SENT"
+      ).length;
+      const openedCount = campaign.recipients.filter(
+        (r) => r.openedAt !== null
+      ).length;
+      const clickedCount = campaign.recipients.filter(
+        (r) => r.clickedAt !== null
+      ).length;
       const conversions = campaign._count.bookings;
 
-      const openRate = totalRecipients > 0 ? (openedCount / totalRecipients) * 100 : 0;
-      const clickRate = totalRecipients > 0 ? (clickedCount / totalRecipients) * 100 : 0;
-      const conversionRate = totalRecipients > 0 ? (conversions / totalRecipients) * 100 : 0;
+      const openRate =
+        totalRecipients > 0 ? (openedCount / totalRecipients) * 100 : 0;
+      const clickRate =
+        totalRecipients > 0 ? (clickedCount / totalRecipients) * 100 : 0;
+      const conversionRate =
+        totalRecipients > 0 ? (conversions / totalRecipients) * 100 : 0;
 
       return {
         campaign,

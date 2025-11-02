@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
-import { prisma } from "@indietix/db";
+import { prisma, Prisma } from "@indietix/db";
 import {
   validateSegmentQuery,
   previewSegmentQuery,
@@ -8,7 +8,9 @@ import {
 } from "@indietix/marketing";
 import { TRPCError } from "@trpc/server";
 
-function requireAuth(ctx: { session?: { user?: { id: string; role: string } } }) {
+function requireAuth(ctx: {
+  session?: { user?: { id: string; role: string } };
+}) {
   if (!ctx.session?.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -50,7 +52,7 @@ export const segmentsRouter = router({
       const segment = await prisma.segment.create({
         data: {
           name: input.name,
-          query: input.query as any,
+          query: input.query as unknown as Prisma.InputJsonValue,
           createdBy: user.id,
         },
       });
@@ -102,7 +104,7 @@ export const segmentsRouter = router({
         where: { id: input.id },
         data: {
           name: input.name,
-          query: input.query as any,
+          query: input.query as unknown as Prisma.InputJsonValue,
         },
       });
 
@@ -182,7 +184,10 @@ export const segmentsRouter = router({
         });
       }
 
-      const count = await previewSegmentQuery(prisma, input.query as SegmentQuery);
+      const count = await previewSegmentQuery(
+        prisma,
+        input.query as SegmentQuery
+      );
 
       return {
         count,

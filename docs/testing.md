@@ -16,6 +16,7 @@ IndieTix uses a comprehensive testing strategy across the monorepo:
 **Scope**: `apps/web`, `apps/admin`, `apps/organizer`, `packages/*`
 
 **Configuration**:
+
 - Root config: `vitest.config.ts`
 - Per-app config: `apps/*/vitest.config.ts`
 - Setup file: `vitest.setup.ts` (imports `@testing-library/jest-dom`)
@@ -23,6 +24,7 @@ IndieTix uses a comprehensive testing strategy across the monorepo:
 **Environment**: jsdom (for React component testing)
 
 **Commands**:
+
 ```bash
 # Run all Vitest tests
 pnpm -w test
@@ -38,6 +40,7 @@ pnpm --filter @indietix/web test:watch
 ```
 
 **Example test locations**:
+
 - `apps/web/src/__tests__/home.spec.tsx`
 - `packages/utils/src/__tests__/format.spec.ts`
 
@@ -46,6 +49,7 @@ pnpm --filter @indietix/web test:watch
 **Scope**: `apps/mobile`
 
 **Configuration**:
+
 - Config: `apps/mobile/jest.config.js`
 - Setup: `apps/mobile/jest.setup.js`
 - Preset: `jest-expo`
@@ -53,6 +57,7 @@ pnpm --filter @indietix/web test:watch
 **Environment**: React Native testing environment
 
 **Commands**:
+
 ```bash
 # Run mobile tests
 pnpm --filter @indietix/mobile test
@@ -62,6 +67,7 @@ pnpm --filter @indietix/mobile test -- --watch
 ```
 
 **Example test locations**:
+
 - `apps/mobile/src/__tests__/App.test.tsx`
 
 ### Web E2E Tests (Playwright)
@@ -71,6 +77,7 @@ pnpm --filter @indietix/mobile test -- --watch
 **Configuration**: `apps/web/playwright.config.ts`
 
 **Commands**:
+
 ```bash
 # Install Playwright browsers (first time only)
 cd apps/web
@@ -89,6 +96,7 @@ pnpm exec playwright test home.spec.ts
 **Test location**: `apps/web/e2e/`
 
 **Notes**:
+
 - Playwright builds the Next.js app and runs `next start` before tests
 - Tests run against `http://localhost:3000`
 - CI runs tests in headless mode with retries
@@ -102,6 +110,7 @@ pnpm exec playwright test home.spec.ts
 **Environment**: CI-only (requires Android emulator)
 
 **Commands** (CI only):
+
 ```bash
 # Build Android APK
 bash scripts/android-build.sh
@@ -111,6 +120,7 @@ maestro test .maestro/smoke.yml -a apps/mobile/android/app/build/outputs/apk/deb
 ```
 
 **Notes**:
+
 - Mobile E2E tests run only in CI on Android emulator
 - Tests are marked as `continue-on-error: true` to prevent blocking PRs
 - APK is built using Expo prebuild + Gradle
@@ -166,6 +176,7 @@ pnpm -w build
 ### Running E2E Tests Locally
 
 **Web (Playwright)**:
+
 ```bash
 cd apps/web
 
