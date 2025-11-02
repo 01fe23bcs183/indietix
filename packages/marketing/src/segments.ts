@@ -110,7 +110,7 @@ export async function executeSegmentQuery(
       },
     });
 
-    const userIds = userBookingCounts.map((u) => u.userId);
+    const userIds = userBookingCounts.map((u: any) => u.userId);
     
     if (userIds.length === 0) {
       return [];
