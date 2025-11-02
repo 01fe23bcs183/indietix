@@ -16,6 +16,10 @@ import { adminTransactionsRouter } from "./routers/admin/transactions";
 import { adminSettingsRouter } from "./routers/admin/settings";
 import { adminDashboardRouter } from "./routers/admin/dashboard";
 import { notifyRouter } from "./routers/notify";
+import { promosRouter } from "./routers/promos";
+import { pricingRouter } from "./routers/pricing";
+import { segmentsRouter } from "./routers/segments";
+import { campaignsRouter } from "./routers/campaigns";
 
 export const appRouter = router({
   health: healthRouter,
@@ -26,6 +30,10 @@ export const appRouter = router({
   waitlist: waitlistRouter,
   payouts: payoutsRouter,
   notify: notifyRouter,
+  promos: promosRouter,
+  pricing: pricingRouter,
+  segments: segmentsRouter,
+  campaigns: campaignsRouter,
   organizer: router({
     events: organizerEventsRouter,
     attendees: organizerAttendeesRouter,
