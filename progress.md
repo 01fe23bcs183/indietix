@@ -1,56 +1,40 @@
-# IndieTix Notifications System - Progress Tracker
+# IndieTix Marketing Tooling - Progress Tracker
 
 ## Progress Bar
 ```
-[██████████████░░░░░░] 70% Complete
+[█░░░░░░░░░░░░░░░░░░░] 5% Complete
 ```
 
 ## Current Status
-**Phase:** Final Checks & PR Creation
-**Last Updated:** 2025-11-02 03:00 UTC
+**Phase:** Initial Setup & Exploration
+**Last Updated:** 2025-11-02 03:43:51 UTC
 
 ## Completed Tasks
-- ✅ Created notify_DOCUMENT.md documentation
-- ✅ Pulled latest changes from main
-- ✅ Created todo list with 31 tasks
-- ✅ Created git branch devin/1762051688-notifications-system
-- ✅ Explored existing codebase structure and dependencies
-- ✅ Updated Prisma schema with NotificationPreference and Notification models
-- ✅ Generated Prisma client
-- ✅ Installed dependencies
-- ✅ Created packages/notify directory structure
-- ✅ Implemented all Email providers (Resend + Fake)
-- ✅ Implemented all SMS providers (Twilio + Fake)
-- ✅ Implemented all Push providers (Expo + Fake)
+- ✅ Created marketing_tooling_DOCUMENT.md documentation
+- ✅ Pulled latest changes from main (commit 6ab2cc8)
+- ✅ Created todo list with 24 tasks
 
 ## In Progress
-- 🔄 Creating template directory structure and base templates
+- 🔄 Exploring existing codebase structure
 
 ## Pending Tasks
-- ⏳ Explore existing codebase structure and dependencies
-- ⏳ Update Prisma schema with NotificationPreference and Notification models
-- ⏳ Generate Prisma client and run migrations
-- ⏳ Create packages/notify directory structure
-- ⏳ Implement Email providers (Resend + Fake)
-- ⏳ Implement SMS providers (Twilio + Fake)
-- ⏳ Implement Push providers (Expo + Fake)
-- ⏳ Create template directory structure and base templates
-- ⏳ Implement email templates with React Email
-- ⏳ Implement SMS templates with Handlebars
-- ⏳ Implement Push templates
-- ⏳ Create notification orchestration layer (send.ts)
-- ⏳ Add tRPC routers for notification preferences and scheduling
-- ⏳ Create /profile/notifications page in web app
-- ⏳ Create /api/push/register endpoint
-- ⏳ Create /api/cron/notifications endpoint
-- ⏳ Create admin preview UI at /admin/notifications/preview
-- ⏳ Implement reminder scheduling on booking confirmation
-- ⏳ Create GitHub Actions cron workflow
-- ⏳ Write unit tests for templates, providers, and preferences
-- ⏳ Write Playwright tests for profile and admin pages
-- ⏳ Create docs/notifications.md documentation
-- ⏳ Update seed script with default notification preferences
-- ⏳ Run pnpm install
+- ⏳ Design and implement Prisma schema changes (PromoCode, EventPricePhase, Campaign, Segment, CampaignRecipient)
+- ⏳ Create packages/utils/discounts.ts for promo code logic
+- ⏳ Create packages/marketing/segments.ts for segment query engine
+- ⏳ Implement promo code API endpoints
+- ⏳ Implement price phase API endpoints
+- ⏳ Implement campaign API endpoints
+- ⏳ Implement segment API endpoints
+- ⏳ Create tracking routes (/api/trk/open and /api/trk/c)
+- ⏳ Build organizer app promo management UI
+- ⏳ Build organizer app campaign wizard UI
+- ⏳ Update web app event page to show price phases
+- ⏳ Update web app checkout to support promo codes
+- ⏳ Add admin app promo/campaign oversight features
+- ⏳ Write unit tests
+- ⏳ Write Playwright E2E tests
+- ⏳ Create docs/marketing.md documentation
+- ⏳ Run pnpm install and generate Prisma client
 - ⏳ Run pnpm -w build
 - ⏳ Run pnpm -w test
 - ⏳ Run Playwright tests
@@ -58,17 +42,19 @@
 - ⏳ Wait for CI checks to pass
 
 ## Key Milestones
-1. [ ] Database schema and migrations complete
-2. [ ] Provider layer implemented (Email, SMS, Push with Fakes)
-3. [ ] Template system functional
-4. [ ] User preferences UI complete
-5. [ ] Admin preview UI complete
-6. [ ] Scheduling and cron system operational
-7. [ ] All tests passing
-8. [ ] PR created and CI passing
+1. [ ] Database schema complete (5 new models)
+2. [ ] Discount & segment logic implemented
+3. [ ] API endpoints functional
+4. [ ] Tracking routes operational
+5. [ ] Organizer UI complete
+6. [ ] Web app integration complete
+7. [ ] Admin oversight features complete
+8. [ ] All tests passing
+9. [ ] PR created and CI passing
 
 ## Notes
-- Using Fake providers for CI to ensure offline operation
-- Templates: booking_confirmed, booking_cancelled, refund_succeeded, waitlist_offer_created, event_reminder_T24, event_reminder_T2, organizer_payout_completed, admin_announcement
-- Preference categories: transactional, reminders, marketing
-- Channels: email, sms, push
+- No promo stacking allowed
+- Discounts apply before fees (fees computed on discounted subtotal)
+- Price phases: time-based and seat-based conditions
+- Campaign tracking: open pixel + click redirect
+- CI must pass offline (no external email/SMS providers required)
