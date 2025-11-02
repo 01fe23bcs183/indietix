@@ -61,23 +61,11 @@ export default function EditPromoPage() {
 
     await updateMutation.mutateAsync({
       id,
-      code: formData.code,
-      type: formData.type,
-      value: formData.value,
       startAt: formData.startAt ? new Date(formData.startAt) : undefined,
       endAt: formData.endAt ? new Date(formData.endAt) : undefined,
       usageLimit: formData.usageLimit || undefined,
       perUserLimit: formData.perUserLimit || undefined,
-      minPrice: formData.minPrice || undefined,
-      applicableEvents: formData.applicableEvents?.length
-        ? formData.applicableEvents
-        : undefined,
-      applicableCategories: formData.applicableCategories?.length
-        ? formData.applicableCategories
-        : undefined,
-      applicableCities: formData.applicableCities?.length
-        ? formData.applicableCities
-        : undefined,
+      active: true,
     });
   };
 
