@@ -95,6 +95,32 @@ enum NotificationStatus {
   FAILED
 }
 
+enum PromoCodeType {
+  PERCENT
+  FLAT
+}
+
+enum CampaignChannel {
+  EMAIL
+  SMS
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+enum CampaignRecipientStatus {
+  PENDING
+  SENT
+  OPENED
+  CLICKED
+  BOUNCED
+}
+
 model User {
   id                      String    @id @default(cuid())
   email                   String    @unique
@@ -179,6 +205,7 @@ model Event {
   bookings                  Booking[]
   waitlistEntries           WaitlistEntry[]
   views                     EventView[]
+  pricePhases               EventPricePhase[]
 
   @@index([slug])
   @@index([organizerId])
@@ -219,11 +246,15 @@ model Booking {
   attendedAt         DateTime?
   qrCode             String?
   ticketPayloadHash  String?
+  promoCodeId        String?
+  campaignId         String?
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   
   event              Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoCode          PromoCode?    @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  campaign           Campaign?     @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   paymentEvents      PaymentEvent[]
   scanLogs           ScanLog[]
   refunds            Refund[]
@@ -234,6 +265,8 @@ model Booking {
   @@index([status])
   @@index([holdExpiresAt])
   @@index([ticketNumber])
+  @@index([promoCodeId])
+  @@index([campaignId])
 }
 
 model Payout {
@@ -452,4 +485,112 @@ model Notification {
   @@index([type])
   @@index([channel])
   @@index([scheduledAt])
+}
+
+model PromoCode {
+  id                    String         @id @default(cuid())
+  code                  String         @unique
+  type                  PromoCodeType
+  value                 Int            // Percentage (1-100) or flat amount in paise
+  
+  // Time constraints
+  startAt               DateTime?
+  endAt                 DateTime?
+  
+  // Usage constraints
+  usageLimit            Int?           // Total usage limit across all users
+  perUserLimit          Int?           // Per-user usage limit
+  minPrice              Int?           // Minimum ticket price in paise
+  
+  // Scope constraints
+  organizerId           String?        // If set, only this organizer's events
+  applicableEvents      String[]       @default([]) // Event IDs
+  applicableCategories  String[]       @default([]) // Category names
+  applicableCities      String[]       @default([]) // City names
+  
+  // Status
+  active                Boolean        @default(true)
+  
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  
+  bookings              Booking[]
+
+  @@index([code])
+  @@index([organizerId])
+  @@index([active])
+  @@index([startAt, endAt])
+}
+
+model EventPricePhase {
+  id        String    @id @default(cuid())
+  eventId   String
+  name      String    // e.g., "Early Bird", "Last Minute"
+  startsAt  DateTime?
+  endsAt    DateTime?
+  maxSeats  Int?      // Phase ends when this many seats are booked
+  price     Int       // Price in paise for this phase
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([startsAt, endsAt])
+}
+
+model Campaign {
+  id           String          @id @default(cuid())
+  name         String
+  channel      CampaignChannel
+  status       CampaignStatus  @default(DRAFT)
+  templateKey  String          // Template identifier for rendering
+  scheduledAt  DateTime?
+  createdBy    String          // User ID of creator
+  
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  
+  recipients   CampaignRecipient[]
+  bookings     Booking[]
+
+  @@index([status])
+  @@index([createdBy])
+  @@index([scheduledAt])
+}
+
+model Segment {
+  id        String   @id @default(cuid())
+  name      String
+  query     Json     // JSON DSL for segment query
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model CampaignRecipient {
+  id         String                  @id @default(cuid())
+  campaignId String
+  userId     String?
+  email      String
+  phone      String?
+  status     CampaignRecipientStatus @default(PENDING)
+  
+  // Tracking
+  sentAt     DateTime?
+  openedAt   DateTime?
+  clickedAt  DateTime?
+  
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+  
+  campaign   Campaign                @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([userId])
+  @@index([status])
+  @@index([email])
 }

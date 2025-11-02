@@ -415,6 +415,9 @@ importers:
       '@indietix/db':
         specifier: workspace:*
         version: link:../db
+      '@indietix/marketing':
+        specifier: workspace:*
+        version: link:../marketing
       '@indietix/notify':
         specifier: workspace:*
         version: link:../notify
@@ -504,6 +507,28 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
+
+  packages/marketing:
+    dependencies:
+      '@indietix/db':
+        specifier: workspace:*
+        version: link:../db
+      '@prisma/client':
+        specifier: ^5.8.1
+        version: 5.22.0(prisma@5.22.0)
+    devDependencies:
+      '@indietix/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.24
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.1
+        version: 1.6.1(@types/node@20.19.24)(jsdom@27.1.0)(terser@5.44.0)
 
   packages/notify:
     dependencies:
@@ -611,6 +636,13 @@ importers:
         version: 5.9.3
 
   packages/utils:
+    dependencies:
+      '@indietix/db':
+        specifier: workspace:*
+        version: link:../db
+      '@prisma/client':
+        specifier: ^5.8.1
+        version: 5.22.0(prisma@5.22.0)
     devDependencies:
       '@indietix/config':
         specifier: workspace:*
