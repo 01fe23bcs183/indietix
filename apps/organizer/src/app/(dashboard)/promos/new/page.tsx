@@ -43,13 +43,22 @@ export default function NewPromoPage() {
       usageLimit: formData.usageLimit || undefined,
       perUserLimit: formData.perUserLimit || undefined,
       minPrice: formData.minPrice || undefined,
-      applicableEvents: formData.applicableEvents?.length ? formData.applicableEvents : undefined,
-      applicableCategories: formData.applicableCategories?.length ? formData.applicableCategories : undefined,
-      applicableCities: formData.applicableCities?.length ? formData.applicableCities : undefined,
+      applicableEvents: formData.applicableEvents?.length
+        ? formData.applicableEvents
+        : undefined,
+      applicableCategories: formData.applicableCategories?.length
+        ? formData.applicableCategories
+        : undefined,
+      applicableCities: formData.applicableCities?.length
+        ? formData.applicableCities
+        : undefined,
     });
   };
 
-  const updateField = (field: keyof FormData, value: any) => {
+  const updateField = (
+    field: keyof FormData,
+    value: string | number | string[] | undefined
+  ) => {
     setFormData({ ...formData, [field]: value });
   };
 
@@ -80,7 +89,9 @@ export default function NewPromoPage() {
               <input
                 type="text"
                 value={formData.code}
-                onChange={(e) => updateField("code", e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  updateField("code", e.target.value.toUpperCase())
+                }
                 className="w-full border rounded px-4 py-2 font-mono"
                 required
                 minLength={3}
@@ -89,7 +100,8 @@ export default function NewPromoPage() {
                 placeholder="SUMMER2025"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Use uppercase letters and numbers only (e.g., SUMMER2025, SAVE20)
+                Use uppercase letters and numbers only (e.g., SUMMER2025,
+                SAVE20)
               </p>
             </div>
             <div>
@@ -106,7 +118,9 @@ export default function NewPromoPage() {
             </div>
             <div>
               <label className="block mb-2">
-                {formData.type === "PERCENT" ? "Discount Percentage *" : "Discount Amount (₹) *"}
+                {formData.type === "PERCENT"
+                  ? "Discount Percentage *"
+                  : "Discount Amount (₹) *"}
               </label>
               <input
                 type="number"
@@ -119,8 +133,8 @@ export default function NewPromoPage() {
                 step={formData.type === "PERCENT" ? 1 : 100}
               />
               <p className="text-sm text-gray-500 mt-1">
-                {formData.type === "PERCENT" 
-                  ? "Enter a percentage between 1 and 100" 
+                {formData.type === "PERCENT"
+                  ? "Enter a percentage between 1 and 100"
                   : "Enter the discount amount in rupees"}
               </p>
             </div>
@@ -165,7 +179,12 @@ export default function NewPromoPage() {
               <input
                 type="number"
                 value={formData.usageLimit || ""}
-                onChange={(e) => updateField("usageLimit", e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  updateField(
+                    "usageLimit",
+                    e.target.value ? Number(e.target.value) : undefined
+                  )
+                }
                 className="w-full border rounded px-4 py-2"
                 min={1}
                 placeholder="e.g., 100"
@@ -179,7 +198,12 @@ export default function NewPromoPage() {
               <input
                 type="number"
                 value={formData.perUserLimit || ""}
-                onChange={(e) => updateField("perUserLimit", e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  updateField(
+                    "perUserLimit",
+                    e.target.value ? Number(e.target.value) : undefined
+                  )
+                }
                 className="w-full border rounded px-4 py-2"
                 min={1}
                 placeholder="e.g., 1"
@@ -189,11 +213,18 @@ export default function NewPromoPage() {
               </p>
             </div>
             <div>
-              <label className="block mb-2">Minimum Purchase Amount (₹) (optional)</label>
+              <label className="block mb-2">
+                Minimum Purchase Amount (₹) (optional)
+              </label>
               <input
                 type="number"
                 value={formData.minPrice || ""}
-                onChange={(e) => updateField("minPrice", e.target.value ? Number(e.target.value) : undefined)}
+                onChange={(e) =>
+                  updateField(
+                    "minPrice",
+                    e.target.value ? Number(e.target.value) : undefined
+                  )
+                }
                 className="w-full border rounded px-4 py-2"
                 min={0}
                 step={100}
@@ -208,24 +239,42 @@ export default function NewPromoPage() {
 
         {step === 4 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold mb-4">Applicability (optional)</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Applicability (optional)
+            </h2>
             <p className="text-sm text-gray-600 mb-4">
               Leave all fields blank to make this code applicable to all events
             </p>
             <div>
               <label className="block mb-2">Applicable Categories</label>
               <div className="space-y-2">
-                {["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"].map((cat) => (
+                {[
+                  "MUSIC",
+                  "COMEDY",
+                  "SPORTS",
+                  "TECH",
+                  "FOOD",
+                  "ART",
+                  "OTHER",
+                ].map((cat) => (
                   <label key={cat} className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={formData.applicableCategories?.includes(cat) || false}
+                      checked={
+                        formData.applicableCategories?.includes(cat) || false
+                      }
                       onChange={(e) => {
                         const current = formData.applicableCategories || [];
                         if (e.target.checked) {
-                          updateField("applicableCategories", [...current, cat]);
+                          updateField("applicableCategories", [
+                            ...current,
+                            cat,
+                          ]);
                         } else {
-                          updateField("applicableCategories", current.filter(c => c !== cat));
+                          updateField(
+                            "applicableCategories",
+                            current.filter((c) => c !== cat)
+                          );
                         }
                       }}
                       className="mr-2"
@@ -236,13 +285,21 @@ export default function NewPromoPage() {
               </div>
             </div>
             <div>
-              <label className="block mb-2">Applicable Cities (comma-separated)</label>
+              <label className="block mb-2">
+                Applicable Cities (comma-separated)
+              </label>
               <input
                 type="text"
                 value={formData.applicableCities?.join(", ") || ""}
                 onChange={(e) => {
-                  const cities = e.target.value.split(",").map(c => c.trim()).filter(c => c);
-                  updateField("applicableCities", cities.length ? cities : undefined);
+                  const cities = e.target.value
+                    .split(",")
+                    .map((c) => c.trim())
+                    .filter((c) => c);
+                  updateField(
+                    "applicableCities",
+                    cities.length ? cities : undefined
+                  );
                 }}
                 className="w-full border rounded px-4 py-2"
                 placeholder="e.g., Bengaluru, Mumbai, Delhi"

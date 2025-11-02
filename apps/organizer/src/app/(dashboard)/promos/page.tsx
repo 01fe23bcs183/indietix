@@ -9,7 +9,9 @@ import { formatINR } from "@indietix/utils";
 export default function PromosPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | "active" | "inactive">("all");
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
 
   const { data, isLoading, error, refetch } = trpc.promos.list.useQuery({
     page,
@@ -24,7 +26,7 @@ export default function PromosPage() {
   });
 
   const handleDisable = async (id: string) => {
-    if (confirm("Are you sure you want to disable this promo code?")) {
+    if (window.confirm("Are you sure you want to disable this promo code?")) {
       await disableMutation.mutateAsync({ id });
     }
   };
@@ -56,7 +58,9 @@ export default function PromosPage() {
         />
         <select
           value={activeFilter}
-          onChange={(e) => setActiveFilter(e.target.value as typeof activeFilter)}
+          onChange={(e) =>
+            setActiveFilter(e.target.value as typeof activeFilter)
+          }
           className="border rounded px-4 py-2"
         >
           <option value="all">All Status</option>
@@ -88,8 +92,8 @@ export default function PromosPage() {
                   </span>
                 </td>
                 <td className="border p-2">
-                  {promo.type === "PERCENT" 
-                    ? `${promo.value}%` 
+                  {promo.type === "PERCENT"
+                    ? `${promo.value}%`
                     : formatINR(promo.value)}
                 </td>
                 <td className="border p-2">
@@ -98,12 +102,16 @@ export default function PromosPage() {
                 </td>
                 <td className="border p-2 text-sm">
                   {promo.startAt && (
-                    <div>From: {new Date(promo.startAt).toLocaleDateString()}</div>
+                    <div>
+                      From: {new Date(promo.startAt).toLocaleDateString()}
+                    </div>
                   )}
                   {promo.endAt && (
                     <div>To: {new Date(promo.endAt).toLocaleDateString()}</div>
                   )}
-                  {!promo.startAt && !promo.endAt && <div className="text-gray-500">No expiry</div>}
+                  {!promo.startAt && !promo.endAt && (
+                    <div className="text-gray-500">No expiry</div>
+                  )}
                 </td>
                 <td className="border p-2">
                   <span

@@ -21,7 +21,7 @@ export default function CampaignDetailPage() {
 
   const handleCancel = async () => {
     if (
-      confirm(
+      window.confirm(
         "Are you sure you want to cancel this campaign? This action cannot be undone."
       )
     ) {
@@ -190,12 +190,14 @@ export default function CampaignDetailPage() {
             specific time or send it immediately.
           </p>
           <div className="flex gap-2">
-            <Button onClick={() => alert("Schedule feature coming soon")}>
+            <Button
+              onClick={() => window.alert("Schedule feature coming soon")}
+            >
               Schedule Campaign
             </Button>
             <Button
               variant="outline"
-              onClick={() => alert("Send now feature coming soon")}
+              onClick={() => window.alert("Send now feature coming soon")}
             >
               Send Now
             </Button>

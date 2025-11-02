@@ -48,12 +48,16 @@ export default function CheckoutPage() {
       });
 
       if (result.valid) {
-        setPromoSuccess(`Promo code applied! You'll save ${result.discountAmount ? formatINR(result.discountAmount) : "some amount"}`);
+        setPromoSuccess(
+          `Promo code applied! You'll save ${result.discountAmount ? formatINR(result.discountAmount) : "some amount"}`
+        );
       } else {
         setPromoError(result.reason || "Invalid promo code");
       }
-    } catch (err: any) {
-      setPromoError(err.message || "Failed to validate promo code");
+    } catch (err) {
+      setPromoError(
+        err instanceof Error ? err.message : "Failed to validate promo code"
+      );
     }
   };
 
@@ -173,7 +177,9 @@ export default function CheckoutPage() {
             <h2 className="text-lg font-semibold mb-3">Amount Breakdown</h2>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span>Subtotal ({booking.seats} × {formatINR(booking.event.price)})</span>
+                <span>
+                  Subtotal ({booking.seats} × {formatINR(booking.event.price)})
+                </span>
                 <span>{formatINR(booking.event.price * booking.seats)}</span>
               </div>
               <div className="border-t pt-2 mt-2">

@@ -33,8 +33,12 @@ export default function EditPromoPage() {
         code: promo.code,
         type: promo.type,
         value: promo.value,
-        startAt: promo.startAt ? new Date(promo.startAt).toISOString().slice(0, 16) : undefined,
-        endAt: promo.endAt ? new Date(promo.endAt).toISOString().slice(0, 16) : undefined,
+        startAt: promo.startAt
+          ? new Date(promo.startAt).toISOString().slice(0, 16)
+          : undefined,
+        endAt: promo.endAt
+          ? new Date(promo.endAt).toISOString().slice(0, 16)
+          : undefined,
         usageLimit: promo.usageLimit || undefined,
         perUserLimit: promo.perUserLimit || undefined,
         minPrice: promo.minPrice || undefined,
@@ -65,13 +69,22 @@ export default function EditPromoPage() {
       usageLimit: formData.usageLimit || undefined,
       perUserLimit: formData.perUserLimit || undefined,
       minPrice: formData.minPrice || undefined,
-      applicableEvents: formData.applicableEvents?.length ? formData.applicableEvents : undefined,
-      applicableCategories: formData.applicableCategories?.length ? formData.applicableCategories : undefined,
-      applicableCities: formData.applicableCities?.length ? formData.applicableCities : undefined,
+      applicableEvents: formData.applicableEvents?.length
+        ? formData.applicableEvents
+        : undefined,
+      applicableCategories: formData.applicableCategories?.length
+        ? formData.applicableCategories
+        : undefined,
+      applicableCities: formData.applicableCities?.length
+        ? formData.applicableCities
+        : undefined,
     });
   };
 
-  const updateField = (field: keyof FormData, value: any) => {
+  const updateField = (
+    field: keyof FormData,
+    value: string | number | string[] | undefined
+  ) => {
     if (!formData) return;
     setFormData({ ...formData, [field]: value });
   };
@@ -92,7 +105,9 @@ export default function EditPromoPage() {
             <input
               type="text"
               value={formData.code}
-              onChange={(e) => updateField("code", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                updateField("code", e.target.value.toUpperCase())
+              }
               className="w-full border rounded px-4 py-2 font-mono"
               required
               minLength={3}
@@ -114,7 +129,9 @@ export default function EditPromoPage() {
           </div>
           <div>
             <label className="block mb-2">
-              {formData.type === "PERCENT" ? "Discount Percentage *" : "Discount Amount (₹) *"}
+              {formData.type === "PERCENT"
+                ? "Discount Percentage *"
+                : "Discount Amount (₹) *"}
             </label>
             <input
               type="number"
@@ -157,7 +174,12 @@ export default function EditPromoPage() {
             <input
               type="number"
               value={formData.usageLimit || ""}
-              onChange={(e) => updateField("usageLimit", e.target.value ? Number(e.target.value) : undefined)}
+              onChange={(e) =>
+                updateField(
+                  "usageLimit",
+                  e.target.value ? Number(e.target.value) : undefined
+                )
+              }
               className="w-full border rounded px-4 py-2"
               min={1}
             />
@@ -167,7 +189,12 @@ export default function EditPromoPage() {
             <input
               type="number"
               value={formData.perUserLimit || ""}
-              onChange={(e) => updateField("perUserLimit", e.target.value ? Number(e.target.value) : undefined)}
+              onChange={(e) =>
+                updateField(
+                  "perUserLimit",
+                  e.target.value ? Number(e.target.value) : undefined
+                )
+              }
               className="w-full border rounded px-4 py-2"
               min={1}
             />
@@ -177,7 +204,12 @@ export default function EditPromoPage() {
             <input
               type="number"
               value={formData.minPrice || ""}
-              onChange={(e) => updateField("minPrice", e.target.value ? Number(e.target.value) : undefined)}
+              onChange={(e) =>
+                updateField(
+                  "minPrice",
+                  e.target.value ? Number(e.target.value) : undefined
+                )
+              }
               className="w-full border rounded px-4 py-2"
               min={0}
               step={100}
@@ -190,17 +222,30 @@ export default function EditPromoPage() {
           <div>
             <label className="block mb-2">Applicable Categories</label>
             <div className="space-y-2">
-              {["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"].map((cat) => (
+              {[
+                "MUSIC",
+                "COMEDY",
+                "SPORTS",
+                "TECH",
+                "FOOD",
+                "ART",
+                "OTHER",
+              ].map((cat) => (
                 <label key={cat} className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={formData.applicableCategories?.includes(cat) || false}
+                    checked={
+                      formData.applicableCategories?.includes(cat) || false
+                    }
                     onChange={(e) => {
                       const current = formData.applicableCategories || [];
                       if (e.target.checked) {
                         updateField("applicableCategories", [...current, cat]);
                       } else {
-                        updateField("applicableCategories", current.filter(c => c !== cat));
+                        updateField(
+                          "applicableCategories",
+                          current.filter((c) => c !== cat)
+                        );
                       }
                     }}
                     className="mr-2"
@@ -211,13 +256,21 @@ export default function EditPromoPage() {
             </div>
           </div>
           <div>
-            <label className="block mb-2">Applicable Cities (comma-separated)</label>
+            <label className="block mb-2">
+              Applicable Cities (comma-separated)
+            </label>
             <input
               type="text"
               value={formData.applicableCities?.join(", ") || ""}
               onChange={(e) => {
-                const cities = e.target.value.split(",").map(c => c.trim()).filter(c => c);
-                updateField("applicableCities", cities.length ? cities : undefined);
+                const cities = e.target.value
+                  .split(",")
+                  .map((c) => c.trim())
+                  .filter((c) => c);
+                updateField(
+                  "applicableCities",
+                  cities.length ? cities : undefined
+                );
               }}
               className="w-full border rounded px-4 py-2"
               placeholder="e.g., Bengaluru, Mumbai, Delhi"
