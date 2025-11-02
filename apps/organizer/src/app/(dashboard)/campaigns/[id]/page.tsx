@@ -38,11 +38,13 @@ export default function CampaignDetailPage() {
   }
 
   const stats = campaign.metrics || {
-    total: 0,
+    totalRecipients: 0,
     sent: 0,
     opened: 0,
     clicked: 0,
-    bounced: 0,
+    openRate: 0,
+    clickRate: 0,
+    conversions: 0,
   };
 
   const openRate =
@@ -124,7 +126,7 @@ export default function CampaignDetailPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Recipients</span>
-              <span className="text-2xl font-bold">{stats.total}</span>
+              <span className="text-2xl font-bold">{stats.totalRecipients}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Sent</span>
@@ -144,14 +146,6 @@ export default function CampaignDetailPage() {
                 {stats.clicked}
               </span>
             </div>
-            {stats.bounced > 0 && (
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Bounced</span>
-                <span className="text-2xl font-bold text-red-600">
-                  {stats.bounced}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </div>
