@@ -50,7 +50,7 @@ export const segmentsRouter = router({
       const segment = await prisma.segment.create({
         data: {
           name: input.name,
-          query: input.query,
+          query: input.query as any,
           createdBy: user.id,
         },
       });
@@ -102,7 +102,7 @@ export const segmentsRouter = router({
         where: { id: input.id },
         data: {
           name: input.name,
-          query: input.query,
+          query: input.query as any,
         },
       });
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import { prisma } from "@indietix/db";
-import { validatePromoCode, applyPromo } from "@indietix/utils";
+import { applyPromo } from "@indietix/utils";
 import { TRPCError } from "@trpc/server";
 
 function requireAuth(ctx: { session?: { user?: { id: string; role: string } } }) {
@@ -27,7 +27,7 @@ export const promosRouter = router({
   create: publicProcedure
     .input(
       z.object({
-        code: z.string().min(3).max(50).toUpperCase(),
+        code: z.string().min(3).max(50).transform((s) => s.toUpperCase()),
         type: z.enum(["PERCENT", "FLAT"]),
         value: z.number().int().positive(),
         startAt: z.string().datetime().optional(),
@@ -241,7 +241,7 @@ export const promosRouter = router({
         id: z.string(),
       })
     )
-    .query(async ({ input, ctx }) {
+    .query(async ({ input, ctx }) => {
       const user = requireAuth(ctx);
       requireOrganizerOrAdmin(user);
 
