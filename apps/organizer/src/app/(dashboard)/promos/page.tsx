@@ -7,7 +7,6 @@ import Link from "next/link";
 import { formatINR } from "@indietix/utils";
 
 export default function PromosPage() {
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<
     "all" | "active" | "inactive"
