@@ -347,8 +347,41 @@ async function main() {
     ];
 
     for (const bookingData of bookings) {
-      await prisma.booking.create({
-        data: bookingData,
+      const ticketPrice = sunburnEvent.price * bookingData.quantity;
+      const convenienceFee = Math.round(ticketPrice * 0.05);
+      const platformFee = Math.round(ticketPrice * 0.03);
+      const finalAmount = ticketPrice + convenienceFee + platformFee;
+
+      const booking = await prisma.booking.create({
+        data: {
+          eventId: bookingData.eventId,
+          userId: bookingData.userId,
+          ticketNumber: `TIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          seats: bookingData.quantity,
+          ticketPrice,
+          convenienceFee,
+          platformFee,
+          finalAmount,
+          paymentStatus: bookingData.paymentStatus,
+          status: bookingData.status,
+          holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        },
+      });
+
+      const ticket = createSignedTicket(
+        booking.id,
+        booking.userId,
+        booking.eventId
+      );
+      const qrCode = encodeTicketForQR(ticket);
+      const ticketPayloadHash = hashTicketPayload(ticket.payload);
+
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          qrCode,
+          ticketPayloadHash,
+        },
       });
     }
     console.log(`✅ Created 5 sample bookings for ${sunburnEvent.title}`);
