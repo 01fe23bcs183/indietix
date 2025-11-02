@@ -16,6 +16,11 @@ export default function EventDetailPage(): JSX.Element {
     slug,
   });
 
+  const { data: effectivePrice } = trpc.pricing.effectivePrice.useQuery(
+    { eventId: event?.id || "", now: new Date() },
+    { enabled: !!event?.id }
+  );
+
   useEffect(() => {
     if (event?.id) {
       fetch("/api/track/event-view", {
@@ -176,9 +181,33 @@ export default function EventDetailPage(): JSX.Element {
                     <p className="text-sm text-muted-foreground mb-1">
                       Ticket Price
                     </p>
-                    <p className="text-3xl font-bold">
-                      {formatINR(event.price)}
-                    </p>
+                    {effectivePrice?.activePhase ? (
+                      <div>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-3xl font-bold text-green-600">
+                            {formatINR(effectivePrice.effectivePrice)}
+                          </p>
+                          <p className="text-xl text-gray-400 line-through">
+                            {formatINR(event.price)}
+                          </p>
+                        </div>
+                        <div className="mt-2 px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full inline-block">
+                          {effectivePrice.activePhase.name}
+                        </div>
+                        {effectivePrice.activePhase.endsAt && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Ends{" "}
+                            {new Date(
+                              effectivePrice.activePhase.endsAt
+                            ).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-3xl font-bold">
+                        {formatINR(event.price)}
+                      </p>
+                    )}
                   </div>
 
                   <div className="mb-6">
@@ -199,7 +228,9 @@ export default function EventDetailPage(): JSX.Element {
                   </div>
 
                   <PriceBreakdown
-                    basePrice={event.price * quantity}
+                    basePrice={
+                      (effectivePrice?.effectivePrice || event.price) * quantity
+                    }
                     feesConfig={FEES}
                     gstRate={GST_RATE}
                     className="mb-6"
