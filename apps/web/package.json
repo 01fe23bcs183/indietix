@@ -14,6 +14,7 @@
   "dependencies": {
     "@indietix/api": "workspace:*",
     "@indietix/db": "workspace:*",
+    "@indietix/notify": "workspace:*",
     "@indietix/ui": "workspace:*",
     "@indietix/utils": "workspace:*",
     "@tanstack/react-query": "^4.36.1",

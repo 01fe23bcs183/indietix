@@ -1,63 +1,74 @@
-# Payouts Engine Implementation Progress
+# IndieTix Notifications System - Progress Tracker
 
 ## Progress Bar
 ```
-[██████████████░░░░░░] 70% - Running local checks
+[██████████████░░░░░░] 70% Complete
 ```
 
 ## Current Status
-**Phase:** Testing and Validation
-**Last Updated:** 2025-11-01 16:59 UTC
+**Phase:** Final Checks & PR Creation
+**Last Updated:** 2025-11-02 03:00 UTC
 
 ## Completed Tasks
-- ✅ Created todo list with 21 tasks
-- ✅ Created progress.md and documentation files
+- ✅ Created notify_DOCUMENT.md documentation
 - ✅ Pulled latest changes from main
-- ✅ Checked out git branch devin/1762015835-payouts-engine
-- ✅ Explored existing codebase structure (Prisma, tRPC, utils, payments)
-- ✅ Designed and implemented complete Payout model schema in Prisma
-- ✅ Implemented payout calculation logic in packages/utils
-- ✅ Created Fake payout provider for CI
-- ✅ Implemented comprehensive payouts tRPC router with organizer and admin procedures
-- ✅ Built organizer payouts UI (/payouts page)
-- ✅ Built admin payouts UI (/payouts approval queue)
-- ✅ Implemented CSV export functionality
-- ✅ Wrote Vitest unit tests for payout math
-- ✅ Wrote Playwright E2E tests for organizer and admin flows
-- ✅ Created cron workflow for weekly payout generation
-- ✅ Created comprehensive docs/payouts.md documentation
+- ✅ Created todo list with 31 tasks
+- ✅ Created git branch devin/1762051688-notifications-system
+- ✅ Explored existing codebase structure and dependencies
+- ✅ Updated Prisma schema with NotificationPreference and Notification models
+- ✅ Generated Prisma client
+- ✅ Installed dependencies
+- ✅ Created packages/notify directory structure
+- ✅ Implemented all Email providers (Resend + Fake)
+- ✅ Implemented all SMS providers (Twilio + Fake)
+- ✅ Implemented all Push providers (Expo + Fake)
 
 ## In Progress
-- 🔄 Running local checks (pnpm install, build, test)
+- 🔄 Creating template directory structure and base templates
 
 ## Pending Tasks
-- ⏳ Checkout git branch
-- ⏳ Explore codebase structure
-- ⏳ Design Payout model schema
-- ⏳ Implement payout calculation logic
-- ⏳ Create Fake payment provider
-- ⏳ Implement tRPC routers
-- ⏳ Build organizer UI
-- ⏳ Build admin UI
-- ⏳ Implement CSV export
-- ⏳ Create seed data
-- ⏳ Write unit tests
-- ⏳ Write E2E tests
-- ⏳ Create cron workflow
-- ⏳ Create documentation
-- ⏳ Run local checks
+- ⏳ Explore existing codebase structure and dependencies
+- ⏳ Update Prisma schema with NotificationPreference and Notification models
+- ⏳ Generate Prisma client and run migrations
+- ⏳ Create packages/notify directory structure
+- ⏳ Implement Email providers (Resend + Fake)
+- ⏳ Implement SMS providers (Twilio + Fake)
+- ⏳ Implement Push providers (Expo + Fake)
+- ⏳ Create template directory structure and base templates
+- ⏳ Implement email templates with React Email
+- ⏳ Implement SMS templates with Handlebars
+- ⏳ Implement Push templates
+- ⏳ Create notification orchestration layer (send.ts)
+- ⏳ Add tRPC routers for notification preferences and scheduling
+- ⏳ Create /profile/notifications page in web app
+- ⏳ Create /api/push/register endpoint
+- ⏳ Create /api/cron/notifications endpoint
+- ⏳ Create admin preview UI at /admin/notifications/preview
+- ⏳ Implement reminder scheduling on booking confirmation
+- ⏳ Create GitHub Actions cron workflow
+- ⏳ Write unit tests for templates, providers, and preferences
+- ⏳ Write Playwright tests for profile and admin pages
+- ⏳ Create docs/notifications.md documentation
+- ⏳ Update seed script with default notification preferences
+- ⏳ Run pnpm install
+- ⏳ Run pnpm -w build
+- ⏳ Run pnpm -w test
+- ⏳ Run Playwright tests
 - ⏳ Create PR
+- ⏳ Wait for CI checks to pass
 
 ## Key Milestones
 1. [ ] Database schema and migrations complete
-2. [ ] Core payout calculation logic implemented
-3. [ ] Provider integration (Fake) complete
-4. [ ] Organizer UI functional
-5. [ ] Admin UI functional
-6. [ ] All tests passing
-7. [ ] PR created and CI passing
+2. [ ] Provider layer implemented (Email, SMS, Push with Fakes)
+3. [ ] Template system functional
+4. [ ] User preferences UI complete
+5. [ ] Admin preview UI complete
+6. [ ] Scheduling and cron system operational
+7. [ ] All tests passing
+8. [ ] PR created and CI passing
 
 ## Notes
-- Using Fake provider for CI to ensure offline operation
-- Payout formula: GMV_confirmed - refunds_confirmed - fees_kept = net_payable
-- Status flow: PENDING → APPROVED → PROCESSING → COMPLETED/FAILED/CANCELLED
+- Using Fake providers for CI to ensure offline operation
+- Templates: booking_confirmed, booking_cancelled, refund_succeeded, waitlist_offer_created, event_reminder_T24, event_reminder_T2, organizer_payout_completed, admin_announcement
+- Preference categories: transactional, reminders, marketing
+- Channels: email, sms, push
