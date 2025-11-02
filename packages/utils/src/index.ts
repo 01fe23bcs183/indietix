@@ -49,3 +49,10 @@ export type {
   PayoutCalculationParams,
   PrismaClient,
 } from "./payout";
+export {
+  validatePromoCode,
+  calculateDiscount,
+  applyPromo,
+  formatPromoCode,
+} from "./discounts";
+export type { ApplyPromoResult, ValidatePromoParams } from "./discounts";

@@ -18,6 +18,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@indietix/db": "workspace:*",
+    "@prisma/client": "^5.8.1"
+  },
   "devDependencies": {
     "@indietix/config": "workspace:*",
     "@types/node": "^20.11.5",

@@ -1,5 +1,5 @@
 {
-  "name": "@indietix/api",
+  "name": "@indietix/marketing",
   "version": "0.0.0",
   "private": true,
   "main": "./dist/index.js",
@@ -7,7 +7,8 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "import": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
@@ -19,24 +20,13 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@auth/core": "^0.34.3",
     "@indietix/db": "workspace:*",
-    "@indietix/marketing": "workspace:*",
-    "@indietix/notify": "workspace:*",
-    "@indietix/payments": "workspace:*",
-    "@indietix/utils": "workspace:*",
-    "@trpc/server": "^10.45.0",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "next-auth": "5.0.0-beta.30",
-    "zod": "^3.22.4"
+    "@prisma/client": "^5.8.1"
   },
   "devDependencies": {
     "@indietix/config": "workspace:*",
-    "@types/bcrypt": "^6.0.0",
-    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20.11.5",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.1"
+    "vitest": "^1.6.1"
   }
 }

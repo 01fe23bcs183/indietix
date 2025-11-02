@@ -53,6 +53,8 @@ export interface BookingAmounts {
   ticketPrice: number;
   seats: number;
   subtotal: number;
+  discountAmount?: number;
+  discountedSubtotal?: number;
   convenienceFee: number;
   platformFee: number;
   gst: number;
@@ -86,19 +88,26 @@ export function computeTotals(basePrice: number): PricingBreakdown {
 
 export function computeBookingAmounts(
   ticketPrice: number,
-  quantity: number
+  quantity: number,
+  discountAmount?: number
 ): BookingAmounts {
   const subtotal = ticketPrice * quantity;
+  const discountedSubtotal = discountAmount
+    ? subtotal - discountAmount
+    : subtotal;
+
   const feesPerTicket =
     FEES.paymentGateway + FEES.serverMaintenance + FEES.platformSupport;
   const totalFees = feesPerTicket * quantity;
   const gst = Math.round(totalFees * GST_RATE);
-  const finalAmount = subtotal + totalFees + gst;
+  const finalAmount = discountedSubtotal + totalFees + gst;
 
   return {
     ticketPrice,
     seats: quantity,
     subtotal,
+    discountAmount,
+    discountedSubtotal: discountAmount ? discountedSubtotal : undefined,
     convenienceFee: feesPerTicket * quantity,
     platformFee: totalFees,
     gst,
