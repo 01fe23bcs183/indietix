@@ -13,11 +13,7 @@ export default function PromosPage() {
     "all" | "active" | "inactive"
   >("all");
 
-  const { data, isLoading, error, refetch } = trpc.promos.list.useQuery({
-    page,
-    q: search || undefined,
-    active: activeFilter === "all" ? undefined : activeFilter === "active",
-  });
+  const { data, isLoading, error, refetch } = trpc.promos.list.useQuery();
 
   const disableMutation = trpc.promos.disable.useMutation({
     onSuccess: () => {
