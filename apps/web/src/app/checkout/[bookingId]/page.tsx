@@ -24,7 +24,6 @@ export default function CheckoutPage() {
     }
   );
 
-  const validatePromo = trpc.promos.validate.useMutation();
   const confirmPayment = trpc.booking.confirmPayment.useMutation();
 
   useEffect(() => {
@@ -40,19 +39,25 @@ export default function CheckoutPage() {
     setPromoSuccess(null);
 
     try {
-      const result = await validatePromo.mutateAsync({
-        code: promoCode.trim().toUpperCase(),
-        eventId: booking.event.id,
-        basePrice: booking.event.price,
-        quantity: booking.seats,
-      });
+      const response = await fetch(
+        `/api/trpc/promos.validate?input=${encodeURIComponent(
+          JSON.stringify({
+            code: promoCode.trim().toUpperCase(),
+            eventId: booking.event.id,
+            quantity: booking.seats,
+          })
+        )}`
+      );
 
-      if (result.valid) {
+      const data = await response.json();
+      const result = data.result?.data;
+
+      if (result?.valid) {
         setPromoSuccess(
           `Promo code applied! You'll save ${result.discountAmount ? formatINR(result.discountAmount) : "some amount"}`
         );
       } else {
-        setPromoError(result.reason || "Invalid promo code");
+        setPromoError(result?.reason || "Invalid promo code");
       }
     } catch (err) {
       setPromoError(
@@ -154,10 +159,10 @@ export default function CheckoutPage() {
                 />
                 <Button
                   onClick={handleValidatePromo}
-                  disabled={!promoCode.trim() || validatePromo.isPending}
+                  disabled={!promoCode.trim()}
                   variant="outline"
                 >
-                  {validatePromo.isPending ? "Checking..." : "Apply"}
+                  Apply
                 </Button>
               </div>
               {promoError && (
