@@ -11,6 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indietix_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,8 +67,11 @@ jobs:
       - name: Setup Prisma
         run: |
           cd packages/db
-          echo "DATABASE_URL=file:./dev.db" > .env
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/indietix_test" > .env
           pnpm prisma:gen
+          pnpm prisma db push --skip-generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/indietix_test
 
       - name: Lint
         run: pnpm -w lint
@@ -76,11 +94,18 @@ jobs:
       - name: Build admin app
         run: pnpm -w build --filter="@indietix/admin"
 
+      - name: Seed database for E2E tests
+        run: cd packages/db && pnpm exec tsx prisma/seed.ts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/indietix_test
+
       - name: Install Playwright browsers
         run: cd apps/web && pnpm exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
         run: cd apps/web && pnpm test:e2e
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/indietix_test
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

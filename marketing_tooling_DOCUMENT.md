@@ -121,3 +121,26 @@ Implementing first-class marketing tooling for IndieTix including:
 ## Testing Strategy
 
 (To be documented during test implementation)
+
+## CI Infrastructure Fixes (November 2, 2025)
+
+### Issue Identified
+Playwright E2E tests were failing with "element(s) not found" errors because:
+1. Tests expected seeded events in database (tests assert "should display seeded events")
+2. CI workflow was using SQLite (`file:./dev.db`) but Prisma schema requires PostgreSQL
+3. No database seeding step existed in CI workflow
+4. Tests were already failing on main branch (pre-existing issue)
+
+### Solution Implemented
+1. **Added Postgres Service to CI**: Added `postgres:15` service container with health checks
+2. **Updated Database URL**: Changed from SQLite to PostgreSQL connection string
+3. **Added Prisma Push Step**: Run `prisma db push` to create schema in test database
+4. **Added Seed Step**: Run `tsx prisma/seed.ts` to populate test data before Playwright tests
+5. **Added Seed Script**: Added `"seed": "tsx prisma/seed.ts"` to packages/db/package.json
+
+### Files Modified
+- `.github/workflows/ci.yml`: Added Postgres service, updated DATABASE_URL, added seed step
+- `packages/db/package.json`: Added seed script
+
+### Expected Outcome
+Playwright E2E tests should now pass with seeded data available for event listing, detail pages, and booking flows.
