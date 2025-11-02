@@ -37,6 +37,6 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20.11.5",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.1"
+    "vitest": "^4.0.6"
   }
 }
