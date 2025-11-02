@@ -11,7 +11,8 @@ export * from "./event_reminder_T24";
 export * from "./event_reminder_T2";
 export * from "./waitlist_offer_created";
 
-const smsTemplates = {
+// eslint-disable-next-line no-unused-vars
+const smsTemplates: Record<string, (data: TemplateData) => SmsTemplate> = {
   booking_confirmed: renderBookingConfirmed,
   booking_cancelled: renderBookingCancelled,
   event_reminder_T24: renderEventReminderT24,

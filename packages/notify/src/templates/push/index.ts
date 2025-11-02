@@ -9,7 +9,8 @@ export * from "./event_reminder_T24";
 export * from "./event_reminder_T2";
 export * from "./waitlist_offer_created";
 
-const pushTemplates = {
+// eslint-disable-next-line no-unused-vars
+const pushTemplates: Record<string, (data: TemplateData) => PushTemplate> = {
   booking_confirmed: renderBookingConfirmed,
   event_reminder_T24: renderEventReminderT24,
   event_reminder_T2: renderEventReminderT2,

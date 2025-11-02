@@ -17,7 +17,8 @@ export * from "./event_reminder_T2";
 export * from "./organizer_payout_completed";
 export * from "./admin_announcement";
 
-const emailTemplates = {
+// eslint-disable-next-line no-unused-vars
+const emailTemplates: Record<string, (data: TemplateData) => EmailTemplate> = {
   booking_confirmed: renderBookingConfirmed,
   booking_cancelled: renderBookingCancelled,
   refund_succeeded: renderRefundSucceeded,
