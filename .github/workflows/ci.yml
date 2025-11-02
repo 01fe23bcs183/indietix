@@ -95,7 +95,7 @@ jobs:
         run: pnpm -w build --filter="@indietix/admin"
 
       - name: Seed database for E2E tests
-        run: cd packages/db && pnpm dlx tsx prisma/seed.ts
+        run: pnpm --filter @indietix/db run seed
         env:
           DATABASE_URL: postgresql://postgres@localhost:5432/indietix_test
 
@@ -107,6 +107,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres@localhost:5432/indietix_test
           NEXTAUTH_SECRET: dev-test-secret
+          AUTH_SECRET: dev-test-secret
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

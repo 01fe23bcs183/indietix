@@ -24,7 +24,8 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.8.1"
+    "@prisma/client": "^5.8.1",
+    "@indietix/utils": "workspace:*"
   },
   "devDependencies": {
     "@indietix/config": "workspace:*",
