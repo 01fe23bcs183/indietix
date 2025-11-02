@@ -543,6 +543,36 @@ async function main() {
 
   console.log(`✅ Created ${totalViews} synthetic event views across 30 days`);
   console.log(`✅ Created ${totalBookings} synthetic bookings across 30 days`);
+
+  console.log("🔔 Creating default notification preferences for all users...");
+  const allUsers = [
+    admin,
+    organizer1User,
+    organizer2User,
+    customer1,
+    customer2,
+    customer3,
+  ];
+
+  for (const user of allUsers) {
+    await prisma.notificationPreference.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: {
+        userId: user.id,
+        emailEnabled: true,
+        smsEnabled: false,
+        pushEnabled: true,
+        transactional: true,
+        reminders: true,
+        marketing: false,
+      },
+    });
+  }
+  console.log(
+    `✅ Created notification preferences for ${allUsers.length} users`
+  );
+
   console.log("🎉 Database seeding completed successfully!");
 }
 

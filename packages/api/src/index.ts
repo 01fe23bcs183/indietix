@@ -15,6 +15,7 @@ import { adminEventsRouter } from "./routers/admin/events";
 import { adminTransactionsRouter } from "./routers/admin/transactions";
 import { adminSettingsRouter } from "./routers/admin/settings";
 import { adminDashboardRouter } from "./routers/admin/dashboard";
+import { notifyRouter } from "./routers/notify";
 
 export const appRouter = router({
   health: healthRouter,
@@ -24,6 +25,7 @@ export const appRouter = router({
   booking: bookingRouter,
   waitlist: waitlistRouter,
   payouts: payoutsRouter,
+  notify: notifyRouter,
   organizer: router({
     events: organizerEventsRouter,
     attendees: organizerAttendeesRouter,

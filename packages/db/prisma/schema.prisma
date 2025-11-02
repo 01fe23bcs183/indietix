@@ -77,21 +77,42 @@ enum PayoutStatus {
   CANCELLED
 }
 
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationCategory {
+  TRANSACTIONAL
+  REMINDERS
+  MARKETING
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  name          String
-  phone         String?
-  role          Role      @default(CUSTOMER)
-  banned        Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                      String    @id @default(cuid())
+  email                   String    @unique
+  passwordHash            String
+  name                    String
+  phone                   String?
+  role                    Role      @default(CUSTOMER)
+  banned                  Boolean   @default(false)
+  pushTokens              String[]  @default([])
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
   
-  sessions      Session[]
-  organizer     Organizer?
-  bookings      Booking[]
-  adminActions  AdminAction[]
+  sessions                Session[]
+  organizer               Organizer?
+  bookings                Booking[]
+  adminActions            AdminAction[]
+  notificationPreferences NotificationPreference?
+  notifications           Notification[]
 
   @@index([email])
   @@index([role])
@@ -371,4 +392,64 @@ model AdminAction {
   @@index([entityType, entityId])
   @@index([adminId])
   @@index([ts])
+}
+
+model NotificationPreference {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  
+  // Channel preferences
+  emailEnabled      Boolean  @default(true)
+  smsEnabled        Boolean  @default(false)
+  pushEnabled       Boolean  @default(true)
+  
+  // Category preferences
+  transactional     Boolean  @default(true)
+  reminders         Boolean  @default(true)
+  marketing         Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Notification {
+  id            String             @id @default(cuid())
+  userId        String?
+  type          String             // Template key: booking_confirmed, event_reminder_T24, etc.
+  channel       NotificationChannel
+  category      NotificationCategory
+  
+  // Recipient info (can override user's contact info)
+  to            String             // Email address, phone number, or push token
+  
+  // Content payload (JSON for template rendering)
+  payload       Json
+  
+  // Scheduling
+  scheduledAt   DateTime
+  sentAt        DateTime?
+  
+  // Status tracking
+  status        NotificationStatus @default(PENDING)
+  attempts      Int                @default(0)
+  lastAttemptAt DateTime?
+  errorMessage  String?
+  
+  // Provider response
+  providerMessageId String?
+  
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  
+  user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status, scheduledAt])
+  @@index([type])
+  @@index([channel])
+  @@index([scheduledAt])
 }
