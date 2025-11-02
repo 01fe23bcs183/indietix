@@ -193,11 +193,13 @@ export const bookingRouter = router({
 
       return {
         bookingId: booking.id,
+        eventId: booking.eventId,
         ticketNumber: booking.ticketNumber,
         status: booking.status,
         paymentStatus: booking.paymentStatus,
         holdExpiresAt: booking.holdExpiresAt,
         event: booking.event,
+        seats: booking.seats,
         finalAmount: booking.finalAmount,
       };
     }),

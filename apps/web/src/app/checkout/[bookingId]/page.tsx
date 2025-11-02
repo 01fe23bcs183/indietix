@@ -43,7 +43,7 @@ export default function CheckoutPage() {
         `/api/trpc/promos.validate?input=${encodeURIComponent(
           JSON.stringify({
             code: promoCode.trim().toUpperCase(),
-            eventId: booking.event.id,
+            eventId: booking.eventId,
             quantity: booking.seats,
           })
         )}`
