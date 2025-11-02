@@ -25,12 +25,12 @@ The total price for a ticket consists of three main components:
 
 Platform fees are divided into three transparent categories:
 
-| Fee Type | Amount | Purpose |
-|----------|--------|---------|
-| Payment gateway | ₹2 | Processing online payments securely |
-| Server maintenance | ₹2 | Hosting and infrastructure costs |
-| Platform support | ₹10 | Customer service and platform development |
-| **Total Fees** | **₹14** | |
+| Fee Type           | Amount  | Purpose                                   |
+| ------------------ | ------- | ----------------------------------------- |
+| Payment gateway    | ₹2      | Processing online payments securely       |
+| Server maintenance | ₹2      | Hosting and infrastructure costs          |
+| Platform support   | ₹10     | Customer service and platform development |
+| **Total Fees**     | **₹14** |                                           |
 
 ### GST Calculation
 
@@ -114,7 +114,8 @@ The pricing logic is implemented in the `computeTotals` function:
 ```typescript
 export function computeTotals(basePrice: number): PricingBreakdown {
   const subtotal = basePrice;
-  const fees = FEES.paymentGateway + FEES.serverMaintenance + FEES.platformSupport;
+  const fees =
+    FEES.paymentGateway + FEES.serverMaintenance + FEES.platformSupport;
   const gst = Math.round(fees * GST_RATE);
   const total = subtotal + fees + gst;
 
@@ -154,6 +155,7 @@ Pricing calculations are thoroughly tested in `packages/utils/src/__tests__/pric
 - Configuration value verification
 
 Run tests with:
+
 ```bash
 pnpm -w test
 ```
@@ -170,11 +172,13 @@ pnpm -w test
 ### Why Avoid "Convenience Fee"?
 
 The term "convenience fee" has negative connotations:
+
 - Often perceived as arbitrary or excessive
 - Doesn't explain what the fee covers
 - Creates customer frustration and distrust
 
 Instead, we use specific, descriptive labels:
+
 - "Payment gateway" clearly indicates payment processing costs
 - "Server maintenance" explains infrastructure expenses
 - "Platform support" covers customer service and development
@@ -182,6 +186,7 @@ Instead, we use specific, descriptive labels:
 ### Why Fixed Fees Instead of Percentage?
 
 For lower-priced tickets (₹199-₹999), fixed fees are more equitable:
+
 - Percentage-based fees would be too low to cover costs on cheap tickets
 - Percentage-based fees would be excessive on expensive tickets
 - Fixed fees provide predictable revenue for platform sustainability
@@ -199,6 +204,7 @@ For lower-priced tickets (₹199-₹999), fixed fees are more equitable:
 ### Monitoring
 
 Track these metrics to evaluate pricing effectiveness:
+
 - Booking conversion rate
 - Cart abandonment rate
 - Customer feedback on pricing transparency
@@ -207,6 +213,7 @@ Track these metrics to evaluate pricing effectiveness:
 ## Support
 
 For questions about pricing implementation or configuration:
+
 - Technical: Review `packages/utils/src/pricing.ts`
 - Business: Contact platform management
 - Customer-facing: See FAQ and help documentation

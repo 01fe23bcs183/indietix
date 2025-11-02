@@ -147,7 +147,6 @@ export default function PromosPage() {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }

@@ -36,6 +36,7 @@ The progress report is automatically updated when code is merged to main and inc
 ## Getting Started
 
 Coming soon - setup instructions will be added once the foundation is complete.
+
 # IndieTix
 
 All-in-one event booking platform for India (web + mobile + admin)
@@ -116,6 +117,7 @@ pnpm prepare
 #### Development (PostgreSQL via Supabase)
 
 1. Create a `.env` file in the root directory with your Supabase credentials:
+
 ```env
 DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.kzthzbncfftjggfvuage.supabase.co:5432/postgres"
 ```
@@ -123,21 +125,25 @@ DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.kzthzbncfftjggfvuage.supa
 2. Also create `packages/db/.env` with the same DATABASE_URL
 
 3. Generate Prisma client:
+
 ```bash
 pnpm db:gen
 ```
 
 4. Run migrations:
+
 ```bash
 pnpm db:dev
 ```
 
 5. Seed the database:
+
 ```bash
 pnpm db:seed
 ```
 
 This will create:
+
 - 1 ADMIN user (admin@indietix.com / password123)
 - 2 ORGANIZER users with organizer profiles
 - 8 events across Bengaluru, Mumbai, and Delhi
@@ -148,6 +154,7 @@ This will create:
 Tests automatically use SQLite to avoid requiring network access or Supabase credentials in CI.
 
 The test setup (`tests/prisma-test-setup.ts`) automatically:
+
 1. Sets `DATABASE_URL=file:./tmp/test.db`
 2. Runs `prisma db push` to create the schema
 3. Seeds a test user

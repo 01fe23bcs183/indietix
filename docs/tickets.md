@@ -11,6 +11,7 @@ The IndieTix ticket system provides secure QR code-based tickets for confirmed b
 The ticket system uses HMAC-SHA256 signatures to ensure ticket authenticity and prevent fraud.
 
 **Payload Structure:**
+
 ```typescript
 {
   bookingId: string;
@@ -21,11 +22,13 @@ The ticket system uses HMAC-SHA256 signatures to ensure ticket authenticity and 
 ```
 
 **Signature Generation:**
+
 ```
 signature = HMAC_SHA256(JSON.stringify(payload), TICKET_SECRET)
 ```
 
 **Storage:**
+
 - `Booking.qrCode`: Encoded JSON string containing `{ payload, signature }`
 - `Booking.ticketPayloadHash`: Hash of the payload for integrity verification
 - `Booking.attendedAt`: Timestamp when ticket was scanned (null if not attended)
@@ -33,6 +36,7 @@ signature = HMAC_SHA256(JSON.stringify(payload), TICKET_SECRET)
 ### Database Schema
 
 **Booking Model Extensions:**
+
 ```prisma
 model Booking {
   // ... existing fields
@@ -44,6 +48,7 @@ model Booking {
 ```
 
 **ScanLog Model:**
+
 ```prisma
 model ScanLog {
   id          String   @id @default(cuid())
@@ -53,7 +58,7 @@ model ScanLog {
   reason      String?  // Rejection reason
   deviceInfo  String?  // Scanner device information
   createdAt   DateTime @default(now())
-  
+
   booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId, createdAt])
@@ -68,9 +73,11 @@ model ScanLog {
 Returns ticket data for authorized users.
 
 **Authorization:**
+
 - User must be the booking owner OR have ADMIN role
 
 **Response:**
+
 ```json
 {
   "payload": {
@@ -92,6 +99,7 @@ Returns ticket data for authorized users.
 ```
 
 **Error Responses:**
+
 - 401: Unauthorized (no session)
 - 403: Forbidden (not booking owner)
 - 404: Booking not found
@@ -102,10 +110,12 @@ Returns ticket data for authorized users.
 Verifies and marks tickets as attended.
 
 **Authorization:**
+
 - User must have ORGANIZER or ADMIN role
 - Organizer must own the event (unless ADMIN)
 
 **Request Body:**
+
 ```json
 {
   "payload": {
@@ -120,6 +130,7 @@ Verifies and marks tickets as attended.
 ```
 
 **Success Response:**
+
 ```json
 {
   "ok": true,
@@ -132,6 +143,7 @@ Verifies and marks tickets as attended.
 ```
 
 **Error Response:**
+
 ```json
 {
   "ok": false,
@@ -141,6 +153,7 @@ Verifies and marks tickets as attended.
 ```
 
 **Validation Rules:**
+
 1. Signature must be valid (HMAC verification)
 2. Booking must exist
 3. Booking status must be CONFIRMED
@@ -157,6 +170,7 @@ All scan attempts are logged in the ScanLog table with status "OK" or "REJECTED"
 **Route:** `/bookings/[id]`
 
 **Features:**
+
 - Displays QR code for scanning at venue
 - Shows event details (title, date, venue, seats)
 - "Add to Calendar" button (Google Calendar integration)
@@ -164,6 +178,7 @@ All scan attempts are logged in the ScanLog table with status "OK" or "REJECTED"
 - "Works offline" banner when network is unavailable
 
 **Offline Behavior:**
+
 - On first load, ticket data is fetched from API and cached in localStorage
 - If network fails, cached data is used automatically
 - QR code renders from cached data without network access
@@ -173,12 +188,14 @@ All scan attempts are logged in the ScanLog table with status "OK" or "REJECTED"
 **Utility:** `apps/mobile/utils/TicketCache.ts`
 
 **Features:**
+
 - AsyncStorage-based persistence for offline access
 - Cached ticket includes payload, signature, and metadata
 - Multiple tickets can be cached simultaneously
 - Tickets persist across app restarts
 
 **API:**
+
 ```typescript
 // Cache a ticket
 await cacheTicket(bookingId, {
@@ -191,8 +208,8 @@ await cacheTicket(bookingId, {
     city: "...",
     ticketNumber: "...",
     seats: 2,
-    cachedAt: Date.now()
-  }
+    cachedAt: Date.now(),
+  },
 });
 
 // Retrieve cached ticket
@@ -212,6 +229,7 @@ const allTickets = await getAllCachedTickets();
 **Route:** `/scanner` (organizer dashboard)
 
 **Features:**
+
 - Camera-based QR code scanning (html5-qrcode library)
 - Real-time ticket verification via API
 - Success/fail feedback with visual, audio, and haptic cues
@@ -219,6 +237,7 @@ const allTickets = await getAllCachedTickets();
 - Device info tracking for audit logs
 
 **Scanner Flow:**
+
 1. Organizer clicks "Start Camera Scanner"
 2. Camera permission is requested
 3. QR code is detected and decoded
@@ -228,11 +247,13 @@ const allTickets = await getAllCachedTickets();
 7. Scan log is created for audit trail
 
 **Feedback Mechanisms:**
+
 - **Success:** Green screen, checkmark icon, high-pitched beep, double vibration
 - **Error:** Red screen, X icon, low-pitched buzz, single vibration
 - **Display:** Shows attendee name, email, seats, ticket number
 
 **Manual Search:**
+
 - Input field for booking ID or ticket number
 - Fetches ticket data from `/api/tickets/[bookingId]`
 - Processes as if scanned via camera
@@ -250,6 +271,7 @@ Once a ticket is scanned and marked as attended (`attendedAt` is set), subsequen
 ### Audit Logging
 
 Every scan attempt is logged in the `ScanLog` table with:
+
 - Booking ID
 - Organizer ID
 - Status (OK or REJECTED)
@@ -278,11 +300,13 @@ Organizers can only scan tickets for their own events (unless they have ADMIN ro
 ### Unit Tests
 
 **Signature Verification:**
+
 - Valid signature passes verification
 - Invalid signature fails verification
 - Tampered payload fails verification
 
 **Ticket Cache:**
+
 - Encode/decode roundtrip preserves data
 - Cached tickets can be retrieved
 - Multiple tickets can be cached
@@ -290,6 +314,7 @@ Organizers can only scan tickets for their own events (unless they have ADMIN ro
 ### Integration Tests
 
 **API Routes:**
+
 - `/api/tickets/[bookingId]` returns ticket for authorized user
 - `/api/tickets/[bookingId]` rejects unauthorized access
 - `/api/checkin/scan` accepts valid tickets
@@ -300,12 +325,14 @@ Organizers can only scan tickets for their own events (unless they have ADMIN ro
 ### E2E Tests (Playwright)
 
 **Web Ticket View:**
+
 - Confirmed booking displays QR code
 - Event details are shown correctly
 - "Add to Calendar" button works
 - Offline mode uses cached data
 
 **Organizer Scanner:**
+
 - Scanner page loads successfully
 - Manual search finds valid bookings
 - Success/error states display correctly
@@ -313,9 +340,11 @@ Organizers can only scan tickets for their own events (unless they have ADMIN ro
 ## Environment Variables
 
 **Required:**
+
 - `TICKET_SECRET`: Secret key for HMAC signing (must be consistent across all environments)
 
 **Example:**
+
 ```env
 TICKET_SECRET="indietix-ticket-hmac-secret-2024"
 ```

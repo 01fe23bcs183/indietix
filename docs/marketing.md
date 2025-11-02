@@ -18,7 +18,7 @@ Promo codes allow organizers and administrators to offer discounts to customers.
 #### Constraints
 
 - **Time-based**: `startAt` and `endAt` dates define validity period
-- **Usage limits**: 
+- **Usage limits**:
   - `usageLimit`: Total number of times code can be used across all users
   - `perUserLimit`: Maximum uses per individual user
 - **Minimum price**: `minPrice` sets minimum ticket price for code applicability
@@ -121,6 +121,7 @@ const pricing = await trpc.pricing.effectivePrice.query({
 #### UI Display
 
 When an active price phase is in effect:
+
 - Show strikethrough base price: ~~₹500~~
 - Display effective price prominently: **₹400**
 - Show countdown message: "Early bird ends in 2d 3h"
@@ -144,16 +145,24 @@ Segments use a JSON-based query language to define user groups:
 
 ```typescript
 // Users in Bengaluru
-{ city: "Bengaluru" }
+{
+  city: "Bengaluru";
+}
 
 // Users who attended comedy or music events
-{ categories: ["COMEDY", "MUSIC"] }
+{
+  categories: ["COMEDY", "MUSIC"];
+}
 
 // Users who attended events in the last 180 days
-{ attended_in_last_days: 180 }
+{
+  attended_in_last_days: 180;
+}
 
 // Users who booked events with price ≤ ₹600
-{ price_ceiling: 60000 }
+{
+  price_ceiling: 60000;
+}
 ```
 
 #### Campaign Flow
@@ -167,16 +176,25 @@ Segments use a JSON-based query language to define user groups:
 #### Tracking
 
 **Open Tracking**: Embed 1x1 transparent pixel in email:
+
 ```html
-<img src="https://indietix.com/api/trk/open?rid={recipientId}" width="1" height="1" />
+<img
+  src="https://indietix.com/api/trk/open?rid={recipientId}"
+  width="1"
+  height="1"
+/>
 ```
 
 **Click Tracking**: Wrap links with tracking redirect:
+
 ```html
-<a href="https://indietix.com/api/trk/c?rid={recipientId}&url={targetUrl}">Click here</a>
+<a href="https://indietix.com/api/trk/c?rid={recipientId}&url={targetUrl}"
+  >Click here</a
+>
 ```
 
 **UTM Parameters**: Add UTM tags to track conversions:
+
 ```
 ?utm_source=indietix&utm_medium=email&utm_campaign={campaignId}
 ```
@@ -233,6 +251,7 @@ const details = await trpc.campaigns.detail.query({ id: campaign.id });
 #### Promo Code Report
 
 Track promo code performance:
+
 - **Redemptions**: Total number of times code was used
 - **GMV Driven**: Gross merchandise value from bookings using the code
 - **Discount Amount**: Total discount given
@@ -243,6 +262,7 @@ Access via `promos.get` endpoint with booking count.
 #### Campaign Report
 
 Track campaign performance:
+
 - **Delivered**: Number of successfully sent messages
 - **Opens**: Number of recipients who opened the email
 - **Open Rate**: Percentage of delivered emails that were opened
@@ -255,6 +275,7 @@ Access via `campaigns.detail` endpoint.
 ## Database Schema
 
 ### PromoCode
+
 ```prisma
 model PromoCode {
   id                    String         @id @default(cuid())
@@ -278,6 +299,7 @@ model PromoCode {
 ```
 
 ### EventPricePhase
+
 ```prisma
 model EventPricePhase {
   id        String    @id @default(cuid())
@@ -294,6 +316,7 @@ model EventPricePhase {
 ```
 
 ### Campaign
+
 ```prisma
 model Campaign {
   id           String          @id @default(cuid())
@@ -311,6 +334,7 @@ model Campaign {
 ```
 
 ### Segment
+
 ```prisma
 model Segment {
   id        String   @id @default(cuid())
@@ -322,6 +346,7 @@ model Segment {
 ```
 
 ### CampaignRecipient
+
 ```prisma
 model CampaignRecipient {
   id         String                  @id @default(cuid())
@@ -340,6 +365,7 @@ model CampaignRecipient {
 ```
 
 ### Booking Extensions
+
 ```prisma
 model Booking {
   // ... existing fields

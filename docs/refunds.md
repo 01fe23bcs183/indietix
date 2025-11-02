@@ -25,6 +25,7 @@ Event organizers can customize the following fields:
 ### Example 1: ₹199 Ticket (1 seat)
 
 **Original Booking:**
+
 - Ticket Price: ₹199.00
 - Payment Gateway: ₹2.00
 - Server Maintenance: ₹2.00
@@ -33,12 +34,14 @@ Event organizers can customize the following fields:
 - **Total Paid**: ₹216.00
 
 **Refund (before deadline):**
+
 - Refundable: ₹199.00 - ₹0.50 = ₹198.50
 - Non-Refundable: ₹2.00 + ₹2.00 + ₹10.00 + ₹3.00 + ₹0.50 = ₹17.50
 
 ### Example 2: ₹500 Ticket (3 seats)
 
 **Original Booking:**
+
 - Ticket Price: ₹1,500.00 (₹500 × 3)
 - Payment Gateway: ₹6.00 (₹2 × 3)
 - Server Maintenance: ₹6.00 (₹2 × 3)
@@ -47,17 +50,20 @@ Event organizers can customize the following fields:
 - **Total Paid**: ₹1,550.00
 
 **Refund (before deadline):**
+
 - Refundable: ₹1,500.00 - ₹0.50 = ₹1,499.50
 - Non-Refundable: ₹6.00 + ₹6.00 + ₹30.00 + ₹8.00 + ₹0.50 = ₹50.50
 
 ### Example 3: ₹999 Ticket (1 seat, custom ₹100 cancellation fee)
 
 **Original Booking:**
+
 - Ticket Price: ₹999.00
 - Fees + GST: ₹17.00
 - **Total Paid**: ₹1,016.00
 
 **Refund (before deadline):**
+
 - Refundable: ₹999.00 - ₹1.00 = ₹998.00
 - Non-Refundable: ₹17.00 + ₹1.00 = ₹18.00
 
@@ -123,7 +129,7 @@ model Refund {
   processedAt       DateTime?
   failedAt          DateTime?
   failureReason     String?
-  
+
   booking           Booking      @relation(fields: [bookingId], references: [id])
   paymentEvents     PaymentEvent[]
 }
@@ -143,10 +149,11 @@ enum RefundStatus {
 ### Get Refund Preview
 
 ```typescript
-trpc.booking.getRefundPreview.useQuery({ bookingId: string })
+trpc.booking.getRefundPreview.useQuery({ bookingId: string });
 ```
 
 Returns:
+
 - `canCancel`: boolean
 - `reason`: string (if cannot cancel)
 - `refundableAmount`: number (in paise)
@@ -163,6 +170,7 @@ trpc.booking.requestCancellation.useMutation({
 ```
 
 Returns:
+
 - `success`: boolean
 - `refundId`: string
 - `refundAmount`: number (in paise)
@@ -216,6 +224,7 @@ async createRefund(params: {
 ```
 
 Calls Razorpay Refunds API:
+
 - `POST /payments/{paymentId}/refund`
 - Returns refund ID and status
 - Webhook events tracked in `PaymentEvent` table

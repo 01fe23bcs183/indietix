@@ -33,7 +33,7 @@ export default function NewCampaignPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.segmentId) {
-      alert("Please select a segment");
+      window.alert("Please select a segment");
       return;
     }
     await createMutation.mutateAsync({

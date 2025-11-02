@@ -126,7 +126,9 @@ export default function CampaignDetailPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Recipients</span>
-              <span className="text-2xl font-bold">{stats.totalRecipients}</span>
+              <span className="text-2xl font-bold">
+                {stats.totalRecipients}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Sent</span>

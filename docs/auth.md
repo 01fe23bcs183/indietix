@@ -66,33 +66,36 @@ Used in tRPC context and middleware
 
 ### Access Control Matrix
 
-| Route/Resource | CUSTOMER | ORGANIZER | ADMIN |
-|---------------|----------|-----------|-------|
-| `/` (Public pages) | ✅ | ✅ | ✅ |
-| `/auth/*` | ✅ | ✅ | ✅ |
-| `/events` (Browse) | ✅ | ✅ | ✅ |
-| `/bookings` (Own) | ✅ | ✅ | ✅ |
-| `/organizer/*` | ❌ | ✅ | ✅ |
-| `/organizer/events` (Create/Edit) | ❌ | ✅ | ✅ |
-| `/organizer/analytics` | ❌ | ✅ | ✅ |
-| `/organizer/payouts` | ❌ | ✅ | ✅ |
-| `/admin/*` | ❌ | ❌ | ✅ |
-| `/admin/users` | ❌ | ❌ | ✅ |
-| `/admin/moderation` | ❌ | ❌ | ✅ |
+| Route/Resource                    | CUSTOMER | ORGANIZER | ADMIN |
+| --------------------------------- | -------- | --------- | ----- |
+| `/` (Public pages)                | ✅       | ✅        | ✅    |
+| `/auth/*`                         | ✅       | ✅        | ✅    |
+| `/events` (Browse)                | ✅       | ✅        | ✅    |
+| `/bookings` (Own)                 | ✅       | ✅        | ✅    |
+| `/organizer/*`                    | ❌       | ✅        | ✅    |
+| `/organizer/events` (Create/Edit) | ❌       | ✅        | ✅    |
+| `/organizer/analytics`            | ❌       | ✅        | ✅    |
+| `/organizer/payouts`              | ❌       | ✅        | ✅    |
+| `/admin/*`                        | ❌       | ❌        | ✅    |
+| `/admin/users`                    | ❌       | ❌        | ✅    |
+| `/admin/moderation`               | ❌       | ❌        | ✅    |
 
 ### Middleware Implementation
 
 #### Web App (`apps/web/middleware.ts`)
+
 - Protects `/organizer/*` routes: Requires ORGANIZER or ADMIN role
 - Protects `/admin/*` routes: Requires ADMIN role
 - Redirects unauthorized users to `/auth/signin` with HTTP 302
 
 #### Organizer App (`apps/organizer/middleware.ts`)
+
 - Protects all routes except auth and static files
 - Requires ORGANIZER or ADMIN role
 - Redirects unauthorized users to `/auth/signin` with HTTP 302
 
 #### Admin App (`apps/admin/middleware.ts`)
+
 - Protects all routes except auth and static files
 - Requires ADMIN role only
 - Redirects unauthorized users to `/auth/signin` with HTTP 302
@@ -102,16 +105,18 @@ Used in tRPC context and middleware
 ### Public Procedures
 
 #### `auth.signup`
+
 - **Input**: `{ name, email, phone?, password }`
 - **Output**: `{ userId: string }`
 - **Validation**: Zod schema with email format and password min length (6)
-- **Logic**: 
+- **Logic**:
   - Check for existing user
   - Hash password with bcrypt (10 rounds)
   - Create user with role=CUSTOMER
   - Return userId
 
 #### `auth.signin`
+
 - **Input**: `{ email, password }`
 - **Output**: `{ ok: true }`
 - **Validation**: Zod schema with email format and password min length (6)
@@ -120,6 +125,7 @@ Used in tRPC context and middleware
   - Return success or throw UNAUTHORIZED error
 
 #### `auth.me`
+
 - **Input**: None
 - **Output**: `{ id, email, role }`
 - **Authorization**: Requires authenticated session
@@ -129,6 +135,7 @@ Used in tRPC context and middleware
   - Return user data
 
 #### `events.list`
+
 - **Input**: `{ city?, category?, priceLte?, dateFrom?, dateTo?, orderBy? }`
 - **Output**: Array of events with organizer businessName
 - **Filters**:
@@ -143,6 +150,7 @@ Used in tRPC context and middleware
   - Includes organizer businessName
 
 #### `events.getBySlug`
+
 - **Input**: `{ slug: string }`
 - **Output**: Event with full details and organizer info
 - **Logic**:
@@ -153,18 +161,21 @@ Used in tRPC context and middleware
 ## Security Features
 
 ### Password Security
+
 - **Hashing Algorithm**: bcrypt
 - **Salt Rounds**: 10
 - **Minimum Length**: 6 characters
 - **Storage**: Only hashed passwords stored in database
 
 ### Session Security
+
 - **Strategy**: JWT (JSON Web Tokens)
 - **Token Contents**: User ID, email, role
 - **Storage**: HTTP-only cookies (handled by NextAuth)
 - **Expiration**: Configured by NextAuth defaults
 
 ### Input Validation
+
 - **Library**: Zod
 - **Validation Points**:
   - All tRPC procedure inputs
@@ -175,16 +186,19 @@ Used in tRPC context and middleware
 ## Testing
 
 ### Unit Tests
+
 - **bcrypt hash/verify**: Tests password hashing and verification
 - **RBAC helper**: Tests role-based access control logic for all routes and roles
 
 ### E2E Tests (Playwright)
+
 - **Full auth flow**: Signup → Signin → Verify user in header
 - **Invalid credentials**: Test error handling
 - **Email validation**: Test email format validation
 - **Password validation**: Test password length validation
 
 ### Test Database
+
 - **Environment**: SQLite (`file:./tmp/test.db`)
 - **Setup**: `tests/prisma-test-setup.ts`
 - **Process**:
@@ -197,6 +211,7 @@ Used in tRPC context and middleware
 ## Environment Variables
 
 ### Development (PostgreSQL)
+
 ```env
 DATABASE_URL="postgresql://postgres:[PASSWORD]@db.kzthzbncfftjggfvuage.supabase.co:5432/postgres"
 NEXTAUTH_URL="http://localhost:3000"
@@ -204,6 +219,7 @@ NEXTAUTH_SECRET="[GENERATE_RANDOM_SECRET]"
 ```
 
 ### Testing (SQLite)
+
 ```env
 DATABASE_URL="file:./tmp/test.db"
 ```
@@ -211,18 +227,21 @@ DATABASE_URL="file:./tmp/test.db"
 ## API Routes
 
 ### NextAuth Routes
+
 - `GET/POST /api/auth/[...nextauth]`: NextAuth handler for all auth operations
 - `GET /api/auth/signin`: Sign in page
 - `GET /api/auth/signout`: Sign out handler
 - `GET /api/auth/session`: Get current session
 
 ### Custom Auth Routes
+
 - `GET /auth/signin`: Custom sign in page
 - `GET /auth/signup`: Custom sign up page
 
 ## Database Schema
 
 ### User Model
+
 ```prisma
 model User {
   id            String    @id @default(cuid())
@@ -233,7 +252,7 @@ model User {
   role          Role      @default(CUSTOMER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   sessions      Session[]
   organizer     Organizer?
   bookings      Booking[]
@@ -244,6 +263,7 @@ model User {
 ```
 
 ### Session Model
+
 ```prisma
 model Session {
   id        String   @id @default(cuid())
@@ -251,7 +271,7 @@ model Session {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -260,6 +280,7 @@ model Session {
 ```
 
 ### Role Enum
+
 ```prisma
 enum Role {
   CUSTOMER

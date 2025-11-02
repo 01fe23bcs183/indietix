@@ -11,6 +11,7 @@ Net Payable = GMV (Confirmed) - Refunds (Confirmed) - Platform Fees Kept
 ```
 
 Where:
+
 - **GMV (Gross Merchandise Value)**: Total ticket revenue from CONFIRMED bookings within the period
 - **Refunds**: Total amount refunded to customers for CANCELLED bookings within the period
 - **Platform Fees Kept**: Sum of convenience fees and platform fees collected (₹14 per ticket)
@@ -58,6 +59,7 @@ Organizers can request payouts through the `/payouts` page:
 4. Payout created with PENDING status
 
 **Validation Rules**:
+
 - Period start must be before period end
 - No existing PENDING/APPROVED/PROCESSING payout for same period
 - Net payable amount must be positive
@@ -108,10 +110,12 @@ The system supports multiple payout providers:
 #### Fake Provider (Testing/CI)
 
 Used automatically when:
+
 - `NODE_ENV=test`
 - Razorpay credentials not configured
 
 Returns mock response:
+
 ```json
 {
   "payoutId": "px_fake_1234567890abcdef",
@@ -130,11 +134,12 @@ await paymentProvider.createPayout({
   account: "1234567890",
   ifsc: "HDFC0001234",
   amountPaise: 50000,
-  mode: "NEFT" // or "IMPS"
+  mode: "NEFT", // or "IMPS"
 });
 ```
 
 **Configuration**:
+
 ```bash
 RAZORPAY_KEY_ID=rzp_live_xxx
 RAZORPAY_KEY_SECRET=xxx
@@ -152,6 +157,7 @@ RAZORPAY_KEY_SECRET=xxx
 ### Idempotency
 
 Duplicate webhook/processing prevented via `PaymentEvent` table:
+
 - Unique constraint on `eventId` (provider's payout ID)
 - Prevents double-processing of same payout
 
@@ -167,6 +173,7 @@ Sample Organizer,XXXX1234,N/A,500.00,px_fake_123
 ```
 
 **Column Definitions**:
+
 - `beneficiary_name`: Organizer business name
 - `account`: Masked account number (if available)
 - `ifsc`: Bank IFSC code (to be filled manually)
@@ -188,32 +195,32 @@ Sample Organizer,XXXX1234,N/A,500.00,px_fake_123
 model Payout {
   id                String       @id @default(cuid())
   organizerId       String
-  
+
   periodStart       DateTime
   periodEnd         DateTime
-  
+
   amount            Int          // in paise
   currency          String       @default("INR")
-  
+
   status            PayoutStatus @default(PENDING)
-  
+
   // Audit fields
   beneficiaryName   String
   accountMasked     String?
   breakdown         Json         // { gmv, refunds, fees, netPayable, eventCount, bookingCount }
-  
+
   // Provider fields
   provider          String?      // "FAKE" | "RAZORPAYX"
   providerPayoutId  String?
   providerResponse  Json?
-  
+
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   approvedAt        DateTime?
   approvedBy        String?
   processedAt       DateTime?
   completedAt       DateTime?
-  
+
   organizer         Organizer    @relation(fields: [organizerId])
   paymentEvents     PaymentEvent[]
 }
@@ -232,13 +239,13 @@ enum PayoutStatus {
 
 ```typescript
 interface PayoutBreakdown {
-  gmv: number;           // Total ticket revenue
-  refunds: number;       // Total refunds issued
-  feesKept: number;      // Platform fees retained
-  netPayable: number;    // Final amount to pay
-  eventCount: number;    // Number of events
-  bookingCount: number;  // Number of bookings
-  refundCount: number;   // Number of refunds
+  gmv: number; // Total ticket revenue
+  refunds: number; // Total refunds issued
+  feesKept: number; // Platform fees retained
+  netPayable: number; // Final amount to pay
+  eventCount: number; // Number of events
+  bookingCount: number; // Number of bookings
+  refundCount: number; // Number of refunds
 }
 ```
 
@@ -251,8 +258,8 @@ interface PayoutBreakdown {
 ```typescript
 trpc.payouts.organizer.create.useMutation({
   periodStart: Date,
-  periodEnd: Date
-})
+  periodEnd: Date,
+});
 ```
 
 **Returns**: `{ payout, breakdown }`
@@ -272,8 +279,8 @@ trpc.payouts.organizer.list.useQuery({
 
 ```typescript
 trpc.payouts.organizer.getById.useQuery({
-  payoutId: string
-})
+  payoutId: string,
+});
 ```
 
 **Returns**: Payout with organizer details
@@ -295,8 +302,8 @@ trpc.payouts.admin.list.useQuery({
 
 ```typescript
 trpc.payouts.admin.approve.useMutation({
-  payoutId: string
-})
+  payoutId: string,
+});
 ```
 
 **Returns**: Updated payout
@@ -316,8 +323,8 @@ trpc.payouts.admin.reject.useMutation({
 
 ```typescript
 trpc.payouts.admin.process.useMutation({
-  payoutId: string
-})
+  payoutId: string,
+});
 ```
 
 **Returns**: Updated payout with provider response
@@ -326,8 +333,8 @@ trpc.payouts.admin.process.useMutation({
 
 ```typescript
 trpc.payouts.admin.exportCsv.useQuery({
-  payoutId: string
-})
+  payoutId: string,
+});
 ```
 
 **Returns**: `{ csv: string, filename: string }`
@@ -343,6 +350,7 @@ pnpm --filter @indietix/utils test
 ```
 
 **Test Coverage**:
+
 - Payout calculation with confirmed bookings
 - Refund handling
 - Multiple refunds per booking
@@ -361,6 +369,7 @@ pnpm test:e2e
 ```
 
 **Scenarios**:
+
 - Display payouts page with tabs
 - Open request payout dialog
 - Switch between pending/completed tabs
@@ -376,6 +385,7 @@ pnpm test:e2e
 ```
 
 **Scenarios**:
+
 - Display payouts management page
 - View payout breakdown details
 - Approve/reject actions
@@ -408,7 +418,8 @@ pnpm test:e2e
 
 **Cause**: GMV - Refunds - Fees ≤ 0
 
-**Solution**: 
+**Solution**:
+
 - Check if bookings exist in period
 - Verify bookings are CONFIRMED
 - Ensure refunds haven't exceeded revenue
@@ -418,6 +429,7 @@ pnpm test:e2e
 **Cause**: Duplicate payout request for same period
 
 **Solution**:
+
 - Check existing payouts in list
 - Use different period dates
 - Cancel existing payout if needed
@@ -427,6 +439,7 @@ pnpm test:e2e
 **Cause**: Authentication failure or missing env vars
 
 **Solution**:
+
 - Verify `CRON_TOKEN` is set correctly
 - Check GitHub Actions secrets
 - Review cron job logs
@@ -438,7 +451,7 @@ pnpm test:e2e
 SELECT * FROM "Payout" WHERE status = 'PENDING';
 
 -- View payout breakdown
-SELECT 
+SELECT
   id,
   "organizerId",
   amount,
@@ -465,6 +478,7 @@ SELECT * FROM "PaymentEvent" WHERE "payoutId" = 'payout_id';
 ## Support
 
 For issues or questions:
+
 - Check logs in `PaymentEvent` table
 - Review payout `breakdown` JSON for calculation details
 - Contact platform admin for manual intervention

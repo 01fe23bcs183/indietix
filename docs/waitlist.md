@@ -9,10 +9,12 @@ IndieTix implements a FIFO (First-In-First-Out) waitlist system that automatical
 ### 1. Joining the Waitlist
 
 Customers can join the waitlist when:
+
 - Event status is `PUBLISHED` or `SOLD_OUT`
 - Event has no available seats (or organizer wants to manage waitlist)
 
 Required information:
+
 - Email address (required)
 - Phone number (optional)
 - User ID (optional, if logged in)
@@ -20,6 +22,7 @@ Required information:
 ### 2. Seat Release
 
 Seats are freed when:
+
 - Customer cancels a confirmed booking (with refund)
 - Pending booking expires (hold timeout)
 - Organizer manually releases seats
@@ -27,6 +30,7 @@ Seats are freed when:
 ### 3. Offer Creation
 
 When seats are freed:
+
 1. System queries `ACTIVE` waitlist entries ordered by `createdAt` (FIFO)
 2. Creates `WaitlistOffer` records for the first N entries
 3. Updates entry status to `INVITED`
@@ -36,6 +40,7 @@ When seats are freed:
 ### 4. Offer Claim
 
 Customer receives email with unique offer link:
+
 - Link format: `/offers/{offerId}`
 - Page shows countdown timer
 - Customer clicks "Claim Seat" button
@@ -47,6 +52,7 @@ Customer receives email with unique offer link:
 ### 5. Offer Expiry
 
 If customer doesn't claim within time limit:
+
 - Cron job runs every 5 minutes
 - Finds offers with `status=PENDING` and `expiresAt < now`
 - Updates offer status → `EXPIRED`
@@ -69,7 +75,7 @@ model WaitlistEntry {
   invitedAt  DateTime?      // When offer was created
   claimedAt  DateTime?      // When offer was claimed
   expiredAt  DateTime?      // When entry expired (if applicable)
-  
+
   event      Event          @relation(fields: [eventId], references: [id])
   offers     WaitlistOffer[]
 }
@@ -95,7 +101,7 @@ model WaitlistOffer {
   createdAt  DateTime            @default(now())
   claimedAt  DateTime?
   expiredAt  DateTime?
-  
+
   entry      WaitlistEntry       @relation(fields: [entryId], references: [id])
 }
 
@@ -121,6 +127,7 @@ trpc.waitlist.join.useMutation({
 ```
 
 Returns:
+
 - `success`: boolean
 - `entryId`: string
 - `message`: string
@@ -130,11 +137,12 @@ Returns:
 ```typescript
 trpc.waitlist.status.useQuery({
   eventId: string,
-  email: string
-})
+  email: string,
+});
 ```
 
 Returns:
+
 - `isOnWaitlist`: boolean
 - `status`: WaitlistStatus | null
 - `offer`: { id, quantity, expiresAt, status } | null
@@ -143,11 +151,12 @@ Returns:
 
 ```typescript
 trpc.waitlist.getOffer.useQuery({
-  offerId: string
-})
+  offerId: string,
+});
 ```
 
 Returns:
+
 - `id`: string
 - `quantity`: number
 - `expiresAt`: Date
@@ -158,11 +167,12 @@ Returns:
 
 ```typescript
 trpc.waitlist.claim.useMutation({
-  offerId: string
-})
+  offerId: string,
+});
 ```
 
 Returns:
+
 - `success`: boolean
 - `eventId`: string
 - `quantity`: number
@@ -192,7 +202,7 @@ Returns:
     Entry (status: CLAIMED)
     ↓
     Redirect to Event Page
-    
+
 9b. Customer Doesn't Claim → Cron Job Expires Offer
     ↓
     Offer (status: EXPIRED)
@@ -213,6 +223,7 @@ Returns:
 **Authentication**: Bearer token via `CRON_TOKEN` secret
 
 **Logic**:
+
 1. Find all offers with `status=PENDING` and `expiresAt < now`
 2. For each expired offer:
    - Update offer: `status=EXPIRED`, `expiredAt=now`
@@ -237,7 +248,7 @@ Located in `.github/workflows/cron-waitlist.yml`:
 
 ```yaml
 schedule:
-  - cron: "*/5 * * * *"  # Every 5 minutes
+  - cron: "*/5 * * * *" # Every 5 minutes
 ```
 
 ### Environment Variables
@@ -269,6 +280,7 @@ Located at `/offers/[offerId]`:
 - Expiry warning
 
 Key features:
+
 - Real-time countdown
 - Auto-disable on expiry
 - Redirect to event page on claim
@@ -281,6 +293,7 @@ When an offer is created, send email to customer:
 **Subject**: "Seat Available: {Event Title}"
 
 **Body**:
+
 ```
 Good news! A seat has become available for {Event Title}.
 
