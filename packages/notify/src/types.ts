@@ -1,27 +1,29 @@
+/* eslint-disable no-unused-vars */
 export interface EmailProvider {
   kind: "resend" | "fake-email";
-  sendEmail(params: {
+  sendEmail: (params: {
     to: string;
     subject: string;
     html: string;
     text: string;
-  }): Promise<EmailResult>;
+  }) => Promise<EmailResult>;
 }
 
 export interface SmsProvider {
   kind: "twilio" | "fake-sms";
-  sendSms(params: { to: string; body: string }): Promise<SmsResult>;
+  sendSms: (params: { to: string; body: string }) => Promise<SmsResult>;
 }
 
 export interface PushProvider {
   kind: "expo" | "fake-push";
-  sendPush(params: {
+  sendPush: (params: {
     toToken: string;
     title: string;
     body: string;
     data?: Record<string, unknown>;
-  }): Promise<PushResult>;
+  }) => Promise<PushResult>;
 }
+/* eslint-enable no-unused-vars */
 
 export interface EmailResult {
   messageId: string;

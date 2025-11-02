@@ -5,7 +5,8 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@indietix/ui";
 
 export default function NotificationsPage() {
-  const { data: preferences, isLoading } = trpc.notify.getPreferences.useQuery();
+  const { data: preferences, isLoading } =
+    trpc.notify.getPreferences.useQuery();
   const updatePreferences = trpc.notify.updatePreferences.useMutation();
 
   const [formData, setFormData] = useState({
@@ -42,9 +43,9 @@ export default function NotificationsPage() {
 
     try {
       await updatePreferences.mutateAsync(formData);
-      alert("Notification preferences updated successfully!");
-    } catch (error) {
-      alert("Failed to update preferences. Please try again.");
+      window.alert("Notification preferences updated successfully!");
+    } catch {
+      window.alert("Failed to update preferences. Please try again.");
     }
   };
 

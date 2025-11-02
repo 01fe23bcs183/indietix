@@ -76,7 +76,9 @@ const SAMPLE_PAYLOADS: Record<string, Record<string, unknown>> = {
 
 export default function NotificationPreviewPage() {
   const [selectedType, setSelectedType] = useState(TEMPLATE_TYPES[0]!);
-  const [selectedChannel, setSelectedChannel] = useState<"EMAIL" | "SMS" | "PUSH">("EMAIL");
+  const [selectedChannel, setSelectedChannel] = useState<
+    "EMAIL" | "SMS" | "PUSH"
+  >("EMAIL");
   const [payloadJson, setPayloadJson] = useState(
     JSON.stringify(SAMPLE_PAYLOADS[TEMPLATE_TYPES[0]!], null, 2)
   );
@@ -101,15 +103,15 @@ export default function NotificationPreviewPage() {
         payload,
       });
       setPreview(result as typeof preview);
-    } catch (error) {
-      alert("Failed to preview notification. Check your JSON payload.");
+    } catch {
+      window.alert("Failed to preview notification. Check your JSON payload.");
     }
   };
 
   const handleSendTest = async () => {
     try {
       const payload = JSON.parse(payloadJson);
-      const testEmail = prompt("Enter your email address for test:");
+      const testEmail = window.prompt("Enter your email address for test:");
       if (!testEmail) return;
 
       await sendMutation.mutateAsync({
@@ -120,9 +122,9 @@ export default function NotificationPreviewPage() {
         payload,
       });
 
-      alert("Test notification sent! Check your email.");
-    } catch (error) {
-      alert("Failed to send test notification.");
+      window.alert("Test notification sent! Check your email.");
+    } catch {
+      window.alert("Failed to send test notification.");
     }
   };
 
@@ -140,7 +142,9 @@ export default function NotificationPreviewPage() {
         {/* Left Panel: Configuration */}
         <div className="space-y-4">
           <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4">Template Configuration</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Template Configuration
+            </h2>
 
             <div className="space-y-4">
               <div>
@@ -161,11 +165,15 @@ export default function NotificationPreviewPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Channel</label>
+                <label className="block text-sm font-medium mb-2">
+                  Channel
+                </label>
                 <select
                   value={selectedChannel}
                   onChange={(e) =>
-                    setSelectedChannel(e.target.value as "EMAIL" | "SMS" | "PUSH")
+                    setSelectedChannel(
+                      e.target.value as "EMAIL" | "SMS" | "PUSH"
+                    )
                   }
                   className="w-full border rounded px-3 py-2"
                 >
@@ -221,7 +229,9 @@ export default function NotificationPreviewPage() {
           {preview && selectedChannel === "EMAIL" && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Subject</label>
+                <label className="block text-sm font-medium mb-2">
+                  Subject
+                </label>
                 <div className="border rounded px-3 py-2 bg-gray-50">
                   {preview.subject}
                 </div>

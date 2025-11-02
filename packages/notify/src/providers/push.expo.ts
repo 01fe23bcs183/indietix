@@ -2,28 +2,28 @@ import type { PushProvider, PushResult } from "../types";
 
 export class ExpoPushProvider implements PushProvider {
   kind: "expo" = "expo";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private expo: any;
 
   constructor() {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { Expo } = require("expo-server-sdk");
       this.expo = new Expo();
-    } catch (error) {
+    } catch {
       throw new Error(
         "expo-server-sdk package not installed. Install with: pnpm add expo-server-sdk"
       );
     }
   }
 
-  async sendPush(params: {
+  async sendPush(pushParams: {
     toToken: string;
     title: string;
     body: string;
     data?: Record<string, unknown>;
   }): Promise<PushResult> {
     try {
-      if (!this.expo.isExpoPushToken(params.toToken)) {
+      if (!this.expo.isExpoPushToken(pushParams.toToken)) {
         return {
           messageId: "error",
           status: "failed",
@@ -33,11 +33,11 @@ export class ExpoPushProvider implements PushProvider {
 
       const messages = [
         {
-          to: params.toToken,
+          to: pushParams.toToken,
           sound: "default",
-          title: params.title,
-          body: params.body,
-          data: params.data || {},
+          title: pushParams.title,
+          body: pushParams.body,
+          data: pushParams.data || {},
         },
       ];
 

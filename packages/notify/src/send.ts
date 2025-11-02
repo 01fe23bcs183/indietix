@@ -1,17 +1,9 @@
 import { prisma as db } from "@indietix/db";
-import {
-  getEmailProvider,
-  getSmsProvider,
-  getPushProvider,
-} from "./providers";
+import { getEmailProvider, getSmsProvider, getPushProvider } from "./providers";
 import { renderEmailTemplate } from "./templates/email";
 import { renderSmsTemplate } from "./templates/sms";
 import { renderPushTemplate } from "./templates/push";
-import type {
-  SendNotificationParams,
-  NotificationChannel,
-  NotificationCategory,
-} from "./types";
+import type { SendNotificationParams } from "./types";
 
 export async function sendNotification(
   params: SendNotificationParams
@@ -58,6 +50,7 @@ export async function sendNotification(
         channel,
         category,
         to,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         payload: payload as any,
         scheduledAt,
         status: "PENDING",
@@ -112,6 +105,7 @@ export async function sendNotification(
         channel,
         category,
         to,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         payload: payload as any,
         scheduledAt: new Date(),
         sentAt: new Date(),

@@ -1,3 +1,0 @@
-{
-  "extends": ["@indietix/config/.eslintrc.js"]
-}

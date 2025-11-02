@@ -545,8 +545,15 @@ async function main() {
   console.log(`✅ Created ${totalBookings} synthetic bookings across 30 days`);
 
   console.log("🔔 Creating default notification preferences for all users...");
-  const allUsers = [admin, organizer1User, organizer2User, customer1, customer2, customer3];
-  
+  const allUsers = [
+    admin,
+    organizer1User,
+    organizer2User,
+    customer1,
+    customer2,
+    customer3,
+  ];
+
   for (const user of allUsers) {
     await prisma.notificationPreference.upsert({
       where: { userId: user.id },
@@ -562,7 +569,9 @@ async function main() {
       },
     });
   }
-  console.log(`✅ Created notification preferences for ${allUsers.length} users`);
+  console.log(
+    `✅ Created notification preferences for ${allUsers.length} users`
+  );
 
   console.log("🎉 Database seeding completed successfully!");
 }

@@ -17,10 +17,7 @@ export * from "./event_reminder_T2";
 export * from "./organizer_payout_completed";
 export * from "./admin_announcement";
 
-const emailTemplates: Record<
-  string,
-  (data: TemplateData) => EmailTemplate
-> = {
+const emailTemplates = {
   booking_confirmed: renderBookingConfirmed,
   booking_cancelled: renderBookingCancelled,
   refund_succeeded: renderRefundSucceeded,
