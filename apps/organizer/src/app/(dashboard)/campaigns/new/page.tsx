@@ -32,9 +32,15 @@ export default function NewCampaignPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.segmentId) {
+      alert("Please select a segment");
+      return;
+    }
     await createMutation.mutateAsync({
-      ...formData,
+      name: formData.name,
       channel: formData.channel.toUpperCase() as "EMAIL" | "SMS",
+      templateKey: formData.templateKey,
+      segmentId: formData.segmentId,
       scheduledAt: formData.scheduledAt
         ? new Date(formData.scheduledAt)
         : undefined,
