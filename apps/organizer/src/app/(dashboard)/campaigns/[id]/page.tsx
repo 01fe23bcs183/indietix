@@ -37,7 +37,7 @@ export default function CampaignDetailPage() {
     return <div className="p-8">Campaign not found</div>;
   }
 
-  const stats = campaign.stats || {
+  const stats = campaign.metrics || {
     total: 0,
     sent: 0,
     opened: 0,
