@@ -27,13 +27,82 @@ Implementing first-class marketing tooling for IndieTix including:
 ## Architecture Decisions
 
 ### Database Schema
-(To be documented as implementation progresses)
+
+**New Models to Add:**
+
+1. **PromoCode**
+   - `id`, `code`, `type` (PERCENT|FLAT), `value`, `startAt?`, `endAt?`
+   - `usageLimit?`, `perUserLimit?`, `minPrice?`
+   - `organizerId?` (null = admin-scoped)
+   - `applicableEvents String[]?`, `applicableCategories String[]?`, `applicableCities String[]?`
+   - `active Boolean` (admin override)
+   - Timestamps: `createdAt`, `updatedAt`
+
+2. **EventPricePhase**
+   - `id`, `eventId`, `name`, `startsAt?`, `endsAt?`, `maxSeats?`, `price`
+   - Relation: Event hasMany EventPricePhase
+
+3. **Campaign**
+   - `id`, `name`, `channel` (EMAIL|SMS), `status` (DRAFT|SCHEDULED|SENDING|SENT|FAILED)
+   - `templateKey`, `scheduledAt?`, `createdBy` (userId)
+   - `segmentId?` (optional, for targeting)
+   - Timestamps: `createdAt`, `updatedAt`
+
+4. **Segment**
+   - `id`, `name`, `query Json` (DSL for filtering users)
+   - `createdBy` (userId)
+   - Timestamps: `createdAt`, `updatedAt`
+
+5. **CampaignRecipient**
+   - `id`, `campaignId`, `userId?`, `email`, `phone?`
+   - `status` (PENDING|SENT|OPENED|CLICKED|BOUNCED)
+   - `openedAt?`, `clickedAt?`
+   - Timestamps: `createdAt`, `updatedAt`
+
+**Booking Model Extensions:**
+- Add `promoCodeId?` (optional relation to PromoCode)
+- Add `campaignId?` (optional, for attribution via UTM)
+- Add `discountAmount?` (amount saved via promo)
 
 ### API Design
-(To be documented as implementation progresses)
+
+**New Routers:**
+
+1. **promosRouter** (organizer + admin)
+   - `create`, `update`, `disable`, `list`, `get`
+   - `validate({ code, eventId, qty })` - public endpoint for checkout
+
+2. **pricingRouter** (public)
+   - `effectivePrice({ eventId, now })` - returns active phase price or base price
+
+3. **campaignsRouter** (organizer + admin)
+   - `create`, `update`, `schedule`, `cancel`, `list`, `detail(id)`
+   - `preview({ segmentId })` - preview recipient count
+
+4. **segmentsRouter** (organizer + admin)
+   - `create`, `update`, `list`, `get`, `testQuery({ query })`
+
+**Integration Points:**
+- Modify `booking.start` to accept optional `promoCode` parameter
+- Integrate discount logic into `computeBookingAmounts`
+- Add tracking pixel and click redirect routes
 
 ### UI/UX Approach
-(To be documented as implementation progresses)
+
+**Organizer App:**
+- `/promos` - List/create/edit promo codes with event/category filters
+- `/campaigns` - Campaign wizard (segment → template → schedule)
+- `/campaigns/[id]` - Campaign detail with metrics (opens, clicks, conversions)
+
+**Web App:**
+- Event page: Show price phase badge ("Early bird ends in 2d 3h")
+- Checkout: Promo code input with real-time validation and discount preview
+- Attribution: Capture UTM parameters from campaign links
+
+**Admin App:**
+- Oversight for all promos/campaigns
+- Ability to force-disable abusive codes
+- System-wide campaign analytics
 
 ## Challenges & Solutions
 (To be documented as issues arise)
