@@ -179,6 +179,7 @@ export const bookingRouter = router({
               date: true,
               venue: true,
               city: true,
+              price: true,
             },
           },
         },
