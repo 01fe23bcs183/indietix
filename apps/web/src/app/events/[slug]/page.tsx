@@ -185,7 +185,7 @@ export default function EventDetailPage(): JSX.Element {
                       <div>
                         <div className="flex items-baseline gap-2">
                           <p className="text-3xl font-bold text-green-600">
-                            {formatINR(effectivePrice.price)}
+                            {formatINR(effectivePrice.effectivePrice)}
                           </p>
                           <p className="text-xl text-gray-400 line-through">
                             {formatINR(event.price)}
@@ -229,7 +229,7 @@ export default function EventDetailPage(): JSX.Element {
 
                   <PriceBreakdown
                     basePrice={
-                      (effectivePrice?.price || event.price) * quantity
+                      (effectivePrice?.effectivePrice || event.price) * quantity
                     }
                     feesConfig={FEES}
                     gstRate={GST_RATE}
