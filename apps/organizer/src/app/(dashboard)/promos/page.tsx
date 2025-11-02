@@ -79,7 +79,7 @@ export default function PromosPage() {
             </tr>
           </thead>
           <tbody>
-            {data?.promos.map((promo) => (
+            {data?.map((promo) => (
               <tr key={promo.id}>
                 <td className="border p-2 font-mono font-bold">{promo.code}</td>
                 <td className="border p-2">
@@ -149,27 +149,6 @@ export default function PromosPage() {
         </table>
       </div>
 
-      {data && data.totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          <Button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            variant="outline"
-          >
-            Previous
-          </Button>
-          <span className="px-4 py-2">
-            Page {page} of {data.totalPages}
-          </span>
-          <Button
-            disabled={page === data.totalPages}
-            onClick={() => setPage(page + 1)}
-            variant="outline"
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
