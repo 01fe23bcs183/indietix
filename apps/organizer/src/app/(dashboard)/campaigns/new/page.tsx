@@ -34,6 +34,7 @@ export default function NewCampaignPage() {
     e.preventDefault();
     await createMutation.mutateAsync({
       ...formData,
+      channel: formData.channel.toUpperCase() as "EMAIL" | "SMS",
       scheduledAt: formData.scheduledAt
         ? new Date(formData.scheduledAt)
         : undefined,
