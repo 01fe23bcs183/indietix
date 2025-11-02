@@ -16,8 +16,8 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: indietix_test
+          POSTGRES_HOST_AUTH_METHOD: trust
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -67,11 +67,11 @@ jobs:
       - name: Setup Prisma
         run: |
           cd packages/db
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/indietix_test" > .env
+          echo "DATABASE_URL=postgresql://postgres@localhost:5432/indietix_test" > .env
           pnpm prisma:gen
           pnpm prisma db push --skip-generate
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/indietix_test
+          DATABASE_URL: postgresql://postgres@localhost:5432/indietix_test
 
       - name: Lint
         run: pnpm -w lint
@@ -95,9 +95,9 @@ jobs:
         run: pnpm -w build --filter="@indietix/admin"
 
       - name: Seed database for E2E tests
-        run: cd packages/db && pnpm exec tsx prisma/seed.ts
+        run: cd packages/db && pnpm dlx tsx prisma/seed.ts
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/indietix_test
+          DATABASE_URL: postgresql://postgres@localhost:5432/indietix_test
 
       - name: Install Playwright browsers
         run: cd apps/web && pnpm exec playwright install --with-deps chromium
@@ -105,7 +105,8 @@ jobs:
       - name: Run Playwright tests
         run: cd apps/web && pnpm test:e2e
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/indietix_test
+          DATABASE_URL: postgresql://postgres@localhost:5432/indietix_test
+          NEXTAUTH_SECRET: dev-test-secret
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
