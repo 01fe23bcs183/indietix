@@ -21,6 +21,7 @@
   "dependencies": {
     "@auth/core": "^0.34.3",
     "@indietix/db": "workspace:*",
+    "@indietix/marketing": "workspace:*",
     "@indietix/notify": "workspace:*",
     "@indietix/payments": "workspace:*",
     "@indietix/utils": "workspace:*",

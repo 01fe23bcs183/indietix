@@ -175,7 +175,7 @@ export const campaignsRouter = router({
           prisma,
           campaign.segment.query as SegmentQuery
         );
-        recipients = users.map((u) => ({
+        recipients = users.map((u: { id: string; email: string; phone: string | null }) => ({
           email: u.email,
           phone: u.phone,
           userId: u.id,
