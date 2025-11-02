@@ -1,4 +1,4 @@
-import { prisma as db } from "@indietix/db";
+import { prisma as db, Prisma } from "@indietix/db";
 import { getEmailProvider, getSmsProvider, getPushProvider } from "./providers";
 import { renderEmailTemplate } from "./templates/email";
 import { renderSmsTemplate } from "./templates/sms";
@@ -105,8 +105,7 @@ export async function sendNotification(
         channel,
         category,
         to,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        payload: payload as any,
+        payload: payload as Prisma.InputJsonValue,
         scheduledAt: new Date(),
         sentAt: new Date(),
         status: result.status === "sent" ? "SENT" : "FAILED",
@@ -142,7 +141,7 @@ export async function scheduleNotification(
       channel,
       category,
       to,
-      payload: payload as any,
+      payload: payload as Prisma.InputJsonValue,
       scheduledAt: scheduledAt || new Date(),
       status: "PENDING",
     },
