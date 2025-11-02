@@ -25,26 +25,7 @@ export interface SegmentQuery {
  * Execute a segment query and return matching user IDs
  */
 export async function executeSegmentQuery(
-  prisma: {
-    user: {
-      findMany: (args: {
-        where: Prisma.UserWhereInput;
-        select: { id: true; email: true; phone: true };
-      }) => Promise<Array<{ id: string; email: string; phone: string | null }>>;
-    };
-    booking: {
-      groupBy: (args: {
-        by: string[];
-        where: Prisma.BookingWhereInput;
-        _count: boolean;
-        having?: {
-          _count?: {
-            gte?: number;
-          };
-        };
-      }) => Promise<Array<{ userId: string; _count: number }>>;
-    };
-  },
+  prisma: any,
   query: SegmentQuery
 ): Promise<Array<{ id: string; email: string; phone: string | null }>> {
   const where: Prisma.UserWhereInput = {};
@@ -156,23 +137,7 @@ export async function executeSegmentQuery(
  * Preview segment query results (count only)
  */
 export async function previewSegmentQuery(
-  prisma: {
-    user: {
-      count: (args: { where: Prisma.UserWhereInput }) => Promise<number>;
-    };
-    booking: {
-      groupBy: (args: {
-        by: string[];
-        where: Prisma.BookingWhereInput;
-        _count: boolean;
-        having?: {
-          _count?: {
-            gte?: number;
-          };
-        };
-      }) => Promise<Array<{ userId: string; _count: number }>>;
-    };
-  },
+  prisma: any,
   query: SegmentQuery
 ): Promise<number> {
   const where: Prisma.UserWhereInput = {};
