@@ -13,13 +13,15 @@ const SALT_ROUNDS = 10;
 async function main() {
   console.log("🌱 Starting database seed...");
 
-  const password = await hash("password123", SALT_ROUNDS);
+  const adminEmail = process.env.E2E_ADMIN_EMAIL || "admin@indietix.com";
+  const adminPassword = process.env.E2E_ADMIN_PASSWORD || "password123";
+  const password = await hash(adminPassword, SALT_ROUNDS);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@indietix.com" },
+    where: { email: adminEmail },
     update: {},
     create: {
-      email: "admin@indietix.com",
+      email: adminEmail,
       name: "Admin User",
       passwordHash: password,
       role: "ADMIN",

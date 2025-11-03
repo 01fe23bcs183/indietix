@@ -8,7 +8,8 @@
     "start": "next start -p 3002",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@indietix/api": "workspace:*",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@indietix/config": "workspace:*",
+    "@playwright/test": "^1.40.1",
     "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",

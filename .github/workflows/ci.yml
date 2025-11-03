@@ -49,11 +49,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate test secrets
+        run: |
+          echo "AUTH_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> $GITHUB_ENV
+          echo "E2E_ADMIN_EMAIL=admin@indietix.com" >> $GITHUB_ENV
+          echo "E2E_ADMIN_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")" >> $GITHUB_ENV
+
       - name: Setup Prisma
         run: |
           cd packages/db
           echo "DATABASE_URL=file:./dev.db" > .env
           pnpm prisma:gen
+          pnpm prisma migrate deploy
+          pnpm prisma:seed
 
       - name: Lint
         run: pnpm -w lint
@@ -80,12 +88,30 @@ jobs:
         run: cd apps/web && pnpm exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
+        env:
+          DATABASE_URL: file:../../packages/db/dev.db
         run: cd apps/web && pnpm test:e2e
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-web
           path: apps/web/playwright-report/
+          retention-days: 7
+
+      - name: Install Playwright browsers for admin
+        run: cd apps/admin && pnpm exec playwright install --with-deps chromium
+
+      - name: Run Admin Playwright tests
+        env:
+          DATABASE_URL: file:../../packages/db/dev.db
+        run: cd apps/admin && pnpm test:e2e
+
+      - name: Upload Admin Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-admin
+          path: apps/admin/playwright-report/
           retention-days: 7
