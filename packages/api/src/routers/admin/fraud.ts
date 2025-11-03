@@ -61,7 +61,10 @@ export const fraudRouter = router({
       }
       await requireAdmin(ctx.session.user.id);
       return await prisma.fraudRule.create({
-        data: input,
+        data: {
+          ...input,
+          definition: input.definition as never,
+        },
       });
     }),
 
@@ -82,10 +85,13 @@ export const fraudRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
       await requireAdmin(ctx.session.user.id);
-      const { id, ...data } = input;
+      const { id, definition, ...rest } = input;
       return await prisma.fraudRule.update({
         where: { id },
-        data,
+        data: {
+          ...rest,
+          ...(definition && { definition: definition as never }),
+        },
       });
     }),
 
@@ -179,7 +185,7 @@ export const fraudRouter = router({
         type: input.type,
         value,
         reason: input.reason,
-        createdBy: ctx.session.user.id,
+        createdBy: ctx.session.user!.id,
       }));
       return await prisma.fraudList.createMany({
         data,
