@@ -85,7 +85,7 @@ jobs:
           cd packages/db
           pnpm prisma:gen
           pnpm prisma db push --accept-data-loss
-          pnpm prisma:seed
+          tsx prisma/seed.ts
 
       - name: Lint
         run: pnpm -w lint
