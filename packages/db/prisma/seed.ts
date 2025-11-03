@@ -347,8 +347,21 @@ async function main() {
     ];
 
     for (const bookingData of bookings) {
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const ticketNumber = `TIX-${timestamp}-${random}`;
+      
       await prisma.booking.create({
-        data: bookingData,
+        data: {
+          ...bookingData,
+          ticketNumber,
+          seats: bookingData.quantity,
+          ticketPrice: sunburnEvent.price * bookingData.quantity,
+          convenienceFee: Math.round(sunburnEvent.price * bookingData.quantity * 0.05),
+          platformFee: Math.round(sunburnEvent.price * bookingData.quantity * 0.03),
+          finalAmount: bookingData.totalAmount,
+          holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        },
       });
     }
     console.log(`✅ Created 5 sample bookings for ${sunburnEvent.title}`);
