@@ -2,7 +2,6 @@
 
 import { trpc } from "@/lib/trpc";
 import { Button } from "@indietix/ui";
-import { useState } from "react";
 
 export default function FraudRulesPage() {
   const { data: rules, isLoading, refetch } = trpc.admin.fraud.listRules.useQuery();
