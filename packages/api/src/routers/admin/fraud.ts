@@ -50,9 +50,7 @@ export const adminFraudRouter = router({
       }),
     ]);
 
-    const topIPs = await prisma.$queryRaw<
-      Array<{ ip: string; count: bigint }>
-    >`
+    const topIPs = await prisma.$queryRaw<Array<{ ip: string; count: bigint }>>`
       SELECT ip, COUNT(*) as count
       FROM "BookingAttempt"
       WHERE ip IS NOT NULL

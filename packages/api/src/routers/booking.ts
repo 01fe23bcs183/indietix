@@ -107,7 +107,7 @@ export const bookingRouter = router({
         city: z.string().optional(),
       })
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input }) => {
       const event = await reserveSeats(input.eventId, input.quantity);
 
       const user = await prisma.user.findUnique({
