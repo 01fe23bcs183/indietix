@@ -11,6 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indietix_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/indietix_e2e?schema=public
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,10 +68,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Prisma
-        run: |
-          cd packages/db
-          echo "DATABASE_URL=file:./dev.db" > .env
-          pnpm prisma:gen
+        run: pnpm --filter @indietix/db prisma:gen
 
       - name: Lint
         run: pnpm -w lint
@@ -78,6 +93,11 @@ jobs:
 
       - name: Install Playwright browsers
         run: cd apps/web && pnpm exec playwright install --with-deps chromium
+
+      - name: Setup test database
+        run: |
+          pnpm --filter @indietix/db prisma:push
+          pnpm exec tsx packages/db/prisma/seed.ts
 
       - name: Run Playwright tests
         run: cd apps/web && pnpm test:e2e
