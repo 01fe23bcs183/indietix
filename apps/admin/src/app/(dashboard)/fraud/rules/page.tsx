@@ -9,8 +9,6 @@ export default function FraudRulesPage() {
   const updateRule = trpc.admin.fraud.updateRule.useMutation();
   const deleteRule = trpc.admin.fraud.deleteRule.useMutation();
 
-  const [showCreateForm, setShowCreateForm] = useState(false);
-
   const handleToggleEnabled = async (ruleId: string, currentEnabled: boolean) => {
     await updateRule.mutateAsync({
       id: ruleId,
@@ -39,7 +37,7 @@ export default function FraudRulesPage() {
             Manage fraud detection rules and priorities
           </p>
         </div>
-        <Button onClick={() => setShowCreateForm(true)}>Create Rule</Button>
+        <Button onClick={() => alert("Rule creation form coming soon")}>Create Rule</Button>
       </div>
 
       <div className="bg-white border rounded-lg overflow-hidden">
