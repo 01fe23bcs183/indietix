@@ -15,8 +15,8 @@ jobs:
       postgres:
         image: postgres:15
         env:
+          POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: indietix_ci
         ports:
           - 5432:5432
@@ -67,15 +67,24 @@ jobs:
       - name: Generate test secrets and database URL
         run: |
           echo "AUTH_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> $GITHUB_ENV
+          echo "NEXTAUTH_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> $GITHUB_ENV
           echo "E2E_ADMIN_EMAIL=admin@indietix.com" >> $GITHUB_ENV
           echo "E2E_ADMIN_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")" >> $GITHUB_ENV
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/indietix_ci?schema=public" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://postgres@localhost:5432/indietix_ci?schema=public" >> $GITHUB_ENV
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -U postgres; do
+            echo "Waiting for postgres..."
+            sleep 1
+          done
+          echo "Postgres is ready!"
 
       - name: Setup Prisma
         run: |
           cd packages/db
           pnpm prisma:gen
-          pnpm prisma migrate deploy
+          pnpm prisma db push --accept-data-loss
           pnpm prisma:seed
 
       - name: Lint
