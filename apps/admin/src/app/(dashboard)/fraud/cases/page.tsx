@@ -57,7 +57,7 @@ export default function FraudCasesPage() {
           onClick={() => setStatus("OPEN")}
           variant={status === "OPEN" ? "default" : "outline"}
         >
-          Open ({data?.items.filter((c) => c.status === "OPEN").length || 0})
+          Open
         </Button>
         <Button
           onClick={() => setStatus("APPROVED")}
