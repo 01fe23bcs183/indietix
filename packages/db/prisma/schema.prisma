@@ -121,6 +121,24 @@ enum CampaignRecipientStatus {
   BOUNCED
 }
 
+enum FraudAction {
+  FLAG
+  REJECT
+  REVIEW
+}
+
+enum FraudListType {
+  EMAIL
+  PHONE
+  IP
+}
+
+enum FraudCaseStatus {
+  OPEN
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                      String    @id @default(cuid())
   email                   String    @unique
@@ -248,6 +266,8 @@ model Booking {
   ticketPayloadHash  String?
   promoCodeId        String?
   campaignId         String?
+  riskScore          Int?
+  riskTags           String[]      @default([])
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   
@@ -258,6 +278,8 @@ model Booking {
   paymentEvents      PaymentEvent[]
   scanLogs           ScanLog[]
   refunds            Refund[]
+  bookingAttempts    BookingAttempt[]
+  fraudCases         FraudCase[]
 
   @@index([eventId])
   @@index([userId])
@@ -267,6 +289,7 @@ model Booking {
   @@index([ticketNumber])
   @@index([promoCodeId])
   @@index([campaignId])
+  @@index([riskScore])
 }
 
 model Payout {
@@ -593,4 +616,77 @@ model CampaignRecipient {
   @@index([userId])
   @@index([status])
   @@index([email])
+}
+
+model BookingAttempt {
+  id              String   @id @default(cuid())
+  bookingId       String?
+  userId          String?
+  eventId         String
+  ip              String?
+  userAgent       String?
+  city            String?
+  emailDomain     String?
+  phonePrefix     String?
+  qty             Int
+  paymentProvider String?  // "razorpay" | "fake"
+  result          String?  // "success" | "failed" | "cancelled"
+  paidAt          DateTime?
+  razorpayOrderId String?
+  createdAt       DateTime @default(now())
+  
+  booking         Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([eventId])
+  @@index([ip])
+  @@index([emailDomain])
+  @@index([phonePrefix])
+  @@index([createdAt])
+}
+
+model FraudRule {
+  id         String      @id @default(cuid())
+  name       String
+  enabled    Boolean     @default(true)
+  priority   Int         @default(0)
+  definition Json        // Rule conditions in JSON format
+  action     FraudAction
+  weight     Int         @default(10) // Weight for risk scoring
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([enabled, priority])
+}
+
+model FraudList {
+  id        String        @id @default(cuid())
+  type      FraudListType
+  value     String
+  reason    String?
+  createdBy String
+  createdAt DateTime      @default(now())
+
+  @@unique([type, value])
+  @@index([type, value])
+}
+
+model FraudCase {
+  id        String           @id @default(cuid())
+  bookingId String
+  status    FraudCaseStatus  @default(OPEN)
+  riskScore Int
+  riskTags  String[]         @default([])
+  notes     Json[]           @default([]) // Array of {text, createdBy, createdAt}
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  resolvedAt DateTime?
+  resolvedBy String?
+  
+  booking   Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([createdAt])
 }

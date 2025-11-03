@@ -15,6 +15,7 @@ import { adminEventsRouter } from "./routers/admin/events";
 import { adminTransactionsRouter } from "./routers/admin/transactions";
 import { adminSettingsRouter } from "./routers/admin/settings";
 import { adminDashboardRouter } from "./routers/admin/dashboard";
+import { adminFraudRouter } from "./routers/admin/fraud";
 import { notifyRouter } from "./routers/notify";
 import { promosRouter } from "./routers/promos";
 import { pricingRouter } from "./routers/pricing";
@@ -46,6 +47,7 @@ export const appRouter = router({
     events: adminEventsRouter,
     transactions: adminTransactionsRouter,
     settings: adminSettingsRouter,
+    fraud: adminFraudRouter,
   }),
 });
 

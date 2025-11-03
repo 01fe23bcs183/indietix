@@ -8,6 +8,7 @@ import {
   hashTicketPayload,
 } from "@indietix/utils";
 import { getPaymentProvider } from "@indietix/payments";
+import { evaluate } from "@indietix/fraud";
 import { TRPCError } from "@trpc/server";
 
 const HOLD_TTL_MINUTES = 15;
@@ -101,10 +102,49 @@ export const bookingRouter = router({
         eventId: z.string(),
         quantity: z.number().int().min(1).max(10),
         userId: z.string(),
+        ip: z.string().optional(),
+        userAgent: z.string().optional(),
+        city: z.string().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const event = await reserveSeats(input.eventId, input.quantity);
+
+      const user = await prisma.user.findUnique({
+        where: { id: input.userId },
+        select: { email: true, phone: true, createdAt: true },
+      });
+
+      const emailDomain = user?.email.split("@")[1];
+      const phonePrefix = user?.phone?.substring(0, 3);
+
+      const attemptData = {
+        userId: input.userId,
+        eventId: input.eventId,
+        ip: input.ip,
+        userAgent: input.userAgent,
+        city: input.city,
+        emailDomain,
+        phonePrefix,
+        qty: input.quantity,
+      };
+
+      const bookingAttempt = await prisma.bookingAttempt.create({
+        data: attemptData,
+      });
+
+      const fraudResult = await evaluate(prisma, attemptData, {
+        eventPrice: event.price,
+        userSignupDate: user?.createdAt,
+      });
+
+      if (fraudResult.action === "REJECT") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message:
+            "This booking has been flagged for security reasons. Please contact support.",
+        });
+      }
 
       const amounts = computeBookingAmounts(event.price, input.quantity);
 
@@ -125,8 +165,27 @@ export const bookingRouter = router({
           holdExpiresAt,
           paymentStatus: "PENDING",
           status: "PENDING",
+          riskScore: fraudResult.riskScore,
+          riskTags: fraudResult.riskTags,
         },
       });
+
+      await prisma.bookingAttempt.update({
+        where: { id: bookingAttempt.id },
+        data: { bookingId: booking.id },
+      });
+
+      if (fraudResult.action === "REVIEW") {
+        await prisma.fraudCase.create({
+          data: {
+            bookingId: booking.id,
+            status: "OPEN",
+            riskScore: fraudResult.riskScore,
+            riskTags: fraudResult.riskTags,
+            notes: [],
+          },
+        });
+      }
 
       const paymentProvider = getPaymentProvider();
       const paymentOrder = await paymentProvider.createOrder({
@@ -160,6 +219,8 @@ export const bookingRouter = router({
               ? process.env.RAZORPAY_KEY_ID
               : undefined,
         },
+        riskScore: fraudResult.riskScore,
+        requiresReview: fraudResult.action === "REVIEW",
       };
     }),
 

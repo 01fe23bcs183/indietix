@@ -415,6 +415,9 @@ importers:
       '@indietix/db':
         specifier: workspace:*
         version: link:../db
+      '@indietix/fraud':
+        specifier: workspace:*
+        version: link:../fraud
       '@indietix/marketing':
         specifier: workspace:*
         version: link:../marketing
@@ -507,6 +510,22 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
+
+  packages/fraud:
+    dependencies:
+      '@indietix/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^24.9.2
+        version: 24.9.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.1
+        version: 1.6.1(@types/node@24.9.2)(jsdom@27.1.0)(terser@5.44.0)
 
   packages/marketing:
     dependencies:
