@@ -10,9 +10,6 @@ const nextConfig = {
     "@indietix/notify",
     "@indietix/payments",
   ],
-  experimental: {
-    serverSourceMaps: true,
-  },
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals.push("bcrypt");
