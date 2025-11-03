@@ -1,0 +1,100 @@
+[
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 59,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/59"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 55,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/55"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 54,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/54"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 53,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/53"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 52,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/52"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 51,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/51"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 50,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/50"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 48,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/48"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 42,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/42"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 34,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/34"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 31,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/31"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 23,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/23"
+  },
+  {
+    "severity": "Critical",
+    "type": "CI Failure",
+    "message": "PR merged with failing CI checks",
+    "pr": 2,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/2"
+  },
+  {
+    "severity": "Minor",
+    "type": "Large PR Without Tests",
+    "message": "Large PR (20 files) without test coverage",
+    "pr": 2,
+    "url": "https://github.com/01fe23bcs183/indietix/pull/2"
+  }
+]
