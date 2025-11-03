@@ -3,18 +3,26 @@ import { router, publicProcedure } from "../../trpc";
 import { prisma } from "@indietix/db";
 import { TRPCError } from "@trpc/server";
 
-function requireAdmin(session: { role: string } | null) {
-  if (!session || session.role !== "ADMIN") {
+const requireAdmin = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  if (!user || user.role !== "ADMIN") {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Admin access required",
     });
   }
-}
+};
 
 export const fraudRouter = router({
   listRules: publicProcedure.query(async ({ ctx }) => {
-    requireAdmin(ctx.session);
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    await requireAdmin(ctx.session.user.id);
     return await prisma.fraudRule.findMany({
       orderBy: { priority: "desc" },
     });
@@ -23,7 +31,10 @@ export const fraudRouter = router({
   getRule: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       const rule = await prisma.fraudRule.findUnique({
         where: { id: input.id },
       });
@@ -45,7 +56,10 @@ export const fraudRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       return await prisma.fraudRule.create({
         data: input,
       });
@@ -64,7 +78,10 @@ export const fraudRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       const { id, ...data } = input;
       return await prisma.fraudRule.update({
         where: { id },
@@ -75,7 +92,10 @@ export const fraudRouter = router({
   deleteRule: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       return await prisma.fraudRule.delete({
         where: { id: input.id },
       });
@@ -90,7 +110,10 @@ export const fraudRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       const where = input.type ? { type: input.type } : {};
       const [items, total] = await Promise.all([
         prisma.fraudList.findMany({
@@ -113,19 +136,16 @@ export const fraudRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
-      if (!ctx.session?.userId) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User ID required",
-        });
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
+      await requireAdmin(ctx.session.user.id);
       return await prisma.fraudList.create({
         data: {
           type: input.type,
           value: input.value,
           reason: input.reason,
-          createdBy: ctx.session.userId,
+          createdBy: ctx.session.user.id,
         },
       });
     }),
@@ -133,7 +153,10 @@ export const fraudRouter = router({
   removeFromBlacklist: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       return await prisma.fraudList.delete({
         where: { id: input.id },
       });
@@ -148,18 +171,15 @@ export const fraudRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
-      if (!ctx.session?.userId) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User ID required",
-        });
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
+      await requireAdmin(ctx.session.user.id);
       const data = input.values.map((value) => ({
         type: input.type,
         value,
         reason: input.reason,
-        createdBy: ctx.session!.userId!,
+        createdBy: ctx.session.user.id,
       }));
       return await prisma.fraudList.createMany({
         data,
@@ -176,7 +196,10 @@ export const fraudRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       const where = input.status ? { status: input.status } : {};
       const [items, total] = await Promise.all([
         prisma.fraudCase.findMany({
@@ -201,7 +224,10 @@ export const fraudRouter = router({
   getCase: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await requireAdmin(ctx.session.user.id);
       const fraudCase = await prisma.fraudCase.findUnique({
         where: { id: input.id },
         include: {
@@ -229,13 +255,10 @@ export const fraudRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
-      if (!ctx.session?.userId) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User ID required",
-        });
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
+      await requireAdmin(ctx.session.user.id);
 
       const fraudCase = await prisma.fraudCase.findUnique({
         where: { id: input.id },
@@ -254,7 +277,7 @@ export const fraudRouter = router({
 
       if (input.note) {
         notes.push({
-          adminId: ctx.session.userId,
+          adminId: ctx.session.user.id,
           note: input.note,
           ts: new Date().toISOString(),
         });
@@ -266,13 +289,13 @@ export const fraudRouter = router({
           status: input.status,
           notes,
           resolvedAt: new Date(),
-          resolvedBy: ctx.session.userId,
+          resolvedBy: ctx.session.user.id,
         },
       });
 
       await prisma.adminAction.create({
         data: {
-          adminId: ctx.session.userId,
+          adminId: ctx.session.user.id,
           entityType: "FraudCase",
           entityId: input.id,
           action: input.status === "APPROVED" ? "APPROVE_CASE" : "REJECT_CASE",
@@ -292,13 +315,10 @@ export const fraudRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      requireAdmin(ctx.session);
-      if (!ctx.session?.userId) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User ID required",
-        });
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
+      await requireAdmin(ctx.session.user.id);
 
       const fraudCase = await prisma.fraudCase.findUnique({
         where: { id: input.id },
@@ -315,7 +335,7 @@ export const fraudRouter = router({
       }>) || [];
 
       notes.push({
-        adminId: ctx.session.userId,
+        adminId: ctx.session.user.id,
         note: input.note,
         ts: new Date().toISOString(),
       });
@@ -327,7 +347,10 @@ export const fraudRouter = router({
     }),
 
   getDashboardStats: publicProcedure.query(async ({ ctx }) => {
-    requireAdmin(ctx.session);
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    await requireAdmin(ctx.session.user.id);
 
     const now = new Date();
     const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
