@@ -276,11 +276,12 @@ export const fraudRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Case not found" });
       }
 
-      const notes = (fraudCase.notes as Array<{
-        adminId: string;
-        note: string;
-        ts: string;
-      }>) || [];
+      const notes =
+        (fraudCase.notes as Array<{
+          adminId: string;
+          note: string;
+          ts: string;
+        }>) || [];
 
       if (input.note) {
         notes.push({
@@ -335,11 +336,12 @@ export const fraudRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Case not found" });
       }
 
-      const notes = (fraudCase.notes as Array<{
-        adminId: string;
-        note: string;
-        ts: string;
-      }>) || [];
+      const notes =
+        (fraudCase.notes as Array<{
+          adminId: string;
+          note: string;
+          ts: string;
+        }>) || [];
 
       notes.push({
         adminId: ctx.session.user.id,

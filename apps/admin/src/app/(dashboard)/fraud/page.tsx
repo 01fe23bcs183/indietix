@@ -4,7 +4,8 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@indietix/ui";
 
 export default function FraudDashboardPage() {
-  const { data: stats, isLoading } = trpc.admin.fraud.getDashboardStats.useQuery();
+  const { data: stats, isLoading } =
+    trpc.admin.fraud.getDashboardStats.useQuery();
 
   if (isLoading) {
     return <div className="p-6">Loading fraud dashboard...</div>;
@@ -25,7 +26,9 @@ export default function FraudDashboardPage() {
             <CardTitle>Attempts (24h)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats?.totalAttempts24h || 0}</div>
+            <div className="text-3xl font-bold">
+              {stats?.totalAttempts24h || 0}
+            </div>
           </CardContent>
         </Card>
 
@@ -34,7 +37,9 @@ export default function FraudDashboardPage() {
             <CardTitle>Attempts (7d)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats?.totalAttempts7d || 0}</div>
+            <div className="text-3xl font-bold">
+              {stats?.totalAttempts7d || 0}
+            </div>
           </CardContent>
         </Card>
 

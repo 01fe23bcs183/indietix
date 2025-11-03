@@ -13,11 +13,18 @@ type FraudRule = {
 };
 
 export default function FraudRulesPage() {
-  const { data: rules, isLoading, refetch } = trpc.admin.fraud.listRules.useQuery();
+  const {
+    data: rules,
+    isLoading,
+    refetch,
+  } = trpc.admin.fraud.listRules.useQuery();
   const updateRule = trpc.admin.fraud.updateRule.useMutation();
   const deleteRule = trpc.admin.fraud.deleteRule.useMutation();
 
-  const handleToggleEnabled = async (ruleId: string, currentEnabled: boolean) => {
+  const handleToggleEnabled = async (
+    ruleId: string,
+    currentEnabled: boolean
+  ) => {
     await updateRule.mutateAsync({
       id: ruleId,
       enabled: !currentEnabled,
@@ -26,7 +33,7 @@ export default function FraudRulesPage() {
   };
 
   const handleDelete = async (ruleId: string) => {
-    if (confirm("Are you sure you want to delete this rule?")) {
+    if (window.confirm("Are you sure you want to delete this rule?")) {
       await deleteRule.mutateAsync({ id: ruleId });
       refetch();
     }
@@ -45,7 +52,9 @@ export default function FraudRulesPage() {
             Manage fraud detection rules and priorities
           </p>
         </div>
-        <Button onClick={() => alert("Rule creation form coming soon")}>Create Rule</Button>
+        <Button onClick={() => window.alert("Rule creation form coming soon")}>
+          Create Rule
+        </Button>
       </div>
 
       <div className="bg-white border rounded-lg overflow-hidden">

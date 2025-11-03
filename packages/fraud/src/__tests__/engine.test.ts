@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { evaluateRule, type RuleDefinition, type EvaluationContext } from "../engine";
+import { describe, it, expect, beforeEach } from "vitest";
+import {
+  evaluateRule,
+  type RuleDefinition,
+  type EvaluationContext,
+} from "../engine";
 
 describe("Fraud Engine", () => {
   let mockContext: EvaluationContext;

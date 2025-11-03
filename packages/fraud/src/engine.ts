@@ -111,13 +111,11 @@ export function evaluateRule(
   switch (type) {
     case "velocity_ip": {
       const threshold = (definition.threshold as number) || 5;
-      const minutes = (definition.minutes as number) || 10;
       return context.velocityByIp >= threshold;
     }
 
     case "velocity_user": {
       const threshold = (definition.threshold as number) || 5;
-      const minutes = (definition.minutes as number) || 10;
       return context.velocityByUser >= threshold;
     }
 

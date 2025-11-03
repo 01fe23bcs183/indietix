@@ -18,7 +18,9 @@ type FraudCase = {
 };
 
 export default function FraudCasesPage() {
-  const [status, setStatus] = useState<"OPEN" | "APPROVED" | "REJECTED" | undefined>("OPEN");
+  const [status, setStatus] = useState<
+    "OPEN" | "APPROVED" | "REJECTED" | undefined
+  >("OPEN");
   const { data, isLoading, refetch } = trpc.admin.fraud.listCases.useQuery({
     status,
     limit: 50,
@@ -107,8 +109,7 @@ export default function FraudCasesPage() {
                   <p>Event: {fraudCase.booking.event.title}</p>
                   <p>User: {fraudCase.booking.user.email}</p>
                   <p>
-                    Created:{" "}
-                    {new Date(fraudCase.createdAt).toLocaleString()}
+                    Created: {new Date(fraudCase.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
@@ -126,7 +127,11 @@ export default function FraudCasesPage() {
                 <div className="flex gap-2">
                   <Button
                     onClick={() =>
-                      handleResolve(fraudCase.id, "APPROVED", "Approved by admin")
+                      handleResolve(
+                        fraudCase.id,
+                        "APPROVED",
+                        "Approved by admin"
+                      )
                     }
                     size="sm"
                     variant="default"
@@ -135,7 +140,11 @@ export default function FraudCasesPage() {
                   </Button>
                   <Button
                     onClick={() =>
-                      handleResolve(fraudCase.id, "REJECTED", "Rejected by admin")
+                      handleResolve(
+                        fraudCase.id,
+                        "REJECTED",
+                        "Rejected by admin"
+                      )
                     }
                     size="sm"
                     variant="destructive"
