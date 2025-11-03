@@ -71,13 +71,13 @@ export async function buildContext(
     select: { type: true, value: true },
   });
 
-  const blacklistedEmails = new Set(
+  const blacklistedEmails = new Set<string>(
     blacklists.filter((b) => b.type === "EMAIL").map((b) => b.value)
   );
-  const blacklistedPhones = new Set(
+  const blacklistedPhones = new Set<string>(
     blacklists.filter((b) => b.type === "PHONE").map((b) => b.value)
   );
-  const blacklistedIps = new Set(
+  const blacklistedIps = new Set<string>(
     blacklists.filter((b) => b.type === "IP").map((b) => b.value)
   );
 
