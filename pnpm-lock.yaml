@@ -415,6 +415,9 @@ importers:
       '@indietix/db':
         specifier: workspace:*
         version: link:../db
+      '@indietix/fraud':
+        specifier: workspace:*
+        version: link:../fraud
       '@indietix/marketing':
         specifier: workspace:*
         version: link:../marketing
