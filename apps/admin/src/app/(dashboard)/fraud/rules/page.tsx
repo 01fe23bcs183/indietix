@@ -3,6 +3,15 @@
 import { trpc } from "@/lib/trpc";
 import { Button } from "@indietix/ui";
 
+type FraudRule = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  priority: number;
+  action: string;
+  weight: number;
+};
+
 export default function FraudRulesPage() {
   const { data: rules, isLoading, refetch } = trpc.admin.fraud.listRules.useQuery();
   const updateRule = trpc.admin.fraud.updateRule.useMutation();
@@ -64,7 +73,7 @@ export default function FraudRulesPage() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {rules?.map((rule) => (
+            {rules?.map((rule: FraudRule) => (
               <tr key={rule.id}>
                 <td className="px-6 py-4 text-sm font-medium">{rule.name}</td>
                 <td className="px-6 py-4 text-sm">
