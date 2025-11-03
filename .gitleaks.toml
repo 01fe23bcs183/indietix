@@ -1,0 +1,61 @@
+# Gitleaks Configuration for IndieTix
+# Detects hardcoded secrets, API keys, and credentials
+
+title = "IndieTix Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for false positives"
+paths = [
+  '''\.env\.example$''',
+  '''\.env\.template$''',
+  '''README\.md$''',
+  '''docs/.*\.md$''',
+]
+
+# Custom rules for Indian payment gateways and services
+[[rules]]
+id = "razorpay-key"
+description = "Razorpay API Key"
+regex = '''rzp_(test|live)_[A-Za-z0-9]{14}'''
+tags = ["key", "razorpay"]
+
+[[rules]]
+id = "razorpay-secret"
+description = "Razorpay API Secret"
+regex = '''[A-Za-z0-9]{24}'''
+path = '''(?i)(razorpay|payment).*\.(js|ts|env)'''
+tags = ["secret", "razorpay"]
+
+[[rules]]
+id = "paytm-merchant-key"
+description = "Paytm Merchant Key"
+regex = '''[A-Za-z0-9]{32}'''
+path = '''(?i)(paytm|merchant).*\.(js|ts|env)'''
+tags = ["key", "paytm"]
+
+[[rules]]
+id = "jwt-secret"
+description = "JWT Secret"
+regex = '''(?i)(jwt[_-]?secret|secret[_-]?key)\s*[:=]\s*['"][A-Za-z0-9+/=]{32,}['"]'''
+tags = ["secret", "jwt"]
+
+[[rules]]
+id = "database-url"
+description = "Database Connection String"
+regex = '''(?i)(database[_-]?url|db[_-]?url|connection[_-]?string)\s*[:=]\s*['"].*://.*:.*@.*['"]'''
+tags = ["secret", "database"]
+
+[[rules]]
+id = "aws-access-key"
+description = "AWS Access Key"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["key", "aws"]
+
+[[rules]]
+id = "private-key"
+description = "Private Key"
+regex = '''-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----'''
+tags = ["key", "private"]

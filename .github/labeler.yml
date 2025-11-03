@@ -1,0 +1,37 @@
+# Auto-labeler configuration for IndieTix
+# Automatically applies labels to PRs based on changed files
+
+web:
+  - apps/web/**/*
+
+organizer:
+  - apps/organizer/**/*
+
+admin:
+  - apps/admin/**/*
+
+api:
+  - packages/api/**/*
+
+db:
+  - packages/db/**/*
+
+ui:
+  - packages/ui/**/*
+
+config:
+  - packages/config/**/*
+
+utils:
+  - packages/utils/**/*
+
+infra:
+  - .github/**/*
+  - turbo.json
+  - pnpm-workspace.yaml
+  - "*.config.js"
+  - "*.config.ts"
+
+docs:
+  - docs/**/*
+  - "**/*.md"

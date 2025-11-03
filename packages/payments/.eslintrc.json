@@ -1,0 +1,6 @@
+{
+  "extends": ["@indietix/config/.eslintrc.js"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}
