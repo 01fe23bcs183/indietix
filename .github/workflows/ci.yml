@@ -11,6 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indietix_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,16 +64,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate test secrets
+      - name: Generate test secrets and database URL
         run: |
           echo "AUTH_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> $GITHUB_ENV
           echo "E2E_ADMIN_EMAIL=admin@indietix.com" >> $GITHUB_ENV
           echo "E2E_ADMIN_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/indietix_ci?schema=public" >> $GITHUB_ENV
 
       - name: Setup Prisma
         run: |
           cd packages/db
-          echo "DATABASE_URL=file:./dev.db" > .env
           pnpm prisma:gen
           pnpm prisma migrate deploy
           pnpm prisma:seed
@@ -88,8 +103,6 @@ jobs:
         run: cd apps/web && pnpm exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        env:
-          DATABASE_URL: file:../../packages/db/dev.db
         run: cd apps/web && pnpm test:e2e
 
       - name: Upload Playwright report
@@ -104,8 +117,6 @@ jobs:
         run: cd apps/admin && pnpm exec playwright install --with-deps chromium
 
       - name: Run Admin Playwright tests
-        env:
-          DATABASE_URL: file:../../packages/db/dev.db
         run: cd apps/admin && pnpm test:e2e
 
       - name: Upload Admin Playwright report
