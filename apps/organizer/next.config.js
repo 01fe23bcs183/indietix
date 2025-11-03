@@ -10,6 +10,7 @@ const nextConfig = {
     "@indietix/api",
     "@indietix/db",
     "@indietix/utils",
+    "@indietix/fraud",
   ],
   webpack: (config, { isServer }) => {
     if (isServer) {
