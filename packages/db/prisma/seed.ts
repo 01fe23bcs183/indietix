@@ -12,11 +12,16 @@ try {
   encodeTicketForQR = utils.encodeTicketForQR;
   hashTicketPayload = utils.hashTicketPayload;
 } catch {
-  createSignedTicket = (bookingId: string, userId: string, eventId: string) => ({
+  createSignedTicket = (
+    bookingId: string,
+    userId: string,
+    eventId: string
+  ) => ({
     payload: `${bookingId}:${userId}:${eventId}`,
     signature: randomBytes(32).toString("hex"),
   });
-  encodeTicketForQR = (ticket: any) => Buffer.from(JSON.stringify(ticket)).toString("base64");
+  encodeTicketForQR = (ticket: any) =>
+    Buffer.from(JSON.stringify(ticket)).toString("base64");
   hashTicketPayload = (payload: string) => randomBytes(32).toString("hex");
 }
 
