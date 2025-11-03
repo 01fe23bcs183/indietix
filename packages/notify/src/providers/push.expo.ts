@@ -7,7 +7,8 @@ export class ExpoPushProvider implements PushProvider {
 
   constructor() {
     try {
-      const { Expo } = require("expo-server-sdk");
+      const mod = require("expo-server-sdk");
+      const Expo = mod.Expo ?? mod.default ?? mod;
       this.expo = new Expo();
     } catch {
       throw new Error(

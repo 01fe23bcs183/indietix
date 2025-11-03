@@ -8,7 +8,8 @@ export class TwilioSmsProvider implements SmsProvider {
 
   constructor(accountSid: string, authToken: string, fromNumber: string) {
     try {
-      const twilio = require("twilio");
+      const mod = require("twilio");
+      const twilio = mod.default ?? mod;
       this.twilio = twilio(accountSid, authToken);
       this.fromNumber = fromNumber;
     } catch {
