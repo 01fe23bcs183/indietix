@@ -38,7 +38,11 @@ export interface EvaluationResult {
 
 interface RuleDefinition {
   type: string;
-  [key: string]: any;
+  last_minutes?: number;
+  threshold?: number;
+  min_price?: number;
+  max_signup_age_days?: number;
+  [key: string]: unknown;
 }
 
 export async function evaluate(
@@ -251,7 +255,12 @@ async function evaluateRepeatedFailedPayments(
 
   const since = new Date(Date.now() - minutes * 60 * 1000);
 
-  const whereClause: any = {
+  const whereClause: {
+    createdAt: { gte: Date };
+    result: string;
+    userId?: string;
+    ip?: string;
+  } = {
     createdAt: { gte: since },
     result: "failed",
   };
