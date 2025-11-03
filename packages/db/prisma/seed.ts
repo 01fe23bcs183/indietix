@@ -350,7 +350,7 @@ async function main() {
       const timestamp = Date.now().toString(36).toUpperCase();
       const random = Math.random().toString(36).substring(2, 8).toUpperCase();
       const ticketNumber = `TIX-${timestamp}-${random}`;
-      const { quantity, totalAmount: _totalAmount, ...validBookingData } = bookingData;
+      const { eventId, userId, paymentStatus, status, quantity } = bookingData;
       const ticketPrice = sunburnEvent.price * quantity;
       const convenienceFee = Math.round(ticketPrice * 0.05);
       const platformFee = Math.round(ticketPrice * 0.03);
@@ -358,7 +358,10 @@ async function main() {
 
       await prisma.booking.create({
         data: {
-          ...validBookingData,
+          eventId,
+          userId,
+          paymentStatus,
+          status,
           ticketNumber,
           seats: quantity,
           ticketPrice,
@@ -430,7 +433,7 @@ async function main() {
   ];
 
   for (const bookingData of dxBookings) {
-    const { quantity, totalAmount: _totalAmount, ...validBookingData } = bookingData;
+    const { eventId, userId, paymentStatus, status, quantity } = bookingData;
     const ticketPrice = dxEvent.price * quantity;
     const convenienceFee = Math.round(ticketPrice * 0.05);
     const platformFee = Math.round(ticketPrice * 0.03);
@@ -438,7 +441,10 @@ async function main() {
 
     const booking = await prisma.booking.create({
       data: {
-        ...validBookingData,
+        eventId,
+        userId,
+        paymentStatus,
+        status,
         ticketNumber: `TIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
         seats: quantity,
         ticketPrice,
