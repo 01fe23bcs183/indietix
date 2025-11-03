@@ -181,11 +181,12 @@ export const fraudRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
       await requireAdmin(ctx.session.user.id);
+      const userId = ctx.session.user.id;
       const data = input.values.map((value) => ({
         type: input.type,
         value,
         reason: input.reason,
-        createdBy: ctx.session.user!.id,
+        createdBy: userId,
       }));
       return await prisma.fraudList.createMany({
         data,
