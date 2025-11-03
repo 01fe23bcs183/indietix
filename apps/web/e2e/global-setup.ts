@@ -1,7 +1,9 @@
 import { chromium, FullConfig } from "@playwright/test";
 
 async function globalSetup(config: FullConfig) {
-  const { baseURL, storageState } = config.projects[0].use;
+  const baseURL = config.use?.baseURL || "http://localhost:3000";
+  const storageState = config.use?.storageState || ".auth/user.json";
+  
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
