@@ -20,7 +20,7 @@ export default function FraudRulesPage() {
     refetch,
   } = trpc.admin.fraud.listRules.useQuery();
   const [showCreateForm, setShowCreateForm] = useState(false);
-  
+
   const rules = (rulesData ?? []) as unknown as RuleListItem[];
 
   const createRule = trpc.admin.fraud.createRule.useMutation({

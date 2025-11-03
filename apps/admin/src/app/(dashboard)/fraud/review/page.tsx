@@ -29,7 +29,7 @@ export default function FraudReviewQueuePage() {
   } = trpc.admin.fraud.listCases.useQuery(
     selectedStatus ? { status: selectedStatus } : undefined
   );
-  
+
   const cases = (casesData ?? []) as unknown as CaseListItem[];
 
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
@@ -37,39 +37,41 @@ export default function FraudReviewQueuePage() {
     { id: selectedCase! },
     { enabled: !!selectedCase }
   );
-  
-  const caseDetail = caseDetailData as unknown as {
-    id: string;
-    status: "OPEN" | "APPROVED" | "REJECTED";
-    createdAt: string | Date;
-    resolvedAt: string | Date | null;
-    booking: {
-      event: {
-        title: string;
-        price: number;
-        date: string | Date;
-      };
-      user: {
-        name: string | null;
-        email: string;
-        phone: string | null;
-      };
-      bookingAttempts: Array<{
+
+  const caseDetail = caseDetailData as unknown as
+    | {
         id: string;
-        ip: string | null;
-        emailDomain: string | null;
-        phonePrefix: string | null;
-        qty: number;
-        result: string | null;
+        status: "OPEN" | "APPROVED" | "REJECTED";
         createdAt: string | Date;
-      }>;
-    };
-    notes: Array<{
-      text: string;
-      createdBy: string;
-      createdAt: string;
-    }>;
-  } | undefined;
+        resolvedAt: string | Date | null;
+        booking: {
+          event: {
+            title: string;
+            price: number;
+            date: string | Date;
+          };
+          user: {
+            name: string | null;
+            email: string;
+            phone: string | null;
+          };
+          bookingAttempts: Array<{
+            id: string;
+            ip: string | null;
+            emailDomain: string | null;
+            phonePrefix: string | null;
+            qty: number;
+            result: string | null;
+            createdAt: string | Date;
+          }>;
+        };
+        notes: Array<{
+          text: string;
+          createdBy: string;
+          createdAt: string;
+        }>;
+      }
+    | undefined;
 
   const resolveCase = trpc.admin.fraud.resolveCase.useMutation({
     onSuccess: () => {
