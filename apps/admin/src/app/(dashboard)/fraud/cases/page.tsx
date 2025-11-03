@@ -4,6 +4,19 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@indietix/ui";
 import { useState } from "react";
 
+type FraudCase = {
+  id: string;
+  status: string;
+  riskScore: number;
+  riskTags: string[];
+  createdAt: Date;
+  booking: {
+    id: string;
+    user: { email: string };
+    event: { title: string };
+  };
+};
+
 export default function FraudCasesPage() {
   const [status, setStatus] = useState<"OPEN" | "APPROVED" | "REJECTED" | undefined>("OPEN");
   const { data, isLoading, refetch } = trpc.admin.fraud.listCases.useQuery({
@@ -67,7 +80,7 @@ export default function FraudCasesPage() {
       </div>
 
       <div className="space-y-4">
-        {data?.items.map((fraudCase: any) => (
+        {data?.items.map((fraudCase: FraudCase) => (
           <div key={fraudCase.id} className="bg-white border rounded-lg p-6">
             <div className="flex justify-between items-start">
               <div className="flex-1">
