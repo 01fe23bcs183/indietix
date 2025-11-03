@@ -69,7 +69,7 @@ export function PriceBreakdown({
         </div>
         <div className="flex justify-between font-semibold text-base border-t pt-2">
           <span>Total</span>
-          <span>{formatINR(total)}</span>
+          <span data-testid="price-breakdown-total">{formatINR(total)}</span>
         </div>
       </div>
     </div>

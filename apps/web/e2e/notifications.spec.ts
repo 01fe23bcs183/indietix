@@ -1,10 +1,6 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Notification Preferences", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/auth/signin");
-  });
-
   test("should display notification preferences page", async ({ page }) => {
     await page.goto("/profile/notifications");
 
