@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+
 import { prisma } from "@indietix/db";
 import { computePayoutAmount, type PrismaClient } from "@indietix/utils";
 

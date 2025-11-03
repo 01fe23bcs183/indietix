@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+
 import { expireWaitlistOffers } from "@indietix/api";
 
 export async function GET(request: NextRequest) {

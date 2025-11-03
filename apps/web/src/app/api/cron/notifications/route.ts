@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processPendingNotifications } from "@indietix/notify";
 
+export const runtime = "nodejs";
+
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
