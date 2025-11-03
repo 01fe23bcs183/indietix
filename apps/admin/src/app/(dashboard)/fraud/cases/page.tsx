@@ -9,11 +9,11 @@ type FraudCase = {
   status: string;
   riskScore: number;
   riskTags: string[];
-  createdAt: Date;
+  createdAt: string;
   booking: {
     id: string;
-    user: { email: string };
-    event: { title: string };
+    user: { email: string; name: string };
+    event: { title: string; date: string };
   };
 };
 
