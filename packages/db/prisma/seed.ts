@@ -430,7 +430,7 @@ async function main() {
   ];
 
   for (const bookingData of dxBookings) {
-    const { quantity, totalAmount, ...validBookingData } = bookingData;
+    const { quantity, ...validBookingData } = bookingData;
     const ticketPrice = dxEvent.price * quantity;
     const convenienceFee = Math.round(ticketPrice * 0.05);
     const platformFee = Math.round(ticketPrice * 0.03);
