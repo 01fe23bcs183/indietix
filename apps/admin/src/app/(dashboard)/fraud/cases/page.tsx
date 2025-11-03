@@ -67,7 +67,7 @@ export default function FraudCasesPage() {
       </div>
 
       <div className="space-y-4">
-        {data?.items.map((fraudCase) => (
+        {data?.items.map((fraudCase: any) => (
           <div key={fraudCase.id} className="bg-white border rounded-lg p-6">
             <div className="flex justify-between items-start">
               <div className="flex-1">
