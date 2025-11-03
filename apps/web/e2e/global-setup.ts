@@ -1,8 +1,8 @@
-import { chromium, FullConfig } from "@playwright/test";
+import { chromium } from "@playwright/test";
 
-async function globalSetup(config: FullConfig) {
-  const baseURL = (config as any).use?.baseURL || "http://localhost:3000";
-  const storageState = (config as any).use?.storageState || ".auth/user.json";
+async function globalSetup() {
+  const baseURL = process.env.BASE_URL || "http://localhost:3000";
+  const storageState = ".auth/user.json";
 
   const browser = await chromium.launch();
   const page = await browser.newPage();
@@ -18,7 +18,7 @@ async function globalSetup(config: FullConfig) {
 
   await page.waitForURL(`${baseURL}/`, { timeout: 10000 });
 
-  await page.context().storageState({ path: storageState as string });
+  await page.context().storageState({ path: storageState });
 
   await browser.close();
 }
