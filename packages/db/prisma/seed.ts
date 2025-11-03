@@ -350,7 +350,7 @@ async function main() {
       const timestamp = Date.now().toString(36).toUpperCase();
       const random = Math.random().toString(36).substring(2, 8).toUpperCase();
       const ticketNumber = `TIX-${timestamp}-${random}`;
-      const { quantity, totalAmount, ...validBookingData } = bookingData;
+      const { quantity, ...validBookingData } = bookingData;
       const ticketPrice = sunburnEvent.price * quantity;
       const convenienceFee = Math.round(ticketPrice * 0.05);
       const platformFee = Math.round(ticketPrice * 0.03);
