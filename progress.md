@@ -89,13 +89,15 @@
 2. ✅ Created progress.md and mobile-app-v0_DOCUMENT.md tracking documents
 3. ✅ Analyzed android-e2e CI failure logs
 4. ✅ Identified root cause: hardcoded paths in settings.gradle patch don't work with pnpm
-5. ✅ Fixed scripts/android-build.sh to use dynamic Node.js resolution (like Expo does)
-6. 🔄 Committing and pushing the fix...
+5. ❌ Attempt 1: Dynamic Node.js resolution failed (expo-modules-core not resolvable from android context)
+6. ✅ Attempt 2: Removed settings.gradle patching entirely - let Expo handle it
+7. 🔄 Committing and pushing the fix...
 
 ## Known Issues
-1. **android-e2e CI failure** (FIXED): Gradle plugin resolution issue with expo-modules-core in pnpm monorepo
-   - Root Cause: Script was adding hardcoded paths `../node_modules/expo-modules-core` that don't exist in pnpm monorepos
-   - Solution: Use dynamic Node.js resolution via `require.resolve('expo-modules-core/package.json')` (same pattern Expo uses)
+1. **android-e2e CI failure** (FIXING - Attempt 2): Gradle plugin resolution issue with expo-modules-core in pnpm monorepo
+   - Root Cause: Script was patching settings.gradle unnecessarily, causing resolution issues
+   - Attempt 1 Failed: Dynamic resolution returned null (transitive dependency issue)
+   - Attempt 2: Remove patch entirely - Expo's autolinking should handle everything
    - Status: Fix implemented, awaiting CI validation
 
 ## Notes

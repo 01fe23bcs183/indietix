@@ -122,15 +122,29 @@ The android-e2e check is failing due to Gradle plugin resolution in pnpm monorep
 - These paths don't exist in pnpm monorepos where dependencies are in `.pnpm/` store
 - Original Expo-generated settings.gradle uses dynamic Node.js resolution which works correctly
 
-### 2025-11-04 08:36 UTC - Implemented Fix
+### 2025-11-04 08:36 UTC - Implemented Fix (Attempt 1 - Failed)
 **Action:** Fixed scripts/android-build.sh to use dynamic Node.js resolution
 **Changes:**
 - Replaced hardcoded paths with: `new File(["node", "--print", "require.resolve('expo-modules-core/package.json')"].execute(null, rootDir).text.trim()).getParentFile()`
 - This matches the pattern Expo uses for other includeBuild directives (e.g., @react-native/gradle-plugin)
 - Added logger.quiet() to show resolved path for debugging
-- Removed hardcoded maven repository paths (not needed with dynamic resolution)
 
-**File Modified:** scripts/android-build.sh (lines 27-37)
+**Result:** FAILED - `require.resolve('expo-modules-core/package.json')` returned null because expo-modules-core is a transitive dependency and can't be resolved from android directory context.
+
+### 2025-11-04 08:46 UTC - Implemented Fix (Attempt 2)
+**Action:** Remove settings.gradle patching entirely
+**Rationale:**
+- Expo's `useExpoModules()` already handles module linking
+- Expo's autolinking.gradle should handle plugin resolution
+- The original Expo-generated settings.gradle works correctly without our patch
+- Our patch was causing more problems than it solved
+
+**Changes:**
+- Removed all settings.gradle patching logic from scripts/android-build.sh
+- Now just verifying the file exists and showing first 50 lines for debugging
+- Let Expo handle everything through its built-in autolinking
+
+**File Modified:** scripts/android-build.sh (lines 13-22)
 
 **Next Steps:**
 1. Commit and push the fix
