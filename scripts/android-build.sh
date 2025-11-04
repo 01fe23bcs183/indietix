@@ -6,7 +6,7 @@ echo "Building Android APK for IndieTix Mobile..."
 cd "$(dirname "$0")/.."
 
 echo "Running Expo prebuild for Android..."
-pnpm --filter @indietix/mobile exec expo prebuild --platform android --non-interactive
+CI=1 pnpm --filter @indietix/mobile exec expo prebuild --platform android
 
 echo "Building debug APK with Gradle..."
 cd apps/mobile/android
