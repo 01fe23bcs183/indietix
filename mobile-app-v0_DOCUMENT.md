@@ -131,20 +131,32 @@ The android-e2e check is failing due to Gradle plugin resolution in pnpm monorep
 
 **Result:** FAILED - `require.resolve('expo-modules-core/package.json')` returned null because expo-modules-core is a transitive dependency and can't be resolved from android directory context.
 
-### 2025-11-04 08:46 UTC - Implemented Fix (Attempt 2)
+### 2025-11-04 08:46 UTC - Implemented Fix (Attempt 2 - Failed)
 **Action:** Remove settings.gradle patching entirely
 **Rationale:**
 - Expo's `useExpoModules()` already handles module linking
 - Expo's autolinking.gradle should handle plugin resolution
-- The original Expo-generated settings.gradle works correctly without our patch
-- Our patch was causing more problems than it solved
+
+**Result:** FAILED - Build failed with 2 errors:
+1. Plugin [id: 'expo-module-gradle-plugin'] was not found
+2. Could not get unknown property 'release' for SoftwareComponent
+
+**Root Cause Identified:** The expo-module-gradle-plugin DOES need to be in pluginManagement's includeBuild. Expo's autolinking doesn't handle this automatically in pnpm monorepos.
+
+### 2025-11-04 08:55 UTC - Implemented Fix (Attempt 3)
+**Action:** Add expo-modules-core to pluginManagement with proper pnpm resolution
+**Rationale:**
+- The error "Plugin [id: 'expo-module-gradle-plugin'] was not found" confirms we need expo-modules-core in pluginManagement
+- In pnpm monorepos, expo-modules-core is at: `node_modules/.pnpm/expo-modules-core@VERSION/node_modules/expo-modules-core`
+- Use `require.resolve('expo-modules-core/package.json', { paths: [require.resolve('expo/package.json')] })` to resolve from expo's context
 
 **Changes:**
-- Removed all settings.gradle patching logic from scripts/android-build.sh
-- Now just verifying the file exists and showing first 50 lines for debugging
-- Let Expo handle everything through its built-in autolinking
+- Added pluginManagement block with dynamic resolution using expo as the starting point
+- Added try-catch to handle resolution failures gracefully
+- Added null check before includeBuild to prevent errors
+- Added logger.quiet() for debugging
 
-**File Modified:** scripts/android-build.sh (lines 13-22)
+**File Modified:** scripts/android-build.sh (lines 13-49)
 
 **Next Steps:**
 1. Commit and push the fix
