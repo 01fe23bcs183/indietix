@@ -26,14 +26,13 @@ if [ -f "$SETTINGS_FILE" ]; then
     echo "Adding expo-modules-core plugin management to settings.gradle..."
     cat > /tmp/gradle-patch.txt << 'EOF'
 pluginManagement {
-    includeBuild("../node_modules/expo-modules-core")
-    includeBuild("../../node_modules/expo-modules-core")
+    def expoModulesCorePath = new File(["node", "--print", "require.resolve('expo-modules-core/package.json')"].execute(null, rootDir).text.trim()).getParentFile()
+    logger.quiet("Expo modules core resolved to: ${expoModulesCorePath}")
+    includeBuild(expoModulesCorePath)
     repositories {
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven { url = uri(file("${rootDir}/../node_modules/expo-modules-core/android/maven")) }
-        maven { url = uri(file("${rootDir}/../../node_modules/expo-modules-core/android/maven")) }
     }
 }
 
