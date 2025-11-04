@@ -46,10 +46,7 @@ export default function EventDetail(): JSX.Element {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorTitle}>Event Not Found</Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.back()}>
           <Text style={styles.buttonText}>Go Back</Text>
         </TouchableOpacity>
       </View>

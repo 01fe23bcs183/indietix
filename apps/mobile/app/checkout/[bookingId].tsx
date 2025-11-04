@@ -204,9 +204,7 @@ export default function CheckoutPage(): JSX.Element {
                 <Text style={styles.promoButtonText}>Apply</Text>
               </TouchableOpacity>
             </View>
-            {promoError && (
-              <Text style={styles.promoError}>{promoError}</Text>
-            )}
+            {promoError && <Text style={styles.promoError}>{promoError}</Text>}
             {promoSuccess && (
               <Text style={styles.promoSuccess}>{promoSuccess}</Text>
             )}

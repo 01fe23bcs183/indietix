@@ -150,35 +150,70 @@ export default function Bookings(): JSX.Element {
     <View style={styles.container}>
       <View style={styles.filterContainer}>
         <TouchableOpacity
-          style={[styles.filterButton, !statusFilter && styles.filterButtonActive]}
+          style={[
+            styles.filterButton,
+            !statusFilter && styles.filterButtonActive,
+          ]}
           onPress={() => setStatusFilter(null)}
         >
-          <Text style={[styles.filterButtonText, !statusFilter && styles.filterButtonTextActive]}>
+          <Text
+            style={[
+              styles.filterButtonText,
+              !statusFilter && styles.filterButtonTextActive,
+            ]}
+          >
             All ({allBookings.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.filterButton, statusFilter === "CONFIRMED" && styles.filterButtonActive]}
+          style={[
+            styles.filterButton,
+            statusFilter === "CONFIRMED" && styles.filterButtonActive,
+          ]}
           onPress={() => setStatusFilter("CONFIRMED")}
         >
-          <Text style={[styles.filterButtonText, statusFilter === "CONFIRMED" && styles.filterButtonTextActive]}>
-            Confirmed ({allBookings.filter((b) => b.status === "CONFIRMED").length})
+          <Text
+            style={[
+              styles.filterButtonText,
+              statusFilter === "CONFIRMED" && styles.filterButtonTextActive,
+            ]}
+          >
+            Confirmed (
+            {allBookings.filter((b) => b.status === "CONFIRMED").length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.filterButton, statusFilter === "ATTENDED" && styles.filterButtonActive]}
+          style={[
+            styles.filterButton,
+            statusFilter === "ATTENDED" && styles.filterButtonActive,
+          ]}
           onPress={() => setStatusFilter("ATTENDED")}
         >
-          <Text style={[styles.filterButtonText, statusFilter === "ATTENDED" && styles.filterButtonTextActive]}>
-            Attended ({allBookings.filter((b) => b.status === "ATTENDED").length})
+          <Text
+            style={[
+              styles.filterButtonText,
+              statusFilter === "ATTENDED" && styles.filterButtonTextActive,
+            ]}
+          >
+            Attended (
+            {allBookings.filter((b) => b.status === "ATTENDED").length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.filterButton, statusFilter === "CANCELLED" && styles.filterButtonActive]}
+          style={[
+            styles.filterButton,
+            statusFilter === "CANCELLED" && styles.filterButtonActive,
+          ]}
           onPress={() => setStatusFilter("CANCELLED")}
         >
-          <Text style={[styles.filterButtonText, statusFilter === "CANCELLED" && styles.filterButtonTextActive]}>
-            Cancelled ({allBookings.filter((b) => b.status === "CANCELLED").length})
+          <Text
+            style={[
+              styles.filterButtonText,
+              statusFilter === "CANCELLED" && styles.filterButtonTextActive,
+            ]}
+          >
+            Cancelled (
+            {allBookings.filter((b) => b.status === "CANCELLED").length})
           </Text>
         </TouchableOpacity>
       </View>

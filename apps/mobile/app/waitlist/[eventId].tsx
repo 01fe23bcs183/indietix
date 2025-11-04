@@ -92,8 +92,7 @@ export default function WaitlistJoin(): JSX.Element {
 
   const isAlreadyOnWaitlist =
     waitlistStatus?.isOnWaitlist &&
-    (waitlistStatus.status === "ACTIVE" ||
-      waitlistStatus.status === "INVITED");
+    (waitlistStatus.status === "ACTIVE" || waitlistStatus.status === "INVITED");
 
   return (
     <ScrollView style={styles.container}>
@@ -136,29 +135,30 @@ export default function WaitlistJoin(): JSX.Element {
             <Text style={styles.alreadyOnWaitlistText}>
               We'll notify you via email when tickets become available.
             </Text>
-            {waitlistStatus?.offer && waitlistStatus.offer.status === "PENDING" && (
-              <View style={styles.offerCard}>
-                <Text style={styles.offerTitle}>🎉 You Have an Offer!</Text>
-                <Text style={styles.offerText}>
-                  {waitlistStatus.offer.quantity} ticket
-                  {waitlistStatus.offer.quantity > 1 ? "s" : ""} available
-                </Text>
-                <Text style={styles.offerExpiry}>
-                  Expires:{" "}
-                  {new Date(waitlistStatus.offer.expiresAt).toLocaleString(
-                    "en-IN"
-                  )}
-                </Text>
-                <TouchableOpacity
-                  style={styles.claimButton}
-                  onPress={() =>
-                    router.push(`/waitlist/claim/${waitlistStatus.offer!.id}`)
-                  }
-                >
-                  <Text style={styles.claimButtonText}>Claim Offer</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+            {waitlistStatus?.offer &&
+              waitlistStatus.offer.status === "PENDING" && (
+                <View style={styles.offerCard}>
+                  <Text style={styles.offerTitle}>🎉 You Have an Offer!</Text>
+                  <Text style={styles.offerText}>
+                    {waitlistStatus.offer.quantity} ticket
+                    {waitlistStatus.offer.quantity > 1 ? "s" : ""} available
+                  </Text>
+                  <Text style={styles.offerExpiry}>
+                    Expires:{" "}
+                    {new Date(waitlistStatus.offer.expiresAt).toLocaleString(
+                      "en-IN"
+                    )}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.claimButton}
+                    onPress={() =>
+                      router.push(`/waitlist/claim/${waitlistStatus.offer!.id}`)
+                    }
+                  >
+                    <Text style={styles.claimButtonText}>Claim Offer</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
           </View>
         ) : (
           <>

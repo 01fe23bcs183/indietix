@@ -41,7 +41,8 @@ export default function Home(): JSX.Element {
             {item.title}
           </Text>
           <Text style={styles.eventDate}>
-            📅 {new Date(item.date).toLocaleDateString("en-IN", {
+            📅{" "}
+            {new Date(item.date).toLocaleDateString("en-IN", {
               day: "numeric",
               month: "short",
               year: "numeric",

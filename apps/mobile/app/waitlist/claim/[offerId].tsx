@@ -163,7 +163,9 @@ export default function WaitlistClaim(): JSX.Element {
           </Text>
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Price per ticket:</Text>
-            <Text style={styles.priceValue}>{formatINR(offer.event.price)}</Text>
+            <Text style={styles.priceValue}>
+              {formatINR(offer.event.price)}
+            </Text>
           </View>
         </View>
 
@@ -204,7 +206,9 @@ export default function WaitlistClaim(): JSX.Element {
           {isClaiming ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={styles.claimButtonText}>Claim Offer & Proceed to Checkout</Text>
+            <Text style={styles.claimButtonText}>
+              Claim Offer & Proceed to Checkout
+            </Text>
           )}
         </TouchableOpacity>
 
