@@ -6,22 +6,28 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Share,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { trpc } from "../../lib/trpc";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   getCachedTicket,
   cacheTicket,
   type CachedTicket,
 } from "../../utils/TicketCache";
 import QRCode from "react-native-qrcode-svg";
+import * as Calendar from "expo-calendar";
+import * as Sharing from "expo-sharing";
+import { captureRef } from "react-native-view-shot";
 
 export default function TicketDetail(): JSX.Element {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [cachedTicket, setCachedTicket] = useState<CachedTicket | null>(null);
   const [isOffline, setIsOffline] = useState(false);
+  const qrCodeRef = useRef<View>(null);
 
   const {
     data: booking,
@@ -76,6 +82,99 @@ export default function TicketDetail(): JSX.Element {
   async function loadCachedTicket() {
     const cached = await getCachedTicket(id!);
     setCachedTicket(cached);
+  }
+
+  async function handleShareTicket() {
+    try {
+      if (!qrCodeRef.current) {
+        Alert.alert("Error", "Unable to capture QR code");
+        return;
+      }
+
+      const uri = await captureRef(qrCodeRef.current, {
+        format: "png",
+        quality: 1,
+      });
+
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "image/png",
+          dialogTitle: `Share ${ticketData.event.title} Ticket`,
+        });
+      } else {
+        await Share.share({
+          message: `My ticket for ${ticketData.event.title}\nBooking ID: ${ticketData.id.slice(0, 8).toUpperCase()}\nDate: ${typeof ticketData.event.startTime === "string" ? ticketData.event.startTime : new Date(ticketData.event.startTime).toLocaleDateString()}\nVenue: ${ticketData.event.venue}, ${ticketData.event.city}`,
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing ticket:", error);
+      Alert.alert("Error", "Failed to share ticket. Please try again.");
+    }
+  }
+
+  async function handleAddToCalendar() {
+    try {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Calendar permission is required to add events"
+        );
+        return;
+      }
+
+      const calendars = await Calendar.getCalendarsAsync(
+        Calendar.EntityTypes.EVENT
+      );
+      const defaultCalendar =
+        calendars.find((cal) => cal.allowsModifications) || calendars[0];
+
+      if (!defaultCalendar) {
+        Alert.alert("Error", "No calendar available");
+        return;
+      }
+
+      const eventDate =
+        typeof ticketData.event.startTime === "string"
+          ? new Date(ticketData.event.startTime)
+          : new Date(ticketData.event.startTime);
+
+      const endDate = new Date(eventDate);
+      endDate.setHours(endDate.getHours() + 3);
+
+      const eventId = await Calendar.createEventAsync(defaultCalendar.id, {
+        title: ticketData.event.title,
+        startDate: eventDate,
+        endDate: endDate,
+        location: `${ticketData.event.venue}, ${ticketData.event.city}`,
+        notes: `Booking ID: ${ticketData.id.slice(0, 8).toUpperCase()}\nTickets: ${ticketData.seats}`,
+        alarms: [{ relativeOffset: -60 }, { relativeOffset: -1440 }],
+      });
+
+      if (eventId) {
+        Alert.alert("Success", "Event added to your calendar!");
+      }
+    } catch (error) {
+      console.error("Error adding to calendar:", error);
+      Alert.alert("Error", "Failed to add event to calendar. Please try again.");
+    }
+  }
+
+  function handleTransferTicket() {
+    Alert.alert(
+      "Transfer Ticket",
+      "Enter the email address of the person you want to transfer this ticket to:",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Transfer",
+          onPress: () => {
+            Alert.alert("Info", "Ticket transfer feature coming soon");
+          },
+        },
+      ]
+    );
   }
 
   function handleCancelBooking() {
@@ -204,7 +303,7 @@ export default function TicketDetail(): JSX.Element {
         {qrData && (
           <View style={styles.qrContainer}>
             <Text style={styles.qrTitle}>Your Ticket QR Code</Text>
-            <View style={styles.qrCodeWrapper}>
+            <View style={styles.qrCodeWrapper} ref={qrCodeRef}>
               <QRCode value={qrData} size={200} />
             </View>
             <Text style={styles.qrInstructions}>
@@ -216,12 +315,25 @@ export default function TicketDetail(): JSX.Element {
 
       {ticketData.status === "CONFIRMED" && (
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleAddToCalendar}
+          >
             <Text style={styles.actionButtonText}>📅 Add to Calendar</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleShareTicket}
+          >
             <Text style={styles.actionButtonText}>📤 Share Ticket</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleTransferTicket}
+          >
+            <Text style={styles.actionButtonText}>🔄 Transfer Ticket</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
