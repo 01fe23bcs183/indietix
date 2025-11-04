@@ -31,6 +31,7 @@ export default function Bookings(): JSX.Element {
   const [cachedTickets, setCachedTickets] = useState<
     Array<{ bookingId: string; ticket: CachedTicket }>
   >([]);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const {
     data: bookings,
@@ -75,6 +76,10 @@ export default function Bookings(): JSX.Element {
         isCached: true,
       })),
   ];
+
+  const filteredBookings = statusFilter
+    ? allBookings.filter((b) => b.status === statusFilter)
+    : allBookings;
 
   function renderBooking({ item }: { item: BookingItem }) {
     return (
@@ -143,21 +148,66 @@ export default function Bookings(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={allBookings}
-        renderItem={renderBooking}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={() => {
-              refetch();
-              loadCachedTickets();
-            }}
-          />
-        }
-      />
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[styles.filterButton, !statusFilter && styles.filterButtonActive]}
+          onPress={() => setStatusFilter(null)}
+        >
+          <Text style={[styles.filterButtonText, !statusFilter && styles.filterButtonTextActive]}>
+            All ({allBookings.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterButton, statusFilter === "CONFIRMED" && styles.filterButtonActive]}
+          onPress={() => setStatusFilter("CONFIRMED")}
+        >
+          <Text style={[styles.filterButtonText, statusFilter === "CONFIRMED" && styles.filterButtonTextActive]}>
+            Confirmed ({allBookings.filter((b) => b.status === "CONFIRMED").length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterButton, statusFilter === "ATTENDED" && styles.filterButtonActive]}
+          onPress={() => setStatusFilter("ATTENDED")}
+        >
+          <Text style={[styles.filterButtonText, statusFilter === "ATTENDED" && styles.filterButtonTextActive]}>
+            Attended ({allBookings.filter((b) => b.status === "ATTENDED").length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterButton, statusFilter === "CANCELLED" && styles.filterButtonActive]}
+          onPress={() => setStatusFilter("CANCELLED")}
+        >
+          <Text style={[styles.filterButtonText, statusFilter === "CANCELLED" && styles.filterButtonTextActive]}>
+            Cancelled ({allBookings.filter((b) => b.status === "CANCELLED").length})
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {filteredBookings.length === 0 ? (
+        <View style={styles.centerContainer}>
+          <Text style={styles.emptyIcon}>🎫</Text>
+          <Text style={styles.emptyTitle}>No {statusFilter} Tickets</Text>
+          <Text style={styles.emptyText}>
+            You don't have any {statusFilter?.toLowerCase()} tickets
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredBookings}
+          renderItem={renderBooking}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={() => {
+                refetch();
+                loadCachedTickets();
+              }}
+            />
+          }
+        />
+      )}
     </View>
   );
 }
@@ -192,6 +242,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     textAlign: "center",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    padding: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    gap: 8,
+  },
+  filterButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#f5f5f5",
+    alignItems: "center",
+  },
+  filterButtonActive: {
+    backgroundColor: "#0066cc",
+  },
+  filterButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#666",
+  },
+  filterButtonTextActive: {
+    color: "#fff",
   },
   listContent: {
     padding: 16,
