@@ -2,7 +2,7 @@
 
 ## Overall Progress
 ```
-[████████████░░░░░░░░] 55% Complete (22/39 tasks)
+[██████████████░░░░░░] 75% Complete (29/39 tasks)
 ```
 
 ## Current Status
