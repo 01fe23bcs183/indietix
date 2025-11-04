@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Alert,
   Share,
-  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { trpc } from "../../lib/trpc";
@@ -157,7 +156,10 @@ export default function TicketDetail(): JSX.Element {
       }
     } catch (error) {
       console.error("Error adding to calendar:", error);
-      Alert.alert("Error", "Failed to add event to calendar. Please try again.");
+      Alert.alert(
+        "Error",
+        "Failed to add event to calendar. Please try again."
+      );
     }
   }
 

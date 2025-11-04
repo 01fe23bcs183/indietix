@@ -17,7 +17,10 @@ export default function RootLayout(): JSX.Element {
               <Stack.Screen name="auth/signin" options={{ title: "Sign In" }} />
               <Stack.Screen name="auth/signup" options={{ title: "Sign Up" }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="bookings/[id]" options={{ title: "Ticket" }} />
+              <Stack.Screen
+                name="bookings/[id]"
+                options={{ title: "Ticket" }}
+              />
             </Stack>
           </AuthProvider>
         </QueryClientProvider>
