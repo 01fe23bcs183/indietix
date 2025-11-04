@@ -347,8 +347,29 @@ async function main() {
     ];
 
     for (const bookingData of bookings) {
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const ticketNumber = `TIX-${timestamp}-${random}`;
+      const { eventId, userId, paymentStatus, status, quantity } = bookingData;
+      const ticketPrice = sunburnEvent.price * quantity;
+      const convenienceFee = Math.round(ticketPrice * 0.05);
+      const platformFee = Math.round(ticketPrice * 0.03);
+      const finalAmount = ticketPrice + convenienceFee + platformFee;
+
       await prisma.booking.create({
-        data: bookingData,
+        data: {
+          eventId,
+          userId,
+          paymentStatus,
+          status,
+          ticketNumber,
+          seats: quantity,
+          ticketPrice,
+          convenienceFee,
+          platformFee,
+          finalAmount,
+          holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        },
       });
     }
     console.log(`✅ Created 5 sample bookings for ${sunburnEvent.title}`);
@@ -412,15 +433,24 @@ async function main() {
   ];
 
   for (const bookingData of dxBookings) {
+    const { eventId, userId, paymentStatus, status, quantity } = bookingData;
+    const ticketPrice = dxEvent.price * quantity;
+    const convenienceFee = Math.round(ticketPrice * 0.05);
+    const platformFee = Math.round(ticketPrice * 0.03);
+    const finalAmount = ticketPrice + convenienceFee + platformFee;
+
     const booking = await prisma.booking.create({
       data: {
-        ...bookingData,
+        eventId,
+        userId,
+        paymentStatus,
+        status,
         ticketNumber: `TIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        seats: bookingData.quantity,
-        ticketPrice: dxEvent.price * bookingData.quantity,
-        convenienceFee: Math.round(dxEvent.price * bookingData.quantity * 0.05),
-        platformFee: Math.round(dxEvent.price * bookingData.quantity * 0.03),
-        finalAmount: bookingData.totalAmount,
+        seats: quantity,
+        ticketPrice,
+        convenienceFee,
+        platformFee,
+        finalAmount,
         holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
       },
     });
