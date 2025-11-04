@@ -6,17 +6,21 @@ import {
   StyleSheet,
   ActivityIndicator,
   Linking,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { trpc } from "../../lib/trpc";
 import { formatINR, FEES, GST_RATE } from "@indietix/utils";
 import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function EventDetail(): JSX.Element {
   const params = useLocalSearchParams();
   const router = useRouter();
   const slug = params.slug as string;
   const [quantity, setQuantity] = useState(1);
+  const [isBooking, setIsBooking] = useState(false);
+  const { user } = useAuth();
 
   const { data: event, isLoading } = trpc.events.getBySlug.useQuery({
     slug,
@@ -26,6 +30,8 @@ export default function EventDetail(): JSX.Element {
     { eventId: event?.id || "", now: new Date() },
     { enabled: !!event?.id }
   );
+
+  const startBooking = trpc.booking.start.useMutation();
 
   if (isLoading) {
     return (
@@ -65,11 +71,37 @@ export default function EventDetail(): JSX.Element {
     `${event.venue}, ${event.city}`
   )}`;
 
-  function handleBookNow() {
+  async function handleBookNow() {
+    if (!user) {
+      Alert.alert("Sign In Required", "Please sign in to book tickets", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Sign In", onPress: () => router.push("/auth/signin") },
+      ]);
+      return;
+    }
+
     if (isSoldOut) {
       router.push(`/waitlist/${event.id}`);
-    } else {
-      router.push(`/checkout/${event.id}?quantity=${quantity}`);
+      return;
+    }
+
+    setIsBooking(true);
+    try {
+      const result = await startBooking.mutateAsync({
+        eventId: event.id,
+        quantity,
+        userId: user.id,
+      });
+
+      router.push(`/checkout/${result.bookingId}`);
+    } catch (error) {
+      Alert.alert(
+        "Booking Failed",
+        error instanceof Error ? error.message : "Failed to start booking",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsBooking(false);
     }
   }
 
@@ -246,12 +278,21 @@ export default function EventDetail(): JSX.Element {
           )}
 
           <TouchableOpacity
-            style={[styles.bookButton, isSoldOut && styles.soldOutButton]}
+            style={[
+              styles.bookButton,
+              isSoldOut && styles.soldOutButton,
+              isBooking && styles.bookButtonDisabled,
+            ]}
             onPress={handleBookNow}
+            disabled={isBooking}
           >
-            <Text style={styles.bookButtonText}>
-              {isSoldOut ? "Join Waitlist" : "Book Now"}
-            </Text>
+            {isBooking ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.bookButtonText}>
+                {isSoldOut ? "Join Waitlist" : "Book Now"}
+              </Text>
+            )}
           </TouchableOpacity>
 
           <Text style={styles.seatsInfo}>
@@ -534,6 +575,9 @@ const styles = StyleSheet.create({
   },
   soldOutButton: {
     backgroundColor: "#f59e0b",
+  },
+  bookButtonDisabled: {
+    backgroundColor: "#ccc",
   },
   bookButtonText: {
     fontSize: 18,
