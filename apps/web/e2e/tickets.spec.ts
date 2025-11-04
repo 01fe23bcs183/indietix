@@ -64,7 +64,9 @@ test.describe("Ticket System", () => {
       window.dispatchEvent(new Event("offline"));
     });
 
-    await expect(page.locator("text=Works offline")).toBeVisible({
+    await expect(
+      page.locator("text=Works offline - Your ticket is cached locally")
+    ).toBeVisible({
       timeout: 5000,
     });
   });
