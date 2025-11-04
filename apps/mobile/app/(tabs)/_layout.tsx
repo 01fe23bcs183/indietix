@@ -5,6 +5,13 @@ export default function TabsLayout() {
   return (
     <Tabs>
       <Tabs.Screen
+        name="home"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color }) => <Text style={{ color }}>🏠</Text>,
+        }}
+      />
+      <Tabs.Screen
         name="bookings"
         options={{
           title: "My Tickets",

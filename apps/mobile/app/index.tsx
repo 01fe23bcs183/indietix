@@ -11,7 +11,7 @@ export default function Index(): JSX.Element {
   useEffect(() => {
     if (!isLoading) {
       if (user) {
-        router.replace("/(tabs)/bookings");
+        router.replace("/(tabs)/home");
       } else {
         router.replace("/auth/signin");
       }
