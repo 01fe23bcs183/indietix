@@ -155,17 +155,29 @@ The android-e2e check is failing due to Gradle plugin resolution in pnpm monorep
 - This means expo-modules-core is already included elsewhere (by Expo's autolinking)
 - Need to use dependencySubstitution to avoid naming conflict
 
-### 2025-11-04 09:03 UTC - Implemented Fix (Attempt 4)
+### 2025-11-04 09:03 UTC - Implemented Fix (Attempt 4 - Failed)
 **Action:** Add dependencySubstitution to avoid naming conflict
 **Rationale:**
 - expo-modules-core is already included as a project by Expo's autolinking
 - Using includeBuild without dependencySubstitution causes naming conflict
-- Need to tell Gradle to substitute the module dependency with the included build project
+
+**Result:** FAILED - Same naming conflict error. dependencySubstitution didn't work.
+- Error: "has name 'expo-modules-core' which is the same as a project of the main build"
+- Root cause: includeBuild approach is fundamentally wrong - we shouldn't include expo-modules-core as a build
+
+### 2025-11-04 09:09 UTC - Implemented Fix (Attempt 5)
+**Action:** Add expo-modules-core maven repository instead of includeBuild
+**Rationale:**
+- The plugin needs to be available in pluginManagement's repositories, not as an includeBuild
+- expo-modules-core has an android/maven directory that contains the plugin
+- This is what the original hardcoded patch was trying to do, but with dynamic resolution
+- This approach avoids the naming conflict because we're not including it as a build
 
 **Changes:**
-- Added dependencySubstitution block inside includeBuild
-- Changed grep check from "expo-module-gradle-plugin" to "pluginManagement" (more reliable)
-- This tells Gradle to use the included build for the expo-modules-core module
+- Removed includeBuild and dependencySubstitution
+- Added expo-modules-core/android/maven as a maven repository in pluginManagement
+- Dynamically resolve the path using require.resolve from expo's context
+- Check if maven directory exists before adding it
 
 **File Modified:** scripts/android-build.sh (lines 19-52)
 

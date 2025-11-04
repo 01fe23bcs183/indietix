@@ -92,16 +92,18 @@
 5. ❌ Attempt 1: Dynamic Node.js resolution failed (expo-modules-core not resolvable from android context)
 6. ❌ Attempt 2: Removed patching entirely - failed with "Plugin expo-module-gradle-plugin not found"
 7. ⚠️ Attempt 3: Resolved expo-modules-core correctly but naming conflict with existing project
-8. ✅ Attempt 4: Add dependencySubstitution to avoid naming conflict
-9. 🔄 Committing and pushing the fix...
+8. ❌ Attempt 4: dependencySubstitution didn't resolve naming conflict
+9. ✅ Attempt 5: Add expo-modules-core/android/maven as repository instead of includeBuild
+10. 🔄 Committing and pushing the fix...
 
 ## Known Issues
-1. **android-e2e CI failure** (FIXING - Attempt 4): Gradle plugin resolution issue with expo-modules-core in pnpm monorepo
-   - Root Cause: expo-module-gradle-plugin needs expo-modules-core in pluginManagement's includeBuild
+1. **android-e2e CI failure** (FIXING - Attempt 5): Gradle plugin resolution issue with expo-modules-core in pnpm monorepo
+   - Root Cause: expo-module-gradle-plugin needs to be available in pluginManagement repositories
    - Attempt 1 Failed: Dynamic resolution returned null (couldn't resolve from android context)
    - Attempt 2 Failed: No patching caused "Plugin not found" error
    - Attempt 3 Partial: Resolved correctly but naming conflict (expo-modules-core already exists as project)
-   - Attempt 4: Add dependencySubstitution to tell Gradle to use included build for module
+   - Attempt 4 Failed: dependencySubstitution didn't work, same naming conflict
+   - Attempt 5: Add expo-modules-core/android/maven as maven repository (not includeBuild)
    - Status: Fix implemented, awaiting CI validation
 
 ## Notes

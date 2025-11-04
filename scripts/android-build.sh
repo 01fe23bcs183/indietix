@@ -17,7 +17,7 @@ if [ -f "$SETTINGS_FILE" ]; then
   sed -n '1,50p' "$SETTINGS_FILE"
   
   if ! grep -q "pluginManagement" "$SETTINGS_FILE"; then
-    echo "Adding pluginManagement with expo-modules-core for pnpm monorepo..."
+    echo "Adding pluginManagement with expo-modules-core maven repo for pnpm monorepo..."
     cat > /tmp/gradle-patch.txt << 'EOF'
 pluginManagement {
     def expoModulesCoreDir
@@ -30,18 +30,17 @@ pluginManagement {
         expoModulesCoreDir = null
     }
     
-    if (expoModulesCoreDir != null && expoModulesCoreDir.exists()) {
-        includeBuild(expoModulesCoreDir) {
-            dependencySubstitution {
-                substitute(module("expo-modules-core:expo-modules-core")).using(project(":"))
-            }
-        }
-    }
-    
     repositories {
         gradlePluginPortal()
         google()
         mavenCentral()
+        if (expoModulesCoreDir != null && expoModulesCoreDir.exists()) {
+            def mavenDir = new File(expoModulesCoreDir, "android/maven")
+            if (mavenDir.exists()) {
+                maven { url = uri(mavenDir) }
+                logger.quiet("Added expo-modules-core maven repo: ${mavenDir}")
+            }
+        }
     }
 }
 
