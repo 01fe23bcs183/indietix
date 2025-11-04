@@ -17,31 +17,29 @@ if [ -f "$SETTINGS_FILE" ]; then
   sed -n '1,50p' "$SETTINGS_FILE"
   
   if ! grep -q "pluginManagement" "$SETTINGS_FILE"; then
-    echo "Adding pluginManagement for expo-module-gradle-plugin resolution in pnpm monorepo..."
-    
+    echo "Adding pluginManagement with renamed includeBuild for pnpm monorepo..."
     cat > /tmp/gradle-patch.txt << 'EOF'
 pluginManagement {
+    def expoModulesCoreDir
+    try {
+        def expoModulesCorePath = new File(["node", "--print", "require.resolve('expo-modules-core/package.json', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+        expoModulesCoreDir = expoModulesCorePath.getParentFile()
+        logger.quiet("Resolved expo-modules-core to: ${expoModulesCoreDir}")
+    } catch (Exception e) {
+        logger.warn("Failed to resolve expo-modules-core: ${e.message}")
+        expoModulesCoreDir = null
+    }
+    
+    if (expoModulesCoreDir != null && expoModulesCoreDir.exists()) {
+        includeBuild(expoModulesCoreDir) {
+            name = 'expo-modules-core-plugin'
+        }
+    }
+    
     repositories {
         gradlePluginPortal()
         google()
         mavenCentral()
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == 'expo-module-gradle-plugin') {
-                // The plugin is provided by expo-modules-core which is included by autolinking
-                // We need to resolve it from the pnpm store
-                def expoModulesCoreDir
-                try {
-                    def expoModulesCorePath = new File(["node", "--print", "require.resolve('expo-modules-core/package.json', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
-                    expoModulesCoreDir = expoModulesCorePath.getParentFile()
-                    logger.quiet("Resolved expo-modules-core for plugin to: ${expoModulesCoreDir}")
-                    useModule("expo-modules-core:expo-modules-core:+")
-                } catch (Exception e) {
-                    logger.warn("Failed to resolve expo-modules-core for plugin: ${e.message}")
-                }
-            }
-        }
     }
 }
 
