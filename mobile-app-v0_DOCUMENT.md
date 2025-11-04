@@ -231,10 +231,36 @@ Instead of trying to include expo-modules-core in pluginManagement, let me check
 
 **File Modified:** scripts/android-build.sh (lines 15-52)
 
-**Next Steps:**
-1. Commit and push the fix
-2. Wait for CI to run
-3. Verify android-e2e check passes
+**Result:** FAILED - Renaming the build doesn't help, plugin still not found
+- Error: "Included Builds (None of the included builds contain this plugin)"
+- Root cause: When we rename the build, the plugin can't be found because plugin IDs are tied to the original build structure
+- The plugin 'expo-module-gradle-plugin' is defined in expo-modules-core, but renaming the build breaks the association
+
+### 2025-11-04 09:41 UTC - Status After 9 Failed Attempts
+**Summary:**
+After 9 different approaches to fix the android-e2e CI failure, none have succeeded:
+1. Dynamic Node.js resolution → null resolution
+2. No patching → Plugin not found
+3. includeBuild → Naming conflict
+4. includeBuild with dependencySubstitution → Still naming conflict
+5. Maven repository → Directory doesn't exist
+6. resolutionStrategy with useModule() → Not a Maven artifact
+7. includeBuild with custom name → Plugin not found in renamed build
+
+**Root Cause:**
+The fundamental issue is that expo-modules-core needs to be available as an included build in pluginManagement for the expo-module-gradle-plugin to work, but Expo's autolinking already includes expo-modules-core as a project, creating an unsolvable naming conflict in the current Gradle/Expo/pnpm setup.
+
+**Current Status:**
+- 8/9 CI checks passing
+- Only android-e2e failing
+- Mobile app v0 functionality is working (auth, bookings, tickets, offline support)
+- The android-e2e failure only affects APK building in CI, not the app's functionality
+
+**Recommendation:**
+Report status to user and await guidance on whether to:
+1. Continue attempting to fix android-e2e with more advanced approaches
+2. Accept android-e2e as non-blocking and proceed to Phase 2 feature implementation
+3. Seek user's expertise on the pnpm monorepo + Expo + Gradle plugin resolution issue
 
 ---
 
