@@ -27,11 +27,17 @@ test.describe("Notification Preferences", () => {
     await page.goto("/profile/notifications");
 
     await page.waitForLoadState("networkidle");
-    await expect(page.locator("text=Transactional")).toBeVisible({
+    await expect(
+      page.locator("span.font-medium:has-text('Transactional')")
+    ).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.locator("text=Reminders")).toBeVisible();
-    await expect(page.locator("text=Marketing")).toBeVisible();
+    await expect(
+      page.locator("span.font-medium:has-text('Reminders')")
+    ).toBeVisible();
+    await expect(
+      page.locator("span.font-medium:has-text('Marketing')")
+    ).toBeVisible();
   });
 
   test("should have save button", async ({ page }) => {
