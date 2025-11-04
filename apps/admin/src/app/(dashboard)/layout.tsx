@@ -12,6 +12,7 @@ const navigation = [
   { name: "Events", href: "/events" },
   { name: "Transactions", href: "/transactions" },
   { name: "Payouts", href: "/payouts" },
+  { name: "Fraud Detection", href: "/fraud" },
   { name: "Settings", href: "/settings" },
 ];
 

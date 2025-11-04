@@ -7,7 +7,8 @@ export class ResendEmailProvider implements EmailProvider {
 
   constructor(apiKey: string) {
     try {
-      const { Resend } = require("resend");
+      const mod = require("resend");
+      const Resend = mod.Resend ?? mod.default ?? mod;
       this.resend = new Resend(apiKey);
     } catch {
       throw new Error(

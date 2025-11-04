@@ -122,10 +122,7 @@ test.describe("Event Detail Page", () => {
 
     await expect(page.locator("text=Transparent Fee Breakdown")).toBeVisible();
 
-    const totalElement = page
-      .locator("text=Total")
-      .locator("..")
-      .locator("text=/₹/");
+    const totalElement = page.getByTestId("price-breakdown-total");
     await expect(totalElement).toBeVisible();
   });
 

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma as db } from "@indietix/db";
 
+export const runtime = "nodejs";
+
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();

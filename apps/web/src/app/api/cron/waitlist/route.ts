@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { expireWaitlistOffers } from "@indietix/api";
 
+export const runtime = "nodejs";
+
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const expectedToken = process.env.CRON_TOKEN;

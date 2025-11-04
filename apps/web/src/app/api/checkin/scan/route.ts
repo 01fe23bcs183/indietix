@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { verifyTicketSignature } from "@indietix/utils";
 import type { TicketPayload } from "@indietix/utils";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();

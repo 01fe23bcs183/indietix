@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@indietix/db";
 import { auth } from "../../../../lib/auth";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   if (process.env.NODE_ENV === "test") {
     return NextResponse.json({ success: true, tracked: false });

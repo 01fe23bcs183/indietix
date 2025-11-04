@@ -3,6 +3,8 @@ import { prisma } from "@indietix/db";
 import { auth } from "@/lib/auth";
 import { decodeTicketFromQR } from "@indietix/utils";
 
+export const runtime = "nodejs";
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { bookingId: string } }

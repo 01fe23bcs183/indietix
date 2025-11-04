@@ -110,6 +110,24 @@ export async function POST(request: NextRequest) {
             },
           },
         });
+
+        const bookingAttempts = await tx.bookingAttempt.findMany({
+          where: { bookingId: booking.id },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        });
+
+        const latestAttempt = bookingAttempts[0];
+        if (latestAttempt) {
+          await tx.bookingAttempt.update({
+            where: { id: latestAttempt.id },
+            data: {
+              result: "success",
+              paymentProvider: "razorpay",
+              paidAt: new Date(),
+            },
+          });
+        }
       });
 
       console.log(`Booking ${booking.id} confirmed successfully`);
@@ -120,6 +138,23 @@ export async function POST(request: NextRequest) {
           paymentStatus: "FAILED",
         },
       });
+
+      const bookingAttempts = await prisma.bookingAttempt.findMany({
+        where: { bookingId: booking.id },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      });
+
+      const latestAttempt = bookingAttempts[0];
+      if (latestAttempt) {
+        await prisma.bookingAttempt.update({
+          where: { id: latestAttempt.id },
+          data: {
+            result: "failed",
+            paymentProvider: "razorpay",
+          },
+        });
+      }
 
       console.log(`Booking ${booking.id} marked as failed`);
     }

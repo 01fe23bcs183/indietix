@@ -181,7 +181,7 @@ export default function PromoDetailPage() {
               {promo.applicableCategories &&
               promo.applicableCategories.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {promo.applicableCategories.map((cat) => (
+                  {promo.applicableCategories.map((cat: string) => (
                     <span
                       key={cat}
                       className="px-3 py-1 bg-gray-100 rounded text-sm"
@@ -200,7 +200,7 @@ export default function PromoDetailPage() {
               </h3>
               {promo.applicableCities && promo.applicableCities.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {promo.applicableCities.map((city) => (
+                  {promo.applicableCities.map((city: string) => (
                     <span
                       key={city}
                       className="px-3 py-1 bg-gray-100 rounded text-sm"
