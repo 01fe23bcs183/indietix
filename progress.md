@@ -94,8 +94,9 @@
 7. ⚠️ Attempt 3: Resolved expo-modules-core correctly but naming conflict with existing project
 8. ❌ Attempt 4: dependencySubstitution didn't resolve naming conflict
 9. ❌ Attempt 5: Maven repository approach - directory doesn't exist
-10. ✅ Attempt 6: Use resolutionStrategy.eachPlugin to resolve plugin without includeBuild
-11. 🔄 Committing and pushing the fix...
+10. ❌ Attempt 6: resolutionStrategy with useModule() - tried to resolve as Maven artifact
+11. ✅ Attempt 7: Use includeBuild with custom name to avoid naming conflict
+12. 🔄 Committing and pushing the fix...
 
 ## Known Issues
 1. **android-e2e CI failure** (FIXING - Attempt 6): Gradle plugin resolution issue with expo-modules-core in pnpm monorepo
@@ -105,7 +106,8 @@
    - Attempt 3 Partial: Resolved correctly but naming conflict (expo-modules-core already exists as project)
    - Attempt 4 Failed: dependencySubstitution didn't work, same naming conflict
    - Attempt 5 Failed: Maven repository approach - android/maven directory doesn't exist
-   - Attempt 6: Use resolutionStrategy.eachPlugin with useModule() to resolve plugin
+   - Attempt 6 Failed: resolutionStrategy with useModule() - tried to resolve as Maven artifact, not found
+   - Attempt 7: Use includeBuild with custom name 'expo-modules-core-plugin' to avoid naming conflict
    - Status: Fix implemented, awaiting CI validation
 
 ## Notes

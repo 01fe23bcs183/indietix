@@ -211,6 +211,26 @@ Instead of trying to include expo-modules-core in pluginManagement, let me check
 
 **File Modified:** scripts/android-build.sh (lines 15-52)
 
+**Result:** FAILED - useModule() tried to resolve as Maven artifact, not found
+- Error: "Plugin [id: 'expo-module-gradle-plugin', artifact: 'expo-modules-core:expo-modules-core:+'] was not found"
+- Root cause: expo-modules-core is not published to Maven as a Gradle plugin
+- useModule() is for Maven artifacts, not local projects
+
+### 2025-11-04 09:28 UTC - Implemented Fix (Attempt 7)
+**Action:** Use includeBuild with custom name to avoid naming conflict
+**Rationale:**
+- After 7 attempts, realized the core issue: naming conflict between includeBuild and existing project
+- Gradle's includeBuild supports a `name` parameter to rename the build
+- By naming it 'expo-modules-core-plugin' instead of 'expo-modules-core', we avoid the conflict
+- This allows the plugin to be available in pluginManagement without duplicate names
+
+**Changes:**
+- Removed resolutionStrategy approach
+- Back to includeBuild but with `name = 'expo-modules-core-plugin'`
+- This renames the included build to avoid conflict with the project named 'expo-modules-core'
+
+**File Modified:** scripts/android-build.sh (lines 15-52)
+
 **Next Steps:**
 1. Commit and push the fix
 2. Wait for CI to run
