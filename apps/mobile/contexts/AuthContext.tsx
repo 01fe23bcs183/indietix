@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { trpc } from "../lib/trpc";
 
 interface User {
   id: string;
@@ -24,6 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const signinMutation = trpc.auth.signin.useMutation();
+  const signupMutation = trpc.auth.signup.useMutation();
+
   useEffect(() => {
     loadUser();
   }, []);
@@ -43,17 +47,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signIn(email: string, password: string) {
     try {
-      void password; // Mark as intentionally unused for now
-      const mockUser: User = {
-        id: "mock-user-id",
+      const result = await signinMutation.mutateAsync({
         email,
-        name: email.split("@")[0],
-        role: "CUSTOMER",
-      };
+        password,
+      });
 
-      await AsyncStorage.setItem("user", JSON.stringify(mockUser));
-      await AsyncStorage.setItem("auth_token", "mock-token");
-      setUser(mockUser);
+      await AsyncStorage.setItem("user", JSON.stringify(result.user));
+      await AsyncStorage.setItem("auth_token", result.token);
+      setUser(result.user);
     } catch (error) {
       console.error("Sign in failed:", error);
       throw error;
@@ -62,17 +63,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signUp(email: string, password: string, name: string) {
     try {
-      void password; // Mark as intentionally unused for now
-      const mockUser: User = {
-        id: "mock-user-id",
+      const result = await signupMutation.mutateAsync({
         email,
+        password,
         name,
-        role: "CUSTOMER",
-      };
+      });
 
-      await AsyncStorage.setItem("user", JSON.stringify(mockUser));
-      await AsyncStorage.setItem("auth_token", "mock-token");
-      setUser(mockUser);
+      await AsyncStorage.setItem("user", JSON.stringify(result.user));
+      await AsyncStorage.setItem("auth_token", result.token);
+      setUser(result.user);
     } catch (error) {
       console.error("Sign up failed:", error);
       throw error;
