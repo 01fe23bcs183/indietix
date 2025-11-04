@@ -165,21 +165,51 @@ The android-e2e check is failing due to Gradle plugin resolution in pnpm monorep
 - Error: "has name 'expo-modules-core' which is the same as a project of the main build"
 - Root cause: includeBuild approach is fundamentally wrong - we shouldn't include expo-modules-core as a build
 
-### 2025-11-04 09:09 UTC - Implemented Fix (Attempt 5)
+### 2025-11-04 09:09 UTC - Implemented Fix (Attempt 5 - Failed)
 **Action:** Add expo-modules-core maven repository instead of includeBuild
 **Rationale:**
 - The plugin needs to be available in pluginManagement's repositories, not as an includeBuild
 - expo-modules-core has an android/maven directory that contains the plugin
-- This is what the original hardcoded patch was trying to do, but with dynamic resolution
-- This approach avoids the naming conflict because we're not including it as a build
+
+**Result:** FAILED - The android/maven directory doesn't exist in expo-modules-core
+- Error: Back to "Plugin [id: 'expo-module-gradle-plugin'] was not found"
+- Root cause: The maven directory check failed, so no repository was added
+- The plugin is part of expo-modules-core itself, not in a separate maven repo
+
+### 2025-11-04 09:17 UTC - Analysis After 6 Failed Attempts
+**Summary of Attempts:**
+1. Hardcoded paths → Don't exist in pnpm monorepo
+2. No patching → Plugin not found
+3. Dynamic resolution with includeBuild → Naming conflict
+4. includeBuild with dependencySubstitution → Still naming conflict
+5. Maven repository approach → Directory doesn't exist
+
+**Root Cause Analysis:**
+- The expo-module-gradle-plugin is a Gradle plugin defined in expo-modules-core
+- It needs to be available via includeBuild in pluginManagement
+- Expo's autolinking already includes expo-modules-core as a project (not a build)
+- This creates a naming conflict when we try to include it as a build in pluginManagement
+- The fundamental issue: Can't have the same module as both a project and an included build
+
+**Next Approach (Attempt 6):**
+Instead of trying to include expo-modules-core in pluginManagement, let me check if we need to modify the generated settings.gradle AFTER Expo prebuild to remove the duplicate expo-modules-core project inclusion, or use a different build name for the pluginManagement includeBuild.
+
+### 2025-11-04 09:21 UTC - Implemented Fix (Attempt 6)
+**Action:** Use resolutionStrategy in pluginManagement instead of includeBuild
+**Rationale:**
+- Analyzed the BEFORE PATCH settings.gradle - it has NO pluginManagement block
+- Expo's autolinking.gradle includes expo-modules-core as a project (not in settings.gradle)
+- The conflict happens because we're trying to includeBuild something that's already a project
+- Solution: Use resolutionStrategy.eachPlugin to resolve the expo-module-gradle-plugin
+- This tells Gradle how to find the plugin without creating a duplicate inclusion
 
 **Changes:**
-- Removed includeBuild and dependencySubstitution
-- Added expo-modules-core/android/maven as a maven repository in pluginManagement
-- Dynamically resolve the path using require.resolve from expo's context
-- Check if maven directory exists before adding it
+- Removed all includeBuild and maven repository approaches
+- Added pluginManagement with resolutionStrategy.eachPlugin
+- When requested.id.id == 'expo-module-gradle-plugin', use useModule() to resolve it
+- Still dynamically resolve expo-modules-core path for logging/debugging
 
-**File Modified:** scripts/android-build.sh (lines 19-52)
+**File Modified:** scripts/android-build.sh (lines 15-52)
 
 **Next Steps:**
 1. Commit and push the fix

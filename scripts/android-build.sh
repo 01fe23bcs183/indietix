@@ -17,28 +17,29 @@ if [ -f "$SETTINGS_FILE" ]; then
   sed -n '1,50p' "$SETTINGS_FILE"
   
   if ! grep -q "pluginManagement" "$SETTINGS_FILE"; then
-    echo "Adding pluginManagement with expo-modules-core maven repo for pnpm monorepo..."
+    echo "Adding pluginManagement for expo-module-gradle-plugin resolution in pnpm monorepo..."
+    
     cat > /tmp/gradle-patch.txt << 'EOF'
 pluginManagement {
-    def expoModulesCoreDir
-    try {
-        def expoModulesCorePath = new File(["node", "--print", "require.resolve('expo-modules-core/package.json', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
-        expoModulesCoreDir = expoModulesCorePath.getParentFile()
-        logger.quiet("Resolved expo-modules-core to: ${expoModulesCoreDir}")
-    } catch (Exception e) {
-        logger.warn("Failed to resolve expo-modules-core: ${e.message}")
-        expoModulesCoreDir = null
-    }
-    
     repositories {
         gradlePluginPortal()
         google()
         mavenCentral()
-        if (expoModulesCoreDir != null && expoModulesCoreDir.exists()) {
-            def mavenDir = new File(expoModulesCoreDir, "android/maven")
-            if (mavenDir.exists()) {
-                maven { url = uri(mavenDir) }
-                logger.quiet("Added expo-modules-core maven repo: ${mavenDir}")
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'expo-module-gradle-plugin') {
+                // The plugin is provided by expo-modules-core which is included by autolinking
+                // We need to resolve it from the pnpm store
+                def expoModulesCoreDir
+                try {
+                    def expoModulesCorePath = new File(["node", "--print", "require.resolve('expo-modules-core/package.json', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+                    expoModulesCoreDir = expoModulesCorePath.getParentFile()
+                    logger.quiet("Resolved expo-modules-core for plugin to: ${expoModulesCoreDir}")
+                    useModule("expo-modules-core:expo-modules-core:+")
+                } catch (Exception e) {
+                    logger.warn("Failed to resolve expo-modules-core for plugin: ${e.message}")
+                }
             }
         }
     }
