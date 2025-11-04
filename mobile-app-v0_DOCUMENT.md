@@ -143,20 +143,31 @@ The android-e2e check is failing due to Gradle plugin resolution in pnpm monorep
 
 **Root Cause Identified:** The expo-module-gradle-plugin DOES need to be in pluginManagement's includeBuild. Expo's autolinking doesn't handle this automatically in pnpm monorepos.
 
-### 2025-11-04 08:55 UTC - Implemented Fix (Attempt 3)
+### 2025-11-04 08:55 UTC - Implemented Fix (Attempt 3 - Partial Success)
 **Action:** Add expo-modules-core to pluginManagement with proper pnpm resolution
 **Rationale:**
 - The error "Plugin [id: 'expo-module-gradle-plugin'] was not found" confirms we need expo-modules-core in pluginManagement
 - In pnpm monorepos, expo-modules-core is at: `node_modules/.pnpm/expo-modules-core@VERSION/node_modules/expo-modules-core`
 - Use `require.resolve('expo-modules-core/package.json', { paths: [require.resolve('expo/package.json')] })` to resolve from expo's context
 
-**Changes:**
-- Added pluginManagement block with dynamic resolution using expo as the starting point
-- Added try-catch to handle resolution failures gracefully
-- Added null check before includeBuild to prevent errors
-- Added logger.quiet() for debugging
+**Result:** PARTIAL SUCCESS - expo-modules-core resolved correctly but new error:
+- "Included build ... has name 'expo-modules-core' which is the same as a project of the main build"
+- This means expo-modules-core is already included elsewhere (by Expo's autolinking)
+- Need to use dependencySubstitution to avoid naming conflict
 
-**File Modified:** scripts/android-build.sh (lines 13-49)
+### 2025-11-04 09:03 UTC - Implemented Fix (Attempt 4)
+**Action:** Add dependencySubstitution to avoid naming conflict
+**Rationale:**
+- expo-modules-core is already included as a project by Expo's autolinking
+- Using includeBuild without dependencySubstitution causes naming conflict
+- Need to tell Gradle to substitute the module dependency with the included build project
+
+**Changes:**
+- Added dependencySubstitution block inside includeBuild
+- Changed grep check from "expo-module-gradle-plugin" to "pluginManagement" (more reliable)
+- This tells Gradle to use the included build for the expo-modules-core module
+
+**File Modified:** scripts/android-build.sh (lines 19-52)
 
 **Next Steps:**
 1. Commit and push the fix

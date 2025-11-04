@@ -16,8 +16,8 @@ if [ -f "$SETTINGS_FILE" ]; then
   echo "--- BEFORE PATCH (first 50 lines) ---"
   sed -n '1,50p' "$SETTINGS_FILE"
   
-  if ! grep -q "expo-module-gradle-plugin" "$SETTINGS_FILE"; then
-    echo "Adding expo-modules-core to pluginManagement for pnpm monorepo..."
+  if ! grep -q "pluginManagement" "$SETTINGS_FILE"; then
+    echo "Adding pluginManagement with expo-modules-core for pnpm monorepo..."
     cat > /tmp/gradle-patch.txt << 'EOF'
 pluginManagement {
     def expoModulesCoreDir
@@ -31,7 +31,11 @@ pluginManagement {
     }
     
     if (expoModulesCoreDir != null && expoModulesCoreDir.exists()) {
-        includeBuild(expoModulesCoreDir)
+        includeBuild(expoModulesCoreDir) {
+            dependencySubstitution {
+                substitute(module("expo-modules-core:expo-modules-core")).using(project(":"))
+            }
+        }
     }
     
     repositories {
@@ -44,12 +48,12 @@ pluginManagement {
 EOF
     cat /tmp/gradle-patch.txt "$SETTINGS_FILE" > /tmp/settings-patched.gradle
     mv /tmp/settings-patched.gradle "$SETTINGS_FILE"
-    echo "✓ Patched settings.gradle with expo-modules-core configuration"
+    echo "✓ Patched settings.gradle with pluginManagement configuration"
     
     echo "--- AFTER PATCH (first 80 lines) ---"
     sed -n '1,80p' "$SETTINGS_FILE"
   else
-    echo "✓ settings.gradle already has expo-module-gradle-plugin configuration"
+    echo "✓ settings.gradle already has pluginManagement configuration"
   fi
 else
   echo "⚠ Warning: settings.gradle not found at $SETTINGS_FILE"
