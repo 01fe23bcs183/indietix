@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { expireWaitlistOffers } from "@indietix/api";
 
 export const runtime = "nodejs";
-
-import { expireWaitlistOffers } from "@indietix/api";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
