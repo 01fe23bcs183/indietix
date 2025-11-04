@@ -24,5 +24,10 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
+    env: {
+      AUTH_SECRET: process.env.AUTH_SECRET ?? "test-e2e-secret-local",
+      AUTH_TRUST_HOST: "true",
+      NEXTAUTH_URL: "http://localhost:3000",
+    },
   },
 });
