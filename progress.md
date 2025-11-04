@@ -96,7 +96,9 @@
 9. ❌ Attempt 5: Maven repository approach - directory doesn't exist
 10. ❌ Attempt 6: resolutionStrategy with useModule() - tried to resolve as Maven artifact
 11. ❌ Attempt 7: includeBuild with custom name - plugin not found in renamed build
-12. 🛑 After 9 attempts, seeking user guidance on how to proceed
+12. ❌ Attempt 8: pnpm hoisting with .npmrc - per-app .npmrc ignored by root install
+13. ✅ Attempt 9: Symlink approach - create symlink in build script (NOW properly implemented)
+14. 🔄 Waiting for CI validation...
 
 ## Known Issues
 1. **android-e2e CI failure** (FIXING - Attempt 6): Gradle plugin resolution issue with expo-modules-core in pnpm monorepo
