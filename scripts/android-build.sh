@@ -10,32 +10,76 @@ rm -rf apps/mobile/android
 cd apps/mobile
 CI=1 npx expo prebuild --platform android
 
-echo "Patching settings.gradle to add pluginManagement for expo-module-gradle-plugin..."
+echo "Patching modules that use expo-module-gradle-plugin..."
 SETTINGS_FILE="android/settings.gradle"
 
-if ! grep -q "pluginManagement" "$SETTINGS_FILE"; then
-  echo "Adding pluginManagement block to settings.gradle..."
-  
-  cat > /tmp/plugin-management.txt << 'PLUGINMGMT'
+if grep -q "expo-modules-core.*android" "$SETTINGS_FILE"; then
+  echo "Removing previous includeBuild(coreAndroidPath) from settings.gradle"
+  awk '
+    BEGIN{skip=0}
+    /pluginManagement[[:space:]]*{/ {depth=1; skip=1}
+    {
+      if (skip) {
+        n1=gsub(/{/,"{"); n2=gsub(/}/,"}");
+        depth+=n1; depth-=n2;
+        if (depth==0){ skip=0; next }
+        next
+      }
+      print
+    }
+  ' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+fi
+
+if ! grep -q "^pluginManagement" "$SETTINGS_FILE"; then
+  cat > /tmp/pm-repos.gradle <<'PM'
 pluginManagement {
-  def coreAndroidPath = new File(["node", "--print", "const path=require('path');const expo=require.resolve('expo/package.json');const core=require.resolve('expo-modules-core/package.json',{paths:[path.dirname(expo)]});const coreDir=path.dirname(core);path.join(coreDir,'android');"].execute(null, rootDir).text.trim())
-  
-  includeBuild(coreAndroidPath)
-  
   repositories {
     gradlePluginPortal()
     google()
     mavenCentral()
   }
 }
+PM
+  cat /tmp/pm-repos.gradle "$SETTINGS_FILE" > "$SETTINGS_FILE.patched" && mv "$SETTINGS_FILE.patched" "$SETTINGS_FILE"
+  echo "✓ Added pluginManagement repositories to settings.gradle"
+fi
 
-PLUGINMGMT
-  
-  cat /tmp/plugin-management.txt "$SETTINGS_FILE" > /tmp/settings-patched.gradle
-  mv /tmp/settings-patched.gradle "$SETTINGS_FILE"
-  echo "✓ Added pluginManagement to settings.gradle"
+PATCH_FILES=$(find ../../node_modules/.pnpm -path "*/node_modules/*/android/build.gradle" -print0 2>/dev/null | xargs -0 grep -l "id[[:space:]]*'expo-module-gradle-plugin'" 2>/dev/null || true)
+
+if [ -n "$PATCH_FILES" ]; then
+  SNIPPET='apply from: new File(["node", "--print", "require.resolve('\''expo-modules-core/package.json'\'', { paths: [require.resolve('\''expo/package.json'\'')] })"].execute(null, rootDir).text.trim(), "../android/ExpoModulesCorePlugin.gradle")
+applyKotlinExpoModulesCorePlugin()
+'
+  while IFS= read -r f; do
+    echo " - Patching $f"
+    if grep -q "ExpoModulesCorePlugin.gradle" "$f"; then
+      echo "   ✓ already patched"
+      continue
+    fi
+    sed -i "/id[[:space:]]*'expo-module-gradle-plugin'/d" "$f"
+    awk -v s="$SNIPPET" '
+      BEGIN{in_plugins=0; depth=0; inserted=0}
+      {
+        if (in_plugins) {
+          oc=gsub(/{/,"{"); cc=gsub(/}/,"}");
+          depth+=oc; depth-=cc;
+          print
+          if (depth==0 && !inserted) { print s; inserted=1; in_plugins=0; next }
+          next
+        }
+        print
+        if ($0 ~ /^[[:space:]]*plugins[[:space:]]*{[[:space:]]*$/ && !inserted) { in_plugins=1; depth=1 }
+      }
+      END{ if (!inserted) { print s } }
+    ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    if grep -q "applyKotlinExpoModulesCorePlugin" "$f"; then
+      echo "   ✓ patch applied"
+    else
+      echo "   ✗ patch verification failed"
+    fi
+  done <<< "$PATCH_FILES"
 else
-  echo "✓ pluginManagement already exists in settings.gradle"
+  echo "No modules found using expo-module-gradle-plugin. Nothing to patch."
 fi
 
 echo "Building debug APK with Gradle..."
