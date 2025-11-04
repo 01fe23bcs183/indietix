@@ -10,18 +10,32 @@ rm -rf apps/mobile/android
 cd apps/mobile
 CI=1 npx expo prebuild --platform android
 
-echo "Creating symlink for expo-modules-core to fix pnpm monorepo plugin resolution..."
-CORE_PKG=$(node -e "const path=require('path');const expo=require.resolve('expo/package.json');const core=require.resolve('expo-modules-core/package.json',{paths:[path.dirname(expo)]});process.stdout.write(core);")
-CORE_DIR=$(dirname "$CORE_PKG")
+echo "Patching settings.gradle to add pluginManagement for expo-module-gradle-plugin..."
+SETTINGS_FILE="android/settings.gradle"
 
-echo "Resolved expo-modules-core to: $CORE_DIR"
+if ! grep -q "pluginManagement" "$SETTINGS_FILE"; then
+  echo "Adding pluginManagement block to settings.gradle..."
+  
+  cat > /tmp/plugin-management.txt << 'PLUGINMGMT'
+pluginManagement {
+  def coreAndroidPath = new File(["node", "--print", "const path=require('path');const expo=require.resolve('expo/package.json');const core=require.resolve('expo-modules-core/package.json',{paths:[path.dirname(expo)]});const coreDir=path.dirname(core);path.join(coreDir,'android');"].execute(null, rootDir).text.trim())
+  
+  includeBuild(coreAndroidPath)
+  
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+  }
+}
 
-if [ ! -e "node_modules/expo-modules-core" ]; then
-  echo "Creating symlink: node_modules/expo-modules-core -> $CORE_DIR"
-  ln -sf "$CORE_DIR" node_modules/expo-modules-core
-  echo "✓ Symlink created successfully"
+PLUGINMGMT
+  
+  cat /tmp/plugin-management.txt "$SETTINGS_FILE" > /tmp/settings-patched.gradle
+  mv /tmp/settings-patched.gradle "$SETTINGS_FILE"
+  echo "✓ Added pluginManagement to settings.gradle"
 else
-  echo "✓ expo-modules-core already exists at node_modules/expo-modules-core"
+  echo "✓ pluginManagement already exists in settings.gradle"
 fi
 
 echo "Building debug APK with Gradle..."
