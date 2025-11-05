@@ -1,11 +1,27 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Index(): JSX.Element {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (user) {
+        router.replace("/(tabs)/home");
+      } else {
+        router.replace("/auth/signin");
+      }
+    }
+  }, [user, isLoading]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>IndieTix Mobile</Text>
-      <Text style={styles.subtitle}>Event booking on the go</Text>
+      <Text style={styles.title}>IndieTix</Text>
+      <ActivityIndicator size="large" color="#0066cc" />
       <StatusBar style="auto" />
     </View>
   );
@@ -19,12 +35,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
+    marginBottom: 24,
+    color: "#0066cc",
   },
 });

@@ -6,10 +6,14 @@ echo "Building Android APK for IndieTix Mobile..."
 cd "$(dirname "$0")/.."
 
 echo "Running Expo prebuild for Android..."
-pnpm --filter @indietix/mobile exec expo prebuild --platform android --non-interactive
+rm -rf apps/mobile/android
+cd apps/mobile
+CI=1 npx expo prebuild --platform android
+
+echo "Checking for Gradle plugin resolution issues..."
 
 echo "Building debug APK with Gradle..."
-cd apps/mobile/android
+cd android
 ./gradlew assembleDebug
 
 APK_PATH="$(pwd)/app/build/outputs/apk/debug/app-debug.apk"
