@@ -5,7 +5,7 @@ export interface CachedNotification {
   type: "event_reminder" | "waitlist_offer" | "booking_confirmed" | "general";
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   receivedAt: number;
   read: boolean;
 }

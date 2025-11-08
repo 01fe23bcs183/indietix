@@ -1,11 +1,10 @@
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { trpc, trpcClient } from "../lib/trpc";
 import { AuthProvider } from "../contexts/AuthContext";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { useEffect, useRef } from "react";
-import * as Notifications from "expo-notifications";
 import {
   registerForPushNotifications,
   setupNotificationListeners,
@@ -21,7 +20,6 @@ initializeAnalytics();
 
 function RootNavigator(): JSX.Element {
   const router = useRouter();
-  const segments = useSegments();
   const notificationListener = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -41,7 +39,7 @@ function RootNavigator(): JSX.Element {
         if (deepLink) {
           const url = new URL(deepLink);
           const path = url.pathname;
-          router.push(path as any);
+          router.push(path as never);
         }
       }
     );

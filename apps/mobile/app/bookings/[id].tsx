@@ -91,10 +91,14 @@ export default function TicketDetail(): JSX.Element {
         if (minutesAgo < 1) {
           setLastUpdated("Updated just now");
         } else if (minutesAgo < 60) {
-          setLastUpdated(`Updated ${minutesAgo} minute${minutesAgo === 1 ? "" : "s"} ago`);
+          setLastUpdated(
+            `Updated ${minutesAgo} minute${minutesAgo === 1 ? "" : "s"} ago`
+          );
         } else {
           const hoursAgo = Math.floor(minutesAgo / 60);
-          setLastUpdated(`Updated ${hoursAgo} hour${hoursAgo === 1 ? "" : "s"} ago`);
+          setLastUpdated(
+            `Updated ${hoursAgo} hour${hoursAgo === 1 ? "" : "s"} ago`
+          );
         }
       }
     };
@@ -113,7 +117,7 @@ export default function TicketDetail(): JSX.Element {
   async function handleShareTicket() {
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       if (!qrCodeRef.current) {
         Alert.alert("Error", "Unable to capture QR code");
         return;
@@ -135,7 +139,7 @@ export default function TicketDetail(): JSX.Element {
           message: `My ticket for ${ticketData.event.title}\nBooking ID: ${ticketData.id.slice(0, 8).toUpperCase()}\nDate: ${typeof ticketData.event.startTime === "string" ? ticketData.event.startTime : new Date(ticketData.event.startTime).toLocaleDateString()}\nVenue: ${ticketData.event.venue}, ${ticketData.event.city}`,
         });
       }
-      
+
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error sharing ticket:", error);
@@ -147,7 +151,7 @@ export default function TicketDetail(): JSX.Element {
   async function handleAddToCalendar() {
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
@@ -186,7 +190,9 @@ export default function TicketDetail(): JSX.Element {
       });
 
       if (eventId) {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success
+        );
         Alert.alert("Success", "Event added to your calendar!");
       }
     } catch (error) {
@@ -217,7 +223,7 @@ export default function TicketDetail(): JSX.Element {
 
   function handleCancelBooking() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    
+
     Alert.alert(
       "Cancel Booking",
       "Are you sure you want to cancel this booking? This action cannot be undone.",
@@ -346,8 +352,8 @@ export default function TicketDetail(): JSX.Element {
         {qrData && (
           <View style={styles.qrContainer}>
             <Text style={styles.qrTitle}>Your Ticket QR Code</Text>
-            <View 
-              style={styles.qrCodeWrapper} 
+            <View
+              style={styles.qrCodeWrapper}
               ref={qrCodeRef}
               accessibilityLabel="Ticket QR code"
               accessibilityHint="Show this QR code at the venue entrance for scanning"

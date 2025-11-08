@@ -5,7 +5,8 @@ let posthogClient: PostHog | null = null;
 export async function initializeAnalytics(): Promise<void> {
   try {
     const apiKey = process.env.EXPO_PUBLIC_POSTHOG_API_KEY || "mock-key-for-ci";
-    const host = process.env.EXPO_PUBLIC_POSTHOG_HOST || "https://app.posthog.com";
+    const host =
+      process.env.EXPO_PUBLIC_POSTHOG_HOST || "https://app.posthog.com";
 
     if (apiKey === "mock-key-for-ci") {
       console.log("PostHog: Using mock key for CI/development");
@@ -24,7 +25,7 @@ export async function initializeAnalytics(): Promise<void> {
 
 export function trackEvent(
   eventName: string,
-  properties?: Record<string, any>
+  properties?: Record<string, unknown>
 ): void {
   try {
     if (posthogClient) {
@@ -37,7 +38,10 @@ export function trackEvent(
   }
 }
 
-export function identifyUser(userId: string, traits?: Record<string, any>): void {
+export function identifyUser(
+  userId: string,
+  traits?: Record<string, unknown>
+): void {
   try {
     if (posthogClient) {
       posthogClient.identify(userId, traits);

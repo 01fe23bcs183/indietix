@@ -49,43 +49,57 @@ export async function registerPushTokenWithBackend(
 ): Promise<void> {
   try {
     console.log("Registering push token with backend:", { token, userId });
-    
   } catch (error) {
     console.error("Error registering push token with backend:", error);
   }
 }
 
 export function setupNotificationListeners(
+  // eslint-disable-next-line no-unused-vars
   onNotificationReceived?: (notification: Notifications.Notification) => void,
+
   onNotificationResponse?: (
+    // eslint-disable-next-line no-unused-vars
     response: Notifications.NotificationResponse
   ) => void
 ): () => void {
-  const receivedSubscription =
-    Notifications.addNotificationReceivedListener((notification) => {
+  const receivedSubscription = Notifications.addNotificationReceivedListener(
+    (notification) => {
       saveNotification({
         id: notification.request.identifier,
-        type: (notification.request.content.data?.type as any) || "general",
+        type:
+          (notification.request.content.data?.type as
+            | "event_reminder"
+            | "waitlist_offer"
+            | "booking_confirmed"
+            | "general") || "general",
         title: notification.request.content.title || "Notification",
         body: notification.request.content.body || "",
-        data: notification.request.content.data,
+        data: notification.request.content.data as Record<string, unknown>,
       });
 
       if (onNotificationReceived) {
         onNotificationReceived(notification);
       }
-    });
+    }
+  );
 
   const responseSubscription =
     Notifications.addNotificationResponseReceivedListener((response) => {
       saveNotification({
         id: response.notification.request.identifier,
         type:
-          (response.notification.request.content.data?.type as any) ||
-          "general",
+          (response.notification.request.content.data?.type as
+            | "event_reminder"
+            | "waitlist_offer"
+            | "booking_confirmed"
+            | "general") || "general",
         title: response.notification.request.content.title || "Notification",
         body: response.notification.request.content.body || "",
-        data: response.notification.request.content.data,
+        data: response.notification.request.content.data as Record<
+          string,
+          unknown
+        >,
       });
 
       if (onNotificationResponse) {
@@ -115,9 +129,7 @@ export function getDeepLinkFromNotification(
     case "event_reminder":
       return data.eventSlug ? `indietix://event/${data.eventSlug}` : null;
     case "waitlist_offer":
-      return data.offerId
-        ? `indietix://waitlist/claim/${data.offerId}`
-        : null;
+      return data.offerId ? `indietix://waitlist/claim/${data.offerId}` : null;
     case "booking_confirmed":
       return data.bookingId ? `indietix://bookings/${data.bookingId}` : null;
     default:

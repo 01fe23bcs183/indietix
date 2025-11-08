@@ -9,10 +9,12 @@ export function initializeSentry(): void {
       return;
     }
 
+    const isDevelopment = process.env.NODE_ENV === "development";
+
     Sentry.init({
       dsn,
       enableInExpoDevelopment: false,
-      debug: __DEV__,
+      debug: isDevelopment,
       tracesSampleRate: 1.0,
       environment: process.env.NODE_ENV || "development",
     });
@@ -23,7 +25,10 @@ export function initializeSentry(): void {
   }
 }
 
-export function captureException(error: Error, context?: Record<string, any>): void {
+export function captureException(
+  error: Error,
+  context?: Record<string, unknown>
+): void {
   try {
     if (context) {
       Sentry.setContext("additional_context", context);
@@ -34,7 +39,10 @@ export function captureException(error: Error, context?: Record<string, any>): v
   }
 }
 
-export function captureMessage(message: string, level: Sentry.SeverityLevel = "info"): void {
+export function captureMessage(
+  message: string,
+  level: Sentry.SeverityLevel = "info"
+): void {
   try {
     Sentry.captureMessage(message, level);
   } catch (error) {
@@ -42,7 +50,11 @@ export function captureMessage(message: string, level: Sentry.SeverityLevel = "i
   }
 }
 
-export function setUser(userId: string, email?: string, username?: string): void {
+export function setUser(
+  userId: string,
+  email?: string,
+  username?: string
+): void {
   try {
     Sentry.setUser({ id: userId, email, username });
   } catch (error) {
