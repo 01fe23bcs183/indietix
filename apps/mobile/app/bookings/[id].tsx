@@ -19,13 +19,16 @@ import {
 import QRCode from "react-native-qrcode-svg";
 import * as Calendar from "expo-calendar";
 import * as Sharing from "expo-sharing";
+import * as Haptics from "expo-haptics";
 import { captureRef } from "react-native-view-shot";
+import { Analytics } from "../../lib/analytics";
 
 export default function TicketDetail(): JSX.Element {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [cachedTicket, setCachedTicket] = useState<CachedTicket | null>(null);
   const [isOffline, setIsOffline] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string>("");
   const qrCodeRef = useRef<View>(null);
 
   const {
@@ -75,8 +78,32 @@ export default function TicketDetail(): JSX.Element {
   useEffect(() => {
     if (id) {
       loadCachedTicket();
+      Analytics.openTicket(id, "");
     }
   }, [id]);
+
+  useEffect(() => {
+    const updateTimestamp = () => {
+      if (cachedTicket?.meta.cachedAt) {
+        const minutesAgo = Math.floor(
+          (Date.now() - cachedTicket.meta.cachedAt) / 60000
+        );
+        if (minutesAgo < 1) {
+          setLastUpdated("Updated just now");
+        } else if (minutesAgo < 60) {
+          setLastUpdated(`Updated ${minutesAgo} minute${minutesAgo === 1 ? "" : "s"} ago`);
+        } else {
+          const hoursAgo = Math.floor(minutesAgo / 60);
+          setLastUpdated(`Updated ${hoursAgo} hour${hoursAgo === 1 ? "" : "s"} ago`);
+        }
+      }
+    };
+
+    updateTimestamp();
+    const interval = setInterval(updateTimestamp, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [cachedTicket]);
 
   async function loadCachedTicket() {
     const cached = await getCachedTicket(id!);
@@ -85,6 +112,8 @@ export default function TicketDetail(): JSX.Element {
 
   async function handleShareTicket() {
     try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
       if (!qrCodeRef.current) {
         Alert.alert("Error", "Unable to capture QR code");
         return;
@@ -106,14 +135,19 @@ export default function TicketDetail(): JSX.Element {
           message: `My ticket for ${ticketData.event.title}\nBooking ID: ${ticketData.id.slice(0, 8).toUpperCase()}\nDate: ${typeof ticketData.event.startTime === "string" ? ticketData.event.startTime : new Date(ticketData.event.startTime).toLocaleDateString()}\nVenue: ${ticketData.event.venue}, ${ticketData.event.city}`,
         });
       }
+      
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error("Error sharing ticket:", error);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Error", "Failed to share ticket. Please try again.");
     }
   }
 
   async function handleAddToCalendar() {
     try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
       const { status } = await Calendar.requestCalendarPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
@@ -152,10 +186,12 @@ export default function TicketDetail(): JSX.Element {
       });
 
       if (eventId) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert("Success", "Event added to your calendar!");
       }
     } catch (error) {
       console.error("Error adding to calendar:", error);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert(
         "Error",
         "Failed to add event to calendar. Please try again."
@@ -180,6 +216,8 @@ export default function TicketDetail(): JSX.Element {
   }
 
   function handleCancelBooking() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    
     Alert.alert(
       "Cancel Booking",
       "Are you sure you want to cancel this booking? This action cannot be undone.",
@@ -246,6 +284,9 @@ export default function TicketDetail(): JSX.Element {
           <Text style={styles.offlineBannerText}>
             📱 Offline Mode - Showing cached ticket
           </Text>
+          {lastUpdated && (
+            <Text style={styles.offlineTimestamp}>{lastUpdated}</Text>
+          )}
         </View>
       )}
 
@@ -305,7 +346,12 @@ export default function TicketDetail(): JSX.Element {
         {qrData && (
           <View style={styles.qrContainer}>
             <Text style={styles.qrTitle}>Your Ticket QR Code</Text>
-            <View style={styles.qrCodeWrapper} ref={qrCodeRef}>
+            <View 
+              style={styles.qrCodeWrapper} 
+              ref={qrCodeRef}
+              accessibilityLabel="Ticket QR code"
+              accessibilityHint="Show this QR code at the venue entrance for scanning"
+            >
               <QRCode value={qrData} size={200} />
             </View>
             <Text style={styles.qrInstructions}>
@@ -320,6 +366,9 @@ export default function TicketDetail(): JSX.Element {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleAddToCalendar}
+            accessibilityLabel="Add event to calendar"
+            accessibilityHint="Adds this event to your device calendar with reminders"
+            accessibilityRole="button"
           >
             <Text style={styles.actionButtonText}>📅 Add to Calendar</Text>
           </TouchableOpacity>
@@ -327,6 +376,9 @@ export default function TicketDetail(): JSX.Element {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleShareTicket}
+            accessibilityLabel="Share ticket"
+            accessibilityHint="Share your ticket QR code with others"
+            accessibilityRole="button"
           >
             <Text style={styles.actionButtonText}>📤 Share Ticket</Text>
           </TouchableOpacity>
@@ -334,6 +386,9 @@ export default function TicketDetail(): JSX.Element {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleTransferTicket}
+            accessibilityLabel="Transfer ticket"
+            accessibilityHint="Transfer this ticket to another person"
+            accessibilityRole="button"
           >
             <Text style={styles.actionButtonText}>🔄 Transfer Ticket</Text>
           </TouchableOpacity>
@@ -341,6 +396,9 @@ export default function TicketDetail(): JSX.Element {
           <TouchableOpacity
             style={[styles.actionButton, styles.cancelButton]}
             onPress={handleCancelBooking}
+            accessibilityLabel="Cancel booking"
+            accessibilityHint="Cancel this booking and request a refund"
+            accessibilityRole="button"
           >
             <Text style={[styles.actionButtonText, styles.cancelButtonText]}>
               ❌ Cancel Booking
@@ -403,6 +461,12 @@ const styles = StyleSheet.create({
   offlineBannerText: {
     fontSize: 14,
     color: "#856404",
+    fontWeight: "600",
+  },
+  offlineTimestamp: {
+    fontSize: 12,
+    color: "#856404",
+    marginTop: 4,
   },
   ticketCard: {
     backgroundColor: "#fff",

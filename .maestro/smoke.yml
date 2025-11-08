@@ -1,6 +1,29 @@
 appId: com.indietix.mobile
 ---
+# Launch the app
 - launchApp
-- assertVisible: "IndieTix Mobile"
-- tapOn: "IndieTix Mobile"
-- assertVisible: "IndieTix Mobile"
+
+# Wait for app to load
+- assertVisible: "IndieTix"
+
+# Navigate to Bookings tab (if tabs are visible)
+- tapOn: "Bookings"
+- assertVisible: "My Bookings"
+
+# Open the first booking/ticket from mock data
+- tapOn:
+    index: 0
+- assertVisible: "Ticket"
+
+# Verify QR code is visible
+- assertVisible: "Your Ticket QR Code"
+
+# Verify ticket details are visible
+- assertVisible: "Booking ID"
+
+# Go back
+- back
+
+# Navigate to Home tab
+- tapOn: "Home"
+- assertVisible: "Featured Events"
