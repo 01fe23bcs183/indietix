@@ -76,7 +76,7 @@ jobs:
             ~/.maestro/bin/maestro test .maestro/smoke.yml -a apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: android-debug-apk
