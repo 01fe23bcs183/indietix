@@ -23,7 +23,7 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.8.1"
+    "@prisma/client": "^7.0.0"
   },
   "devDependencies": {
     "@indietix/config": "workspace:*",
