@@ -5,7 +5,9 @@ test.describe("Admin Communication Center", () => {
     await page.goto("/auth/signin");
   });
 
-  test("should display communication center page with tabs", async ({ page }) => {
+  test("should display communication center page with tabs", async ({
+    page,
+  }) => {
     await page.goto("/comm");
 
     await expect(page.locator("h1")).toContainText("Communication Center");

@@ -8,7 +8,8 @@ export default function InboxPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = trpc.inbox.list.useQuery();
-  const { data: unreadCount, refetch: refetchCount } = trpc.inbox.unreadCount.useQuery();
+  const { data: unreadCount, refetch: refetchCount } =
+    trpc.inbox.unreadCount.useQuery();
   const readMutation = trpc.inbox.read.useMutation();
   const unreadMutation = trpc.inbox.unread.useMutation();
   const markAllReadMutation = trpc.inbox.markAllRead.useMutation();
@@ -40,9 +41,12 @@ export default function InboxPage() {
     return "📬";
   };
 
-  const getNotificationTitle = (type: string, payload: Record<string, unknown>) => {
+  const getNotificationTitle = (
+    type: string,
+    payload: Record<string, unknown>
+  ) => {
     if (payload.title) return payload.title as string;
-    
+
     const titles: Record<string, string> = {
       booking_confirmed: "Booking Confirmed",
       booking_cancelled: "Booking Cancelled",
@@ -53,11 +57,14 @@ export default function InboxPage() {
       admin_announcement: "Announcement",
       marketing_promo: "Special Offer",
     };
-    
+
     return titles[type] || "Notification";
   };
 
-  const getNotificationPreview = (type: string, payload: Record<string, unknown>) => {
+  const getNotificationPreview = (
+    type: string,
+    payload: Record<string, unknown>
+  ) => {
     if (payload.message) return payload.message as string;
     if (payload.eventTitle) return `Event: ${payload.eventTitle}`;
     return "Click to view details";
@@ -78,7 +85,8 @@ export default function InboxPage() {
           <h1 className="text-3xl font-bold">Inbox</h1>
           {unreadCount && unreadCount.count > 0 && (
             <p className="text-sm text-gray-500 mt-1">
-              {unreadCount.count} unread notification{unreadCount.count !== 1 ? "s" : ""}
+              {unreadCount.count} unread notification
+              {unreadCount.count !== 1 ? "s" : ""}
             </p>
           )}
         </div>
@@ -96,7 +104,9 @@ export default function InboxPage() {
       {!data?.items || data.items.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow">
           <div className="text-4xl mb-4">📭</div>
-          <h2 className="text-xl font-semibold text-gray-700">No notifications</h2>
+          <h2 className="text-xl font-semibold text-gray-700">
+            No notifications
+          </h2>
           <p className="text-gray-500 mt-2">
             You&apos;re all caught up! Check back later for updates.
           </p>

@@ -1,5 +1,8 @@
 import { prisma, Prisma } from "@indietix/db";
-import { buildSegmentWhereClause, type SegmentQuery } from "@indietix/marketing";
+import {
+  buildSegmentWhereClause,
+  type SegmentQuery,
+} from "@indietix/marketing";
 import { checkBulkIdempotency } from "./idempotency";
 import { calculateBatchSize } from "./rate-limiter";
 import { generateUnsubscribeFooter } from "./unsubscribe";
@@ -152,9 +155,16 @@ export async function enqueueNotifications(
   const { channel, templateKey, payload, schedule, utmEnabled } = options;
 
   const userIds = recipients.map((r) => r.userId);
-  const existingUserIds = await checkBulkIdempotency(userIds, campaignId, channel);
+  const existingUserIds = await checkBulkIdempotency(
+    userIds,
+    campaignId,
+    channel
+  );
 
-  const preferencesMap = new Map<string, { channelEnabled: boolean; categoryEnabled: boolean }>();
+  const preferencesMap = new Map<
+    string,
+    { channelEnabled: boolean; categoryEnabled: boolean }
+  >();
   const preferences = await prisma.notificationPreference.findMany({
     where: { userId: { in: userIds } },
   });
@@ -225,7 +235,11 @@ export async function enqueueNotifications(
   }
 
   if (notificationsToCreate.length > 0) {
-    const batchSize = calculateBatchSize(channel, notificationsToCreate.length, options.rateLimit);
+    const batchSize = calculateBatchSize(
+      channel,
+      notificationsToCreate.length,
+      options.rateLimit
+    );
 
     for (let i = 0; i < notificationsToCreate.length; i += batchSize) {
       const batch = notificationsToCreate.slice(i, i + batchSize);
@@ -299,7 +313,9 @@ export async function resumeCampaign(campaignId: string): Promise<void> {
   });
 }
 
-export async function getCampaignStats(campaignId: string): Promise<CampaignStats | null> {
+export async function getCampaignStats(
+  campaignId: string
+): Promise<CampaignStats | null> {
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
     select: { stats: true },
@@ -361,7 +377,9 @@ export async function getOutboxList(status?: string): Promise<
     recipientCount: number;
   }>
 > {
-  const where = status ? { status: status as Prisma.EnumCampaignStatusFilter } : {};
+  const where = status
+    ? { status: status as Prisma.EnumCampaignStatusFilter }
+    : {};
 
   const campaigns = await prisma.campaign.findMany({
     where,
@@ -422,7 +440,9 @@ export async function getFailedNotifications(campaignId?: string): Promise<
   }));
 }
 
-export async function retryFailedNotification(notificationId: string): Promise<void> {
+export async function retryFailedNotification(
+  notificationId: string
+): Promise<void> {
   await prisma.notification.update({
     where: { id: notificationId },
     data: {
@@ -432,7 +452,9 @@ export async function retryFailedNotification(notificationId: string): Promise<v
   });
 }
 
-export async function retryAllFailedForCampaign(campaignId: string): Promise<number> {
+export async function retryAllFailedForCampaign(
+  campaignId: string
+): Promise<number> {
   const result = await prisma.notification.updateMany({
     where: {
       campaignId,

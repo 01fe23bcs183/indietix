@@ -50,10 +50,7 @@ export function tryConsumeToken(channel: "EMAIL" | "SMS" | "PUSH"): boolean {
   const tokensToAdd = Math.floor(elapsed * bucket.ratePerSecond);
 
   if (tokensToAdd > 0) {
-    bucket.tokens = Math.min(
-      bucket.ratePerSecond,
-      bucket.tokens + tokensToAdd
-    );
+    bucket.tokens = Math.min(bucket.ratePerSecond, bucket.tokens + tokensToAdd);
     bucket.lastRefill = now;
   }
 

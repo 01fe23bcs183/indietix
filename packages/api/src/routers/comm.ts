@@ -168,9 +168,11 @@ export const commRouter = router({
   outbox: router({
     list: publicProcedure
       .input(
-        z.object({
-          status: z.string().optional(),
-        }).optional()
+        z
+          .object({
+            status: z.string().optional(),
+          })
+          .optional()
       )
       .query(async ({ input, ctx }) => {
         if (!ctx.session?.user) {
@@ -240,7 +242,8 @@ export const commRouter = router({
         return {
           ...updatedCampaign,
           notifications,
-          recipientCount: campaign._count.recipients || campaign._count.notifications,
+          recipientCount:
+            campaign._count.recipients || campaign._count.notifications,
         };
       }),
 
@@ -260,9 +263,11 @@ export const commRouter = router({
   failed: router({
     list: publicProcedure
       .input(
-        z.object({
-          campaignId: z.string().optional(),
-        }).optional()
+        z
+          .object({
+            campaignId: z.string().optional(),
+          })
+          .optional()
       )
       .query(async ({ input, ctx }) => {
         if (!ctx.session?.user) {
@@ -314,7 +319,16 @@ export const commRouter = router({
         const failed = await getFailedNotifications(input.campaignId);
 
         const csvRows = [
-          ["ID", "User ID", "To", "Type", "Channel", "Error", "Attempts", "Last Attempt"].join(","),
+          [
+            "ID",
+            "User ID",
+            "To",
+            "Type",
+            "Channel",
+            "Error",
+            "Attempts",
+            "Last Attempt",
+          ].join(","),
           ...failed.map((n) =>
             [
               n.id,

@@ -23,7 +23,10 @@ export function verifyUnsubscribeToken(
   token: string
 ): UnsubscribeTokenPayload | null {
   try {
-    const decoded = jwt.verify(token, UNSUBSCRIBE_SECRET) as UnsubscribeTokenPayload;
+    const decoded = jwt.verify(
+      token,
+      UNSUBSCRIBE_SECRET
+    ) as UnsubscribeTokenPayload;
     return decoded;
   } catch {
     return null;

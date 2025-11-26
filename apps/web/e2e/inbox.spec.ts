@@ -42,10 +42,14 @@ test.describe("User Inbox", () => {
     await page.goto("/inbox");
 
     const notificationItem = page.locator("[class*='cursor-pointer']").first();
-    const hasNotifications = await notificationItem.isVisible().catch(() => false);
+    const hasNotifications = await notificationItem
+      .isVisible()
+      .catch(() => false);
 
     if (hasNotifications) {
-      const channelBadge = page.locator("text=EMAIL, text=SMS, text=PUSH").first();
+      const channelBadge = page
+        .locator("text=EMAIL, text=SMS, text=PUSH")
+        .first();
       await expect(channelBadge).toBeVisible();
     }
   });
@@ -54,7 +58,9 @@ test.describe("User Inbox", () => {
     await page.goto("/inbox");
 
     const notificationItem = page.locator("[class*='cursor-pointer']").first();
-    const hasNotifications = await notificationItem.isVisible().catch(() => false);
+    const hasNotifications = await notificationItem
+      .isVisible()
+      .catch(() => false);
 
     if (hasNotifications) {
       await notificationItem.click();

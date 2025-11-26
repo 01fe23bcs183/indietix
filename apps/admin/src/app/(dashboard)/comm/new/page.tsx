@@ -36,7 +36,13 @@ export default function NewSendPage() {
   const createMutation = trpc.comm.send.create.useMutation();
 
   const handleNext = () => {
-    const steps: WizardStep[] = ["channel", "template", "audience", "schedule", "review"];
+    const steps: WizardStep[] = [
+      "channel",
+      "template",
+      "audience",
+      "schedule",
+      "review",
+    ];
     const currentIndex = steps.indexOf(step);
     if (currentIndex < steps.length - 1) {
       setStep(steps[currentIndex + 1]!);
@@ -44,7 +50,13 @@ export default function NewSendPage() {
   };
 
   const handleBack = () => {
-    const steps: WizardStep[] = ["channel", "template", "audience", "schedule", "review"];
+    const steps: WizardStep[] = [
+      "channel",
+      "template",
+      "audience",
+      "schedule",
+      "review",
+    ];
     const currentIndex = steps.indexOf(step);
     if (currentIndex > 0) {
       setStep(steps[currentIndex - 1]!);
@@ -58,13 +70,18 @@ export default function NewSendPage() {
         templateKey: formData.templateKey,
         segmentId: formData.segmentId || undefined,
         payload: formData.payload,
-        schedule: formData.scheduleNow ? undefined : new Date(formData.scheduledAt),
+        schedule: formData.scheduleNow
+          ? undefined
+          : new Date(formData.scheduledAt),
         rate: formData.rateLimit,
         utmEnabled: formData.utmEnabled,
       });
       router.push("/comm");
     } catch (error) {
-      window.alert("Failed to create send: " + (error instanceof Error ? error.message : "Unknown error"));
+      window.alert(
+        "Failed to create send: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
     }
   };
 
@@ -74,13 +91,22 @@ export default function NewSendPage() {
 
       <div className="mb-8">
         <div className="flex items-center justify-between">
-          {(["channel", "template", "audience", "schedule", "review"] as const).map((s, i) => (
+          {(
+            ["channel", "template", "audience", "schedule", "review"] as const
+          ).map((s, i) => (
             <div key={s} className="flex items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   step === s
                     ? "bg-blue-600 text-white"
-                    : i < ["channel", "template", "audience", "schedule", "review"].indexOf(step)
+                    : i <
+                        [
+                          "channel",
+                          "template",
+                          "audience",
+                          "schedule",
+                          "review",
+                        ].indexOf(step)
                       ? "bg-green-500 text-white"
                       : "bg-gray-200 text-gray-600"
                 }`}
@@ -116,7 +142,11 @@ export default function NewSendPage() {
                   }`}
                 >
                   <div className="text-2xl mb-2">
-                    {channel === "EMAIL" ? "📧" : channel === "SMS" ? "📱" : "🔔"}
+                    {channel === "EMAIL"
+                      ? "📧"
+                      : channel === "SMS"
+                        ? "📱"
+                        : "🔔"}
                   </div>
                   <div className="font-medium">{channel}</div>
                 </button>
@@ -129,10 +159,14 @@ export default function NewSendPage() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold mb-4">Select Template</h2>
             <div>
-              <label className="block text-sm font-medium mb-2">Template Key</label>
+              <label className="block text-sm font-medium mb-2">
+                Template Key
+              </label>
               <select
                 value={formData.templateKey}
-                onChange={(e) => setFormData({ ...formData, templateKey: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, templateKey: e.target.value })
+                }
                 className="w-full border rounded px-3 py-2"
               >
                 <option value="">Select a template...</option>
@@ -144,12 +178,17 @@ export default function NewSendPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Payload (JSON)</label>
+              <label className="block text-sm font-medium mb-2">
+                Payload (JSON)
+              </label>
               <textarea
                 value={JSON.stringify(formData.payload, null, 2)}
                 onChange={(e) => {
                   try {
-                    setFormData({ ...formData, payload: JSON.parse(e.target.value) });
+                    setFormData({
+                      ...formData,
+                      payload: JSON.parse(e.target.value),
+                    });
                   } catch {
                     // Invalid JSON, ignore
                   }
@@ -169,7 +208,9 @@ export default function NewSendPage() {
               <label className="block text-sm font-medium mb-2">Segment</label>
               <select
                 value={formData.segmentId}
-                onChange={(e) => setFormData({ ...formData, segmentId: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, segmentId: e.target.value })
+                }
                 className="w-full border rounded px-3 py-2"
               >
                 <option value="">Select a segment...</option>
@@ -187,7 +228,7 @@ export default function NewSendPage() {
                   <span className="font-bold">
                     {estimateQuery.isLoading
                       ? "Loading..."
-                      : estimateQuery.data?.count ?? "N/A"}
+                      : (estimateQuery.data?.count ?? "N/A")}
                   </span>
                 </div>
               </div>
@@ -203,7 +244,9 @@ export default function NewSendPage() {
                 <input
                   type="radio"
                   checked={formData.scheduleNow}
-                  onChange={() => setFormData({ ...formData, scheduleNow: true })}
+                  onChange={() =>
+                    setFormData({ ...formData, scheduleNow: true })
+                  }
                 />
                 <span>Send immediately</span>
               </label>
@@ -211,7 +254,9 @@ export default function NewSendPage() {
                 <input
                   type="radio"
                   checked={!formData.scheduleNow}
-                  onChange={() => setFormData({ ...formData, scheduleNow: false })}
+                  onChange={() =>
+                    setFormData({ ...formData, scheduleNow: false })
+                  }
                 />
                 <span>Schedule for later</span>
               </label>
@@ -219,7 +264,9 @@ export default function NewSendPage() {
                 <input
                   type="datetime-local"
                   value={formData.scheduledAt}
-                  onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, scheduledAt: e.target.value })
+                  }
                   className="w-full border rounded px-3 py-2"
                 />
               )}
@@ -237,7 +284,9 @@ export default function NewSendPage() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        rateLimit: e.target.value ? parseInt(e.target.value) : undefined,
+                        rateLimit: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
                       })
                     }
                     className="w-full border rounded px-3 py-2"
@@ -269,17 +318,22 @@ export default function NewSendPage() {
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Template</span>
-                <span className="font-medium">{formData.templateKey || "Not selected"}</span>
+                <span className="font-medium">
+                  {formData.templateKey || "Not selected"}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Segment</span>
                 <span className="font-medium">
-                  {segments?.find((s) => s.id === formData.segmentId)?.name || "Not selected"}
+                  {segments?.find((s) => s.id === formData.segmentId)?.name ||
+                    "Not selected"}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Estimated Recipients</span>
-                <span className="font-medium">{estimateQuery.data?.count ?? "N/A"}</span>
+                <span className="font-medium">
+                  {estimateQuery.data?.count ?? "N/A"}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Schedule</span>
@@ -291,7 +345,9 @@ export default function NewSendPage() {
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">UTM Tracking</span>
-                <span className="font-medium">{formData.utmEnabled ? "Enabled" : "Disabled"}</span>
+                <span className="font-medium">
+                  {formData.utmEnabled ? "Enabled" : "Disabled"}
+                </span>
               </div>
             </div>
           </div>
@@ -300,7 +356,9 @@ export default function NewSendPage() {
         <div className="flex justify-between mt-6 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={step === "channel" ? () => router.push("/comm") : handleBack}
+            onClick={
+              step === "channel" ? () => router.push("/comm") : handleBack
+            }
           >
             {step === "channel" ? "Cancel" : "Back"}
           </Button>

@@ -1,7 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  generateIdempotencyKey,
-} from "../idempotency";
+import { describe, it, expect, beforeEach } from "vitest";
+import { generateIdempotencyKey } from "../idempotency";
 import {
   getRateLimitForChannel,
   calculateBatchSize,
@@ -23,7 +21,11 @@ describe("Idempotency", () => {
     });
 
     it("should generate different keys for different channels", () => {
-      const emailKey = generateIdempotencyKey("user123", "campaign456", "EMAIL");
+      const emailKey = generateIdempotencyKey(
+        "user123",
+        "campaign456",
+        "EMAIL"
+      );
       const smsKey = generateIdempotencyKey("user123", "campaign456", "SMS");
       const pushKey = generateIdempotencyKey("user123", "campaign456", "PUSH");
 

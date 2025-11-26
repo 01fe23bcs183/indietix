@@ -150,11 +150,7 @@ export async function scheduleNotification(
   return notification.id;
 }
 
-const RETRY_INTERVALS_MS = [
-  2 * 60 * 1000,
-  10 * 60 * 1000,
-  30 * 60 * 1000,
-];
+const RETRY_INTERVALS_MS = [2 * 60 * 1000, 10 * 60 * 1000, 30 * 60 * 1000];
 
 const CHANNEL_RATE_LIMITS = {
   EMAIL: 20,
@@ -164,7 +160,8 @@ const CHANNEL_RATE_LIMITS = {
 
 function getNextRetryTime(attempts: number): Date {
   const intervalIndex = Math.min(attempts, RETRY_INTERVALS_MS.length - 1);
-  const interval = RETRY_INTERVALS_MS[intervalIndex] ?? RETRY_INTERVALS_MS[0] ?? 2 * 60 * 1000;
+  const interval =
+    RETRY_INTERVALS_MS[intervalIndex] ?? RETRY_INTERVALS_MS[0] ?? 2 * 60 * 1000;
   return new Date(Date.now() + interval);
 }
 
@@ -286,7 +283,8 @@ export async function processPendingNotifications(): Promise<{
         }
       } catch (error) {
         const nextRetry = getNextRetryTime(notification.attempts);
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         await db.notification.update({
           where: { id: notification.id },
           data: {
@@ -307,11 +305,13 @@ export async function processPendingNotifications(): Promise<{
     }
 
     if (pendingNotifications.length > 0) {
-      const campaignIds = [...new Set(
-        pendingNotifications
-          .filter((n) => n.campaignId)
-          .map((n) => n.campaignId as string)
-      )];
+      const campaignIds = [
+        ...new Set(
+          pendingNotifications
+            .filter((n) => n.campaignId)
+            .map((n) => n.campaignId as string)
+        ),
+      ];
 
       for (const campaignId of campaignIds) {
         await updateCampaignStats(campaignId);

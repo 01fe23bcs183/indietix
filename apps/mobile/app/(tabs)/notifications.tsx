@@ -25,7 +25,8 @@ export default function NotificationsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const { data, isLoading, refetch } = trpc.inbox.list.useQuery();
-  const { data: unreadCount, refetch: refetchCount } = trpc.inbox.unreadCount.useQuery();
+  const { data: unreadCount, refetch: refetchCount } =
+    trpc.inbox.unreadCount.useQuery();
   const readMutation = trpc.inbox.read.useMutation();
   const markAllReadMutation = trpc.inbox.markAllRead.useMutation();
 
@@ -57,7 +58,10 @@ export default function NotificationsScreen() {
     return "📬";
   };
 
-  const getNotificationTitle = (type: string, payload: Record<string, unknown>) => {
+  const getNotificationTitle = (
+    type: string,
+    payload: Record<string, unknown>
+  ) => {
     if (payload.title) return payload.title as string;
 
     const titles: Record<string, string> = {
@@ -74,7 +78,10 @@ export default function NotificationsScreen() {
     return titles[type] || "Notification";
   };
 
-  const getNotificationPreview = (type: string, payload: Record<string, unknown>) => {
+  const getNotificationPreview = (
+    type: string,
+    payload: Record<string, unknown>
+  ) => {
     if (payload.message) return payload.message as string;
     if (payload.eventTitle) return `Event: ${payload.eventTitle}`;
     return "Tap to view details";

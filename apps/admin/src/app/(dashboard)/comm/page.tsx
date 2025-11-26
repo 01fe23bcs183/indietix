@@ -104,7 +104,10 @@ function CampaignsTab() {
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <StatusBadge status={campaign.status} paused={campaign.paused} />
+                <StatusBadge
+                  status={campaign.status}
+                  paused={campaign.paused}
+                />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {campaign.recipientCount}
@@ -131,7 +134,11 @@ function CampaignsTab() {
 }
 
 function OutboxTab() {
-  const { data: campaigns, isLoading, refetch } = trpc.comm.outbox.list.useQuery({
+  const {
+    data: campaigns,
+    isLoading,
+    refetch,
+  } = trpc.comm.outbox.list.useQuery({
     status: "SENDING",
   });
   const pauseMutation = trpc.comm.send.pause.useMutation();
@@ -162,10 +169,7 @@ function OutboxTab() {
   return (
     <div className="space-y-4">
       {campaigns.map((campaign) => (
-        <div
-          key={campaign.id}
-          className="bg-white rounded-lg shadow p-6"
-        >
+        <div key={campaign.id} className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
               <h3 className="text-lg font-semibold">{campaign.name}</h3>
@@ -265,7 +269,9 @@ function FailedTab() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading failed notifications...</div>;
+    return (
+      <div className="text-center py-8">Loading failed notifications...</div>
+    );
   }
 
   return (
@@ -361,7 +367,9 @@ function StatusBadge({ status, paused }: { status: string; paused: boolean }) {
   };
 
   return (
-    <span className={`px-2 py-1 rounded text-xs font-medium ${colors[status] || "bg-gray-100 text-gray-800"}`}>
+    <span
+      className={`px-2 py-1 rounded text-xs font-medium ${colors[status] || "bg-gray-100 text-gray-800"}`}
+    >
       {status}
     </span>
   );

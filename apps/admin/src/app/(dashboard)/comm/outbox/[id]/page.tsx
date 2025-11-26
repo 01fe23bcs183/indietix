@@ -9,7 +9,11 @@ export default function OutboxDetailPage() {
   const router = useRouter();
   const campaignId = params.id as string;
 
-  const { data: campaign, isLoading, refetch } = trpc.comm.outbox.detail.useQuery({
+  const {
+    data: campaign,
+    isLoading,
+    refetch,
+  } = trpc.comm.outbox.detail.useQuery({
     campaignId,
   });
   const pauseMutation = trpc.comm.send.pause.useMutation();
@@ -68,7 +72,11 @@ export default function OutboxDetailPage() {
           <h1 className="text-3xl font-bold">{campaign.name}</h1>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRefresh} disabled={refreshMutation.isPending}>
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={refreshMutation.isPending}
+          >
             Refresh Stats
           </Button>
           {campaign.paused ? (
@@ -76,7 +84,11 @@ export default function OutboxDetailPage() {
               Resume
             </Button>
           ) : (
-            <Button variant="outline" onClick={handlePause} disabled={pauseMutation.isPending}>
+            <Button
+              variant="outline"
+              onClick={handlePause}
+              disabled={pauseMutation.isPending}
+            >
               Pause
             </Button>
           )}
@@ -132,15 +144,21 @@ export default function OutboxDetailPage() {
             <>
               <div className="grid grid-cols-5 gap-4 mb-4">
                 <div className="text-center p-3 bg-gray-50 rounded">
-                  <div className="text-2xl font-bold text-gray-700">{stats.queued}</div>
+                  <div className="text-2xl font-bold text-gray-700">
+                    {stats.queued}
+                  </div>
                   <div className="text-xs text-gray-500">Queued</div>
                 </div>
                 <div className="text-center p-3 bg-green-50 rounded">
-                  <div className="text-2xl font-bold text-green-700">{stats.sent}</div>
+                  <div className="text-2xl font-bold text-green-700">
+                    {stats.sent}
+                  </div>
                   <div className="text-xs text-gray-500">Sent</div>
                 </div>
                 <div className="text-center p-3 bg-red-50 rounded">
-                  <div className="text-2xl font-bold text-red-700">{stats.failed}</div>
+                  <div className="text-2xl font-bold text-red-700">
+                    {stats.failed}
+                  </div>
                   <div className="text-xs text-gray-500">Failed</div>
                 </div>
                 <div className="text-center p-3 bg-blue-50 rounded">
@@ -197,44 +215,46 @@ export default function OutboxDetailPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {campaign.notifications?.map((notification: {
-                id: string;
-                to: string;
-                status: string;
-                sentAt: string | null;
-                attempts: number;
-                errorMessage: string | null;
-              }) => (
-                <tr key={notification.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {notification.to}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        notification.status === "SENT"
-                          ? "bg-green-100 text-green-800"
-                          : notification.status === "FAILED"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {notification.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {notification.sentAt
-                      ? new Date(notification.sentAt).toLocaleString()
-                      : "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {notification.attempts}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-red-600 max-w-xs truncate">
-                    {notification.errorMessage || "-"}
-                  </td>
-                </tr>
-              ))}
+              {campaign.notifications?.map(
+                (notification: {
+                  id: string;
+                  to: string;
+                  status: string;
+                  sentAt: string | null;
+                  attempts: number;
+                  errorMessage: string | null;
+                }) => (
+                  <tr key={notification.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {notification.to}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          notification.status === "SENT"
+                            ? "bg-green-100 text-green-800"
+                            : notification.status === "FAILED"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {notification.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {notification.sentAt
+                        ? new Date(notification.sentAt).toLocaleString()
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {notification.attempts}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-red-600 max-w-xs truncate">
+                      {notification.errorMessage || "-"}
+                    </td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </div>

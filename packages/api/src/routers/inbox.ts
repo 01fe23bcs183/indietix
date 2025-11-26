@@ -6,10 +6,12 @@ import { TRPCError } from "@trpc/server";
 export const inboxRouter = router({
   list: publicProcedure
     .input(
-      z.object({
-        limit: z.number().min(1).max(100).default(50),
-        cursor: z.string().optional(),
-      }).optional()
+      z
+        .object({
+          limit: z.number().min(1).max(100).default(50),
+          cursor: z.string().optional(),
+        })
+        .optional()
     )
     .query(async ({ input, ctx }) => {
       if (!ctx.session?.user) {
