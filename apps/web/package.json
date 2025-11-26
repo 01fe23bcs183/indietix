@@ -15,6 +15,7 @@
       "@indietix/api": "workspace:*",
       "@indietix/comm": "workspace:*",
       "@indietix/db": "workspace:*",
+      "@indietix/loyalty": "workspace:*",
       "@indietix/notify": "workspace:*",
       "@indietix/ui": "workspace:*",
       "@indietix/utils": "workspace:*",

@@ -156,21 +156,36 @@ model User {
   role                    Role      @default(CUSTOMER)
   banned                  Boolean   @default(false)
   pushTokens              String[]  @default([])
+  karma                   Int       @default(0)
+  profileCompleted        Boolean   @default(false)
+  referralCode            String?   @unique
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
   
-    sessions                Session[]
-    organizer               Organizer?
-    bookings                Booking[]
-    adminActions            AdminAction[]
-    notificationPreferences NotificationPreference?
-    notifications           Notification[]
-    consents                UserConsent[]
-    contentBlocks           ContentBlock[] @relation("ContentBlockAuthor")
-    posts                   Post[]         @relation("PostAuthor")
+  sessions                Session[]
+  organizer               Organizer?
+  bookings                Booking[]
+  adminActions            AdminAction[]
+  notificationPreferences NotificationPreference?
+  notifications           Notification[]
+  consents                UserConsent[]
+  contentBlocks           ContentBlock[] @relation("ContentBlockAuthor")
+  posts                   Post[]         @relation("PostAuthor")
+  
+  // Karma/Loyalty relations
+  karmaTransactions       KarmaTransaction[]
+  userBadges              UserBadge[]
+  leaderboardEntries      LeaderboardEntry[]
+  rewardGrants            RewardGrant[]
+  userPerks               UserPerks?
+  referralsGiven          Referral[]     @relation("ReferrerUser")
+  referralsReceived       Referral[]     @relation("RefereeUser")
+  reviews                 Review[]
 
-    @@index([email])
+  @@index([email])
   @@index([role])
+  @@index([karma])
+  @@index([referralCode])
 }
 
 model Session {
@@ -558,6 +573,7 @@ model PromoCode {
   updatedAt             DateTime       @updatedAt
   
   bookings              Booking[]
+  rewardGrants          RewardGrant[]
 
   @@index([code])
   @@index([organizerId])
@@ -867,4 +883,177 @@ model ExperimentExposure {
   @@index([userId])
   @@index([ts])
   @@index([experimentKey, variant])
+}
+
+// Karma/Loyalty System
+
+enum KarmaTransactionType {
+  EARN
+  SPEND
+  ADJUST
+}
+
+enum KarmaReason {
+  BOOK
+  ATTEND
+  REFERRAL
+  REVIEW
+  EARLY_BIRD
+  PROFILE
+  SHARE
+  STREAK
+  LOW_SALES_HELP
+  REWARD_REDEEM
+  ADMIN_ADJUST
+}
+
+enum BadgeCategory {
+  BOOKINGS
+  ATTENDANCE
+  KARMA
+}
+
+enum RewardGrantStatus {
+  PENDING
+  ACTIVE
+  USED
+  EXPIRED
+  CANCELLED
+}
+
+model KarmaTransaction {
+  id        String               @id @default(cuid())
+  userId    String
+  delta     Int                  // Positive for earn, negative for spend
+  type      KarmaTransactionType
+  reason    KarmaReason
+  refId     String?              // Reference ID (bookingId, eventId, etc.)
+  meta      Json?                // Additional metadata
+  held      Boolean              @default(false) // For fraud review
+  createdAt DateTime             @default(now())
+
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reason, refId], name: "karma_idempotency_key")
+  @@index([userId])
+  @@index([type])
+  @@index([reason])
+  @@index([createdAt])
+  @@index([held])
+}
+
+model Badge {
+  id          String        @id @default(cuid())
+  key         String        @unique
+  name        String
+  description String
+  icon        String        // Icon name or URL
+  threshold   Int           // Karma/count threshold to earn
+  category    BadgeCategory
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  userBadges  UserBadge[]
+
+  @@index([category])
+  @@index([threshold])
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeKey  String
+  earnedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeKey], references: [key], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])
+  @@index([userId])
+  @@index([badgeKey])
+  @@index([earnedAt])
+}
+
+model LeaderboardEntry {
+  id        String   @id @default(cuid())
+  city      String
+  month     String   // Format: "YYYY-MM"
+  userId    String
+  score     Int
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([city, month, userId])
+  @@index([city, month])
+  @@index([userId])
+  @@index([score])
+}
+
+model RewardGrant {
+  id          String            @id @default(cuid())
+  userId      String
+  rewardKey   String            // e.g., "DISCOUNT_200", "EARLY_ACCESS", etc.
+  status      RewardGrantStatus @default(PENDING)
+  promoCodeId String?           // Link to generated promo code for monetary rewards
+  meta        Json?             // Additional metadata
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  usedAt      DateTime?
+  expiresAt   DateTime?
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoCode   PromoCode?        @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([rewardKey])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model UserPerks {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  flags     String[] @default([]) // e.g., ["EARLY_ACCESS", "VIP", "GOLD_STATUS", "WAITLIST_PRIORITY"]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Referral {
+  id           String   @id @default(cuid())
+  referrerId   String   // User who referred
+  refereeId    String   // User who was referred
+  bookingId    String?  // First booking by referee
+  credited     Boolean  @default(false) // Whether karma was credited
+  createdAt    DateTime @default(now())
+
+  referrer     User     @relation("ReferrerUser", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee      User     @relation("RefereeUser", fields: [refereeId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, refereeId])
+  @@index([referrerId])
+  @@index([refereeId])
+  @@index([credited])
+  @@index([createdAt])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  bookingId String   @unique // One review per booking
+  rating    Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([bookingId])
+  @@index([createdAt])
 }

@@ -9,6 +9,7 @@ import {
 } from "@indietix/utils";
 import { getPaymentProvider } from "@indietix/payments";
 import { evaluate } from "@indietix/fraud";
+import { earnKarma, checkEarlyBird, checkLowSalesHelp } from "@indietix/loyalty";
 import { TRPCError } from "@trpc/server";
 
 const HOLD_TTL_MINUTES = 15;
@@ -590,6 +591,31 @@ export const bookingRouter = router({
             razorpayPaymentId: input.razorpayPaymentId,
           },
         });
+      }
+
+      const bookingWithEvent = await prisma.booking.findUnique({
+        where: { id: input.bookingId },
+        include: { event: { select: { date: true, id: true, bookedSeats: true, totalSeats: true } } },
+      });
+
+      if (bookingWithEvent) {
+        await earnKarma({
+          userId: bookingWithEvent.userId,
+          reason: "BOOK",
+          refId: input.bookingId,
+        });
+
+        await checkEarlyBird(
+          bookingWithEvent.userId,
+          input.bookingId,
+          bookingWithEvent.event.date
+        );
+
+        await checkLowSalesHelp(
+          bookingWithEvent.userId,
+          input.bookingId,
+          bookingWithEvent.event.id
+        );
       }
 
       return {

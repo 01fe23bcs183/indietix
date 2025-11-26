@@ -1,53 +1,63 @@
-# IndieTix CMS Content Blocks - Progress Tracker
+# IndieTix Karma/Loyalty System - Progress Tracker
 
 ## Overall Progress
 ```
-[████████████████    ] 80% Complete (13/17 tasks)
+[██████████████████  ] 90% Complete (17/19 tasks)
 ```
 
 ## Current Status
-**Phase:** Phase 4 - Testing & Documentation  
-**Last Updated:** 2025-11-26 03:17 UTC  
-**Branch:** devin/1764126095-cms-content-blocks  
-**PR:** (pending)
+**Phase:** Phase 7 - PR Creation  
+**Last Updated:** 2025-11-26 08:31 UTC  
+**Branch:** devin/1764144565-loyalty-karma-system  
+**PR:** (creating)
 
 ## Completed Tasks
-- [x] Create branch and set up documentation files
-- [x] Add ContentBlock and Post models to Prisma schema
-- [x] Run database migration via Supabase MCP
-- [x] Implement CMS tRPC router with all endpoints
-- [x] Create admin CMS UI at /admin/cms
-- [x] Implement rich-text editor (Tiptap) for type:"rich" blocks
-- [x] Implement JSON editor with schema validation for type:"json" blocks
-- [x] Implement version history with diff view and rollback
-- [x] Implement Next.js draft/preview mode with token verification
-- [x] Update web homepage to read ContentBlock entries with ISR (60s)
-- [x] Create /blog page with tag filtering
-- [x] Create /blog/[slug] for single posts
-- [x] Create /help page with search and category filtering
-- [x] Add SEO metadata generation
-- [x] Write unit tests (JSON schema, preview token, ISR)
-- [x] Write Playwright E2E tests (CMS, blog, help)
-- [x] Create docs/cms.md documentation
+- [x] Pull latest code after user merged PR
+- [x] Create progress.md and LOYALTY_KARMA_SYSTEM_DOCUMENT.md documentation files
+- [x] Create new branch for loyalty system
+- [x] Extend Prisma schema with karma models
+- [x] Create packages/loyalty package structure
+- [x] Implement earning rules configuration (rules.ts)
+- [x] Implement rewards catalog (rewards.ts)
+- [x] Implement badge definitions (badges.ts)
+- [x] Implement core earn logic with idempotent dedup (earn.ts)
+- [x] Implement spend/redemption logic (spend.ts)
+- [x] Implement leaderboard logic (leaderboard.ts)
+- [x] Create loyalty tRPC router with all procedures
+- [x] Wire booking confirmation hook to trigger karma earning
+- [x] Build Karma & Rewards UI section for web profile page
+- [x] Build leaderboard page with city selector
+- [x] Implement nightly cron job for leaderboard recomputation
+- [x] Create docs/loyalty.md documentation
+- [x] Run lint, typecheck, test, and build checks (ALL PASSING)
+
+## In Progress
+- [ ] Create PR with title '[loyalty] Karma system (earn/spend/badges/leaderboards, abuse-safe)'
 
 ## Pending Tasks
-- [ ] Run pnpm -w lint, typecheck, test, and build
-- [ ] Create PR with title '[cms] Content blocks + blog/help + preview/versioning (Next draft mode + ISR)'
 - [ ] Wait for CI checks to pass
 
 ## Recent Actions
-1. Created ContentBlock, ContentBlockVersion, and Post Prisma models
-2. Applied migration to Supabase database via MCP server
-3. Implemented complete CMS tRPC router with ADMIN role checks and audit logging
-4. Created admin CMS UI with Tiptap rich-text editor and JSON editor
-5. Implemented version history with diff view and rollback functionality
-6. Created preview API route with token verification
-7. Updated homepage to read content blocks with ISR (60s revalidation)
-8. Created /blog and /blog/[slug] pages with tag filtering
-9. Created /help page with FAQ and search functionality
-10. Added unit tests for JSON schema validation, preview tokens, and ISR
-11. Added Playwright E2E tests for CMS, blog, and help pages
-12. Created comprehensive docs/cms.md documentation
+1. Pulled latest code from main branch (91 commits)
+2. Created new branch devin/1764144565-loyalty-karma-system
+3. Extended Prisma schema with all loyalty-related models
+4. Created packages/loyalty package with full structure
+5. Implemented all earning rules in rules.ts
+6. Implemented rewards catalog with 6 reward tiers
+7. Implemented 20+ badge definitions
+8. Implemented idempotent earn function with fraud integration
+9. Implemented redemption logic with promo code generation
+10. Implemented leaderboard functions
+11. Created comprehensive loyalty tRPC router
+12. Wired booking confirmation to trigger karma earning
+13. Created Karma & Rewards profile page at /profile/karma
+14. Created leaderboard page at /leaderboard with city/month selectors
+15. Created cron job for nightly leaderboard recomputation
+16. Created docs/loyalty.md documentation
+17. Fixed TypeScript errors in earn.ts and leaderboard.ts
+18. Added @indietix/loyalty dependency to web app
+19. Build passed successfully (all 13 packages)
+20. Tests passed successfully (68 tests across 9 files)
 
 ---
 
