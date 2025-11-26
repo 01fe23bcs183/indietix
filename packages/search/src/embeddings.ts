@@ -1,26 +1,26 @@
-import type { EmbeddingProvider, EmbeddingConfig } from './types.js';
+import type { EmbeddingProvider, EmbeddingConfig } from "./types.js";
 
 /**
  * Get the embedding provider from environment
  */
 export function getEmbeddingProvider(): EmbeddingProvider {
   const provider = process.env.SEARCH_EMBEDDINGS_PROVIDER?.toLowerCase();
-  
-  if (provider === 'local' || provider === 'remote' || provider === 'none') {
+
+  if (provider === "local" || provider === "remote" || provider === "none") {
     return provider;
   }
-  
+
   // Default based on environment
-  if (process.env.CI === 'true') {
-    return 'none';
+  if (process.env.CI === "true") {
+    return "none";
   }
-  
-  if (process.env.NODE_ENV === 'development') {
-    return 'local';
+
+  if (process.env.NODE_ENV === "development") {
+    return "local";
   }
-  
+
   // Production default
-  return 'local';
+  return "local";
 }
 
 /**
@@ -31,7 +31,10 @@ export function getEmbeddingConfig(): EmbeddingConfig {
     provider: getEmbeddingProvider(),
     remoteApiKey: process.env.SEARCH_EMBEDDINGS_API_KEY,
     remoteApiUrl: process.env.SEARCH_EMBEDDINGS_API_URL,
-    rateLimitPerMinute: parseInt(process.env.SEARCH_EMBEDDINGS_RATE_LIMIT || '60', 10),
+    rateLimitPerMinute: parseInt(
+      process.env.SEARCH_EMBEDDINGS_RATE_LIMIT || "60",
+      10
+    ),
   };
 }
 
@@ -39,7 +42,7 @@ export function getEmbeddingConfig(): EmbeddingConfig {
  * Check if embeddings are enabled
  */
 export function isEmbeddingsEnabled(): boolean {
-  return getEmbeddingProvider() !== 'none';
+  return getEmbeddingProvider() !== "none";
 }
 
 /**
@@ -58,27 +61,27 @@ async function getLocalPipeline(): Promise<unknown> {
   if (localPipeline) {
     return localPipeline;
   }
-  
+
   if (localPipelinePromise) {
     return localPipelinePromise;
   }
-  
+
   localPipelinePromise = (async () => {
     try {
       // Dynamic import to avoid loading in CI
-      const { pipeline } = await import('@xenova/transformers');
+      const { pipeline } = await import("@xenova/transformers");
       localPipeline = await pipeline(
-        'feature-extraction',
-        'Xenova/all-MiniLM-L6-v2',
+        "feature-extraction",
+        "Xenova/all-MiniLM-L6-v2",
         { quantized: true }
       );
       return localPipeline;
     } catch (error) {
-      console.error('Failed to load local embedding model:', error);
+      console.error("Failed to load local embedding model:", error);
       throw error;
     }
   })();
-  
+
   return localPipelinePromise;
 }
 
@@ -87,13 +90,17 @@ async function getLocalPipeline(): Promise<unknown> {
  */
 async function generateLocalEmbedding(text: string): Promise<number[]> {
   const pipe = await getLocalPipeline();
-  
+
   // Type assertion for the pipeline function
-  const result = await (pipe as (text: string, options: { pooling: string; normalize: boolean }) => Promise<{ data: Float32Array }>)(
-    text,
-    { pooling: 'mean', normalize: true }
-  );
-  
+  /* eslint-disable no-unused-vars */
+  const result = await (
+    pipe as (
+      text: string,
+      options: { pooling: string; normalize: boolean }
+    ) => Promise<{ data: Float32Array }>
+  )(text, { pooling: "mean", normalize: true });
+  /* eslint-enable no-unused-vars */
+
   return Array.from(result.data);
 }
 
@@ -105,30 +112,33 @@ class RateLimiter {
   private lastRefill: number;
   private readonly maxTokens: number;
   private readonly refillRate: number;
-  
+
   constructor(tokensPerMinute: number) {
     this.maxTokens = tokensPerMinute;
     this.tokens = tokensPerMinute;
     this.lastRefill = Date.now();
     this.refillRate = tokensPerMinute / 60000; // tokens per ms
   }
-  
+
   async acquire(): Promise<void> {
     this.refill();
-    
+
     if (this.tokens < 1) {
       const waitTime = (1 - this.tokens) / this.refillRate;
       await new Promise((resolve) => setTimeout(resolve, waitTime));
       this.refill();
     }
-    
+
     this.tokens -= 1;
   }
-  
+
   private refill(): void {
     const now = Date.now();
     const elapsed = now - this.lastRefill;
-    this.tokens = Math.min(this.maxTokens, this.tokens + elapsed * this.refillRate);
+    this.tokens = Math.min(
+      this.maxTokens,
+      this.tokens + elapsed * this.refillRate
+    );
     this.lastRefill = now;
   }
 }
@@ -150,29 +160,31 @@ async function generateRemoteEmbedding(
   config: EmbeddingConfig
 ): Promise<number[]> {
   if (!config.remoteApiUrl || !config.remoteApiKey) {
-    throw new Error('Remote embedding API URL and key are required');
+    throw new Error("Remote embedding API URL and key are required");
   }
-  
+
   // Apply rate limiting
   await getRateLimiter(config).acquire();
-  
+
   const response = await fetch(config.remoteApiUrl, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${config.remoteApiKey}`,
     },
     body: JSON.stringify({
       input: text,
-      model: 'all-MiniLM-L6-v2',
+      model: "all-MiniLM-L6-v2",
     }),
   });
-  
+
   if (!response.ok) {
     throw new Error(`Remote embedding API error: ${response.status}`);
   }
-  
-  const data = await response.json() as { data: Array<{ embedding: number[] }> };
+
+  const data = (await response.json()) as {
+    data: Array<{ embedding: number[] }>;
+  };
   return data.data[0].embedding;
 }
 
@@ -180,29 +192,31 @@ async function generateRemoteEmbedding(
  * Generate embedding for text
  * Uses the configured provider (local, remote, or none)
  */
-export async function generateEmbedding(text: string): Promise<number[] | null> {
+export async function generateEmbedding(
+  text: string
+): Promise<number[] | null> {
   const config = getEmbeddingConfig();
-  
-  if (config.provider === 'none') {
+
+  if (config.provider === "none") {
     return null;
   }
-  
+
   // Truncate text to reasonable length for embedding
   const truncatedText = text.slice(0, 512);
-  
+
   try {
-    if (config.provider === 'local') {
+    if (config.provider === "local") {
       return await generateLocalEmbedding(truncatedText);
     }
-    
-    if (config.provider === 'remote') {
+
+    if (config.provider === "remote") {
       return await generateRemoteEmbedding(truncatedText, config);
     }
   } catch (error) {
-    console.error('Failed to generate embedding:', error);
+    console.error("Failed to generate embedding:", error);
     return null;
   }
-  
+
   return null;
 }
 
@@ -213,15 +227,15 @@ export async function generateEmbeddings(
   texts: string[]
 ): Promise<Array<number[] | null>> {
   const config = getEmbeddingConfig();
-  
-  if (config.provider === 'none') {
+
+  if (config.provider === "none") {
     return texts.map(() => null);
   }
-  
+
   // Process in parallel with concurrency limit
-  const concurrency = config.provider === 'remote' ? 5 : 10;
+  const concurrency = config.provider === "remote" ? 5 : 10;
   const results: Array<number[] | null> = [];
-  
+
   for (let i = 0; i < texts.length; i += concurrency) {
     const batch = texts.slice(i, i + concurrency);
     const batchResults = await Promise.all(
@@ -229,7 +243,7 @@ export async function generateEmbeddings(
     );
     results.push(...batchResults);
   }
-  
+
   return results;
 }
 
@@ -250,6 +264,6 @@ export function createEventEmbeddingText(event: {
     event.category,
     ...(event.tags || []),
   ];
-  
-  return parts.filter(Boolean).join(' ').slice(0, 512);
+
+  return parts.filter(Boolean).join(" ").slice(0, 512);
 }

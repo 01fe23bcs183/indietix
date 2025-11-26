@@ -9,7 +9,7 @@ export interface SearchFilters {
   minPrice?: number;
   area?: string;
   city?: string;
-  startTimeWindow?: 'morning' | 'afternoon' | 'evening' | 'night';
+  startTimeWindow?: "morning" | "afternoon" | "evening" | "night";
   freeTextQuery?: string;
 }
 
@@ -78,7 +78,7 @@ export interface SuggestInput {
  * Suggest result
  */
 export interface SuggestResult {
-  type: 'event' | 'venue' | 'city';
+  type: "event" | "venue" | "city";
   value: string;
   slug?: string;
 }
@@ -86,7 +86,7 @@ export interface SuggestResult {
 /**
  * Embedding provider type
  */
-export type EmbeddingProvider = 'none' | 'local' | 'remote';
+export type EmbeddingProvider = "none" | "local" | "remote";
 
 /**
  * Embedding configuration

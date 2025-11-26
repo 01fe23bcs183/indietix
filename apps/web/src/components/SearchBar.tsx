@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { trpc } from '@/lib/trpc-provider';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { trpc } from "@/lib/trpc-provider";
 
 interface SearchBarProps {
   value: string;
+  // eslint-disable-next-line no-unused-vars
   onChange: (value: string) => void;
   placeholder?: string;
 }
@@ -14,7 +15,7 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-  
+
   const { data: suggestions } = trpc.search.suggest.useQuery(
     { q: inputValue, limit: 10 },
     {
@@ -22,35 +23,44 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
       staleTime: 10000,
     }
   );
-  
+
   useEffect(() => {
     setInputValue(value);
   }, [value]);
-  
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-    setShowSuggestions(newValue.length >= 2);
-  }, []);
-  
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    onChange(inputValue);
-    setShowSuggestions(false);
-  }, [inputValue, onChange]);
-  
-  const handleSuggestionClick = useCallback((suggestion: { value: string; slug?: string }) => {
-    setInputValue(suggestion.value);
-    onChange(suggestion.value);
-    setShowSuggestions(false);
-  }, [onChange]);
-  
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setInputValue(newValue);
+      setShowSuggestions(newValue.length >= 2);
+    },
+    []
+  );
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      onChange(inputValue);
+      setShowSuggestions(false);
+    },
+    [inputValue, onChange]
+  );
+
+  const handleSuggestionClick = useCallback(
+    (suggestion: { value: string; slug?: string }) => {
+      setInputValue(suggestion.value);
+      onChange(suggestion.value);
+      setShowSuggestions(false);
+    },
+    [onChange]
+  );
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       setShowSuggestions(false);
     }
   }, []);
-  
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -62,11 +72,11 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
         setShowSuggestions(false);
       }
     };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  
+
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div className="relative">
@@ -101,7 +111,7 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
           </svg>
         </button>
       </div>
-      
+
       {showSuggestions && suggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}

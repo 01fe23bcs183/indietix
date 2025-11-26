@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // Search filters interface (matches API router)
 interface SearchFilters {
@@ -9,36 +9,37 @@ interface SearchFilters {
   minPrice?: number;
   area?: string;
   city?: string;
-  startTimeWindow?: 'morning' | 'afternoon' | 'evening' | 'night';
+  startTimeWindow?: "morning" | "afternoon" | "evening" | "night";
   freeTextQuery?: string;
 }
 
 interface FilterChipsProps {
   filters: SearchFilters;
+  // eslint-disable-next-line no-unused-vars
   onRemove: (key: keyof SearchFilters) => void;
   onClear: () => void;
 }
 
 const FILTER_LABELS: Record<keyof SearchFilters, string> = {
-  category: 'Category',
-  dateStart: 'From',
-  dateEnd: 'Until',
-  maxPrice: 'Max Price',
-  minPrice: 'Min Price',
-  area: 'Area',
-  city: 'City',
-  startTimeWindow: 'Time',
-  freeTextQuery: 'Search',
+  category: "Category",
+  dateStart: "From",
+  dateEnd: "Until",
+  maxPrice: "Max Price",
+  minPrice: "Min Price",
+  area: "Area",
+  city: "City",
+  startTimeWindow: "Time",
+  freeTextQuery: "Search",
 };
 
 function formatFilterValue(key: keyof SearchFilters, value: unknown): string {
-  if (key === 'minPrice' || key === 'maxPrice') {
+  if (key === "minPrice" || key === "maxPrice") {
     return `₹${value}`;
   }
-  if (key === 'dateStart' || key === 'dateEnd') {
-    return new Date(value as string).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
+  if (key === "dateStart" || key === "dateEnd") {
+    return new Date(value as string).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
     });
   }
   return String(value);
@@ -46,13 +47,13 @@ function formatFilterValue(key: keyof SearchFilters, value: unknown): string {
 
 export function FilterChips({ filters, onRemove, onClear }: FilterChipsProps) {
   const filterEntries = Object.entries(filters).filter(
-    ([, value]) => value !== undefined && value !== null && value !== ''
+    ([, value]) => value !== undefined && value !== null && value !== ""
   ) as Array<[keyof SearchFilters, unknown]>;
-  
+
   if (filterEntries.length === 0) {
     return null;
   }
-  
+
   return (
     <div className="flex flex-wrap gap-2 mt-4">
       {filterEntries.map(([key, value]) => (
@@ -84,7 +85,7 @@ export function FilterChips({ filters, onRemove, onClear }: FilterChipsProps) {
           </button>
         </span>
       ))}
-      
+
       {filterEntries.length > 1 && (
         <button
           onClick={onClear}
