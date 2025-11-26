@@ -11,12 +11,13 @@
     "test": "vitest run",
     "test:e2e": "playwright test"
   },
-  "dependencies": {
-    "@indietix/api": "workspace:*",
-    "@indietix/db": "workspace:*",
-    "@indietix/notify": "workspace:*",
-    "@indietix/ui": "workspace:*",
-    "@indietix/utils": "workspace:*",
+    "dependencies": {
+      "@indietix/api": "workspace:*",
+      "@indietix/comm": "workspace:*",
+      "@indietix/db": "workspace:*",
+      "@indietix/notify": "workspace:*",
+      "@indietix/ui": "workspace:*",
+      "@indietix/utils": "workspace:*",
     "@tanstack/react-query": "^4.36.1",
     "@trpc/client": "^10.45.0",
     "@trpc/next": "^10.45.0",

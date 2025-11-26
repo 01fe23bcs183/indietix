@@ -103,6 +103,14 @@ enum PromoCodeType {
 enum CampaignChannel {
   EMAIL
   SMS
+  PUSH
+}
+
+enum ConsentType {
+  MARKETING
+  REMINDERS
+  TERMS
+  PRIVACY
 }
 
 enum CampaignStatus {
@@ -151,14 +159,15 @@ model User {
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
   
-  sessions                Session[]
-  organizer               Organizer?
-  bookings                Booking[]
-  adminActions            AdminAction[]
-  notificationPreferences NotificationPreference?
-  notifications           Notification[]
+    sessions                Session[]
+    organizer               Organizer?
+    bookings                Booking[]
+    adminActions            AdminAction[]
+    notificationPreferences NotificationPreference?
+    notifications           Notification[]
+    consents                UserConsent[]
 
-  @@index([email])
+    @@index([email])
   @@index([role])
 }
 
@@ -498,16 +507,25 @@ model Notification {
   // Provider response
   providerMessageId String?
   
+  // Communication Center fields
+  campaignId    String?
+  readAt        DateTime?
+  error         String?
+  
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
   
   user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  campaign      Campaign?          @relation(fields: [campaignId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([status, scheduledAt])
   @@index([type])
   @@index([channel])
   @@index([scheduledAt])
+  @@index([campaignId])
+  @@index([readAt])
+  @@unique([userId, campaignId, channel], name: "idempotency_key")
 }
 
 model PromoCode {
@@ -572,15 +590,25 @@ model Campaign {
   scheduledAt  DateTime?
   createdBy    String          // User ID of creator
   
+  // Communication Center fields
+  paused       Boolean         @default(false)
+  stats        Json?           // { queued, sent, failed, openRate, clickRate }
+  segmentId    String?         // Link to segment used
+  payload      Json?           // Template payload data
+  rateLimit    Int?            // Per-channel rate limit (e.g., 20/sec for email)
+  utmEnabled   Boolean         @default(true)
+  
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   
   recipients   CampaignRecipient[]
   bookings     Booking[]
+  notifications Notification[]
 
   @@index([status])
   @@index([createdBy])
   @@index([scheduledAt])
+  @@index([paused])
 }
 
 model Segment {
@@ -688,5 +716,18 @@ model FraudCase {
 
   @@index([bookingId])
   @@index([status])
+  @@index([createdAt])
+}
+
+model UserConsent {
+  id        String      @id @default(cuid())
+  userId    String
+  type      ConsentType
+  value     Boolean
+  createdAt DateTime    @default(now())
+  
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
   @@index([createdAt])
 }
