@@ -47,8 +47,14 @@
   - `mode: "insensitive"` doesn't work with Prisma enums, only strings
 
 ### Android E2E Failure
-- Downgraded expo-calendar from ^15.0.7 to ~12.0.0 (SDK 50 compatible)
-- This resolves the expo-module-gradle-plugin not found error
+- Removed expo-calendar dependency entirely (was causing Gradle plugin resolution errors)
+- The "Add to Calendar" feature is now temporarily disabled with a user-friendly message
+- This is a nice-to-have feature that can be re-enabled when expo-calendar is compatible with the current Expo SDK
+
+### E2E Empty State Test
+- Added score threshold filtering in search router
+- Events with score of 0 are now filtered out when there's a search query
+- This ensures the "no results" state is shown for non-matching queries like "xyznonexistentevent12345"
 
 ## Notes
 - Using PostgreSQL FTS with tsvector for full-text search

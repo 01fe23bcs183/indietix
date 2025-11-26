@@ -450,8 +450,15 @@ export const searchRouter = router({
       // Sort by score
       scoredEvents.sort((a, b) => b.score - a.score);
 
+      // Filter out events with score of 0 when there's a search query
+      // This ensures "no results" state is shown for non-matching queries
+      const filteredEvents =
+        input.q && input.q.trim().length > 0
+          ? scoredEvents.filter((e) => e.score > 0)
+          : scoredEvents;
+
       // Apply pagination
-      const paginatedEvents = scoredEvents.slice(
+      const paginatedEvents = filteredEvents.slice(
         input.offset,
         input.offset + input.limit
       );
@@ -477,7 +484,7 @@ export const searchRouter = router({
 
       return {
         results,
-        total: scoredEvents.length,
+        total: filteredEvents.length,
         debug: input.debug
           ? {
               appliedFilters,
