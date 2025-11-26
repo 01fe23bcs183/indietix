@@ -22,13 +22,13 @@
   "dependencies": {
     "@indietix/db": "workspace:*",
     "handlebars": "^4.7.8",
-    "react": "^18.2.0",
+    "react": "^19.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@indietix/config": "workspace:*",
     "@types/node": "^20.11.5",
-    "@types/react": "^18.2.0",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^18.2.0",
     "typescript": "^5.3.3",
     "vitest": "^1.2.1"
