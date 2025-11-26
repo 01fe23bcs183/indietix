@@ -110,7 +110,10 @@ test.describe("Search Functionality", () => {
     await page.waitForTimeout(1000);
 
     // Should show "No events found" or similar message
-    const emptyState = page.locator("text=/no events found|0 events found/i");
+    // Use .first() because both "0 events found" and "No events found matching your search" may be visible
+    const emptyState = page
+      .locator("text=/no events found|0 events found/i")
+      .first();
     await expect(emptyState).toBeVisible({ timeout: 10000 });
   });
 
