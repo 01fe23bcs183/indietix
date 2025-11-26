@@ -17,6 +17,7 @@
       "@indietix/db": "workspace:*",
       "@indietix/loyalty": "workspace:*",
       "@indietix/notify": "workspace:*",
+      "@indietix/reco": "workspace:*",
       "@indietix/ui": "workspace:*",
       "@indietix/utils": "workspace:*",
     "@tanstack/react-query": "^4.36.1",

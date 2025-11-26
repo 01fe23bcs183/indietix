@@ -6,10 +6,24 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { trpc } from "../../lib/trpc";
 import { formatINR } from "@indietix/utils";
+
+function getCategoryEmoji(category: string): string {
+  const emojiMap: Record<string, string> = {
+    MUSIC: "🎵",
+    COMEDY: "😂",
+    SPORTS: "🏆",
+    TECH: "💻",
+    ART: "🎨",
+    FOOD: "🍽️",
+    OTHER: "📅",
+  };
+  return emojiMap[category] ?? "📅";
+}
 
 export default function Home(): JSX.Element {
   const router = useRouter();
@@ -22,8 +36,15 @@ export default function Home(): JSX.Element {
     orderBy: "date_asc",
   });
 
+  const { data: recoData } = trpc.reco.forUser.useQuery({
+    limit: 6,
+  });
+
+  const logRecoClick = trpc.reco.logClick.useMutation();
+
   const featuredEvents = events?.events.filter((e) => e.featured) || [];
   const upcomingEvents = events?.events.slice(0, 10) || [];
+  const recommendations = recoData?.recommendations || [];
 
   function renderEventCard({ item }: { item: (typeof upcomingEvents)[0] }) {
     const seatsLeft = item.totalSeats - (item._count?.bookings || 0);
@@ -78,6 +99,64 @@ export default function Home(): JSX.Element {
                 Find amazing events near you
               </Text>
             </View>
+
+            {recommendations.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>
+                    {recoData?.isPersonalized
+                      ? "Recommended for You"
+                      : "Popular Events"}
+                  </Text>
+                  <TouchableOpacity onPress={() => router.push("/events")}>
+                    <Text style={styles.seeAllLink}>See All →</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                >
+                  {recommendations.slice(0, 6).map((reco, index) => (
+                    <TouchableOpacity
+                      key={reco.event.id}
+                      style={styles.recoCard}
+                      onPress={() => {
+                        logRecoClick.mutate({
+                          eventId: reco.event.id,
+                          position: index,
+                          score: reco.score,
+                        });
+                        router.push(`/events/${reco.event.slug}`);
+                      }}
+                    >
+                      <View style={styles.recoImagePlaceholder}>
+                        <Text style={styles.recoEmoji}>
+                          {getCategoryEmoji(reco.event.category)}
+                        </Text>
+                      </View>
+                      <View style={styles.recoInfo}>
+                        <Text style={styles.recoTitle} numberOfLines={2}>
+                          {reco.event.title}
+                        </Text>
+                        <Text style={styles.recoDate}>
+                          {new Date(reco.event.date).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "numeric",
+                              month: "short",
+                            }
+                          )}
+                        </Text>
+                        <Text style={styles.recoPrice}>
+                          {formatINR(reco.event.price)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
 
             {featuredEvents.length > 0 && (
               <View style={styles.section}>
@@ -217,5 +296,49 @@ const styles = StyleSheet.create({
   seatsLeft: {
     fontSize: 12,
     color: "#666",
+  },
+  horizontalList: {
+    paddingRight: 16,
+  },
+  recoCard: {
+    width: 160,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginRight: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: "hidden",
+  },
+  recoImagePlaceholder: {
+    height: 80,
+    backgroundColor: "#e8f0fe",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  recoEmoji: {
+    fontSize: 32,
+  },
+  recoInfo: {
+    padding: 12,
+  },
+  recoTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 4,
+    height: 36,
+  },
+  recoDate: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 4,
+  },
+  recoPrice: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#0066cc",
   },
 });

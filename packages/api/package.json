@@ -26,6 +26,7 @@
         "@indietix/fraud": "workspace:*",
         "@indietix/loyalty": "workspace:*",
         "@indietix/marketing": "workspace:*",
+        "@indietix/reco": "workspace:*",
         "@indietix/notify": "workspace:*",
         "@indietix/payments": "workspace:*",
         "@indietix/utils": "workspace:*",

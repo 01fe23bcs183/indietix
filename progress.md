@@ -1,63 +1,83 @@
-# PR #129 CI Fix Progress
+# Hybrid Recommendations v1 Progress
 
 ## Progress Bar
 ```
-[##################] 90% Complete - Pushing fixes
+[####..............] 20% Complete - Setting up infrastructure
 ```
 
 ## Current Status
-- Branch: `devin/1764146639-search-nl-filters-fts-trgm-embeddings`
-- PR: https://github.com/01fe23bcs183/indietix/pull/129
-- Fixing CI failures and pushing changes
+- Branch: `devin/1764169732-reco-hybrid-recommendations`
+- PR: Not yet created
+- Building low-cost recommendation system with rule-based + lightweight CF
 
-## CI Check Status
-| Check | Status |
-|-------|--------|
-| Lint & Type Check | PASS |
-| Unit Tests | PASS |
-| Code Coverage | PASS |
-| SonarCloud Analysis | PASS |
-| Secret Scanning | PASS |
-| GitGuardian | PASS |
-| Auto Label PR | PASS |
-| lint-typecheck-test-build (E2E) | FIXING |
-| android-e2e | FIXING |
+## Task Overview
+Building a hybrid recommendation system that:
+1. Computes user profile vectors from views, bookings, categories, price band, city, time-of-day
+2. Generates candidates via Jaccard/cosine similarity on user profiles
+3. Scores candidates with configurable weights
+4. Batch computes UserReco table nightly via cron
+5. Falls back to popularity-by-segment for cold-start users
+6. Optionally uses local matrix factorization behind a flag
 
 ## Completed Tasks
-- [x] Analyze previous Devin session to understand what was tried
-- [x] Clone repo and checkout PR branch
-- [x] Review CI logs to identify exact failures
-- [x] Create documentation files
-- [x] Fix E2E test failures - update seed data with future-dated COMEDY events
-- [x] Fix Android E2E failure - downgrade expo-calendar to SDK 50 compatible version (~12.0.0)
-- [x] Run pnpm install to update lockfile
-- [x] Run local build and unit tests - All passing
+- [x] Checkout git branch for reco feature
+- [x] Explore codebase structure - understand existing models, API patterns, and packages
+- [x] Create RECO_HYBRID_RECOMMENDATIONS_DOCUMENT.md
 
 ## In Progress
-- [ ] Push changes to PR #129
-- [ ] Wait for CI to complete
+- [ ] Create progress.md documentation
+- [ ] Create Prisma schema for UserReco model
 
-## Fixes Applied
-### E2E Test Failures
-- Updated COMEDY event dates in seed.ts to be in the future:
-  - "Stand-Up Comedy Night with Zakir Khan": 2025-11-20 → 2026-01-20
-  - "Biswa Kalyan Rath Live in Mumbai": 2025-05-20 → 2026-02-20
-- Fixed category filter in search router:
-  - Changed from `{ equals: filters.category, mode: "insensitive" }` to direct equality
-  - `mode: "insensitive"` doesn't work with Prisma enums, only strings
+## Pending Tasks
+- [ ] Create packages/reco package with engine.ts and config.ts
+- [ ] Implement user profile vector computation
+- [ ] Implement candidate generation (Jaccard/cosine similarity)
+- [ ] Implement scoring function with configurable weights
+- [ ] Implement batch compute for UserReco table
+- [ ] Implement cold-start fallback (popularity-by-segment)
+- [ ] Add optional local MF behind RECO_MF_PROVIDER flag
+- [ ] Create tRPC reco.forUser endpoint
+- [ ] Create cron API endpoint /api/cron/reco
+- [ ] Create GitHub workflow for nightly cron
+- [ ] Update Web/Mobile home to show "Recommended for you" row
+- [ ] Write unit tests
+- [ ] Write Playwright test
+- [ ] Create docs/reco.md
+- [ ] Run lint, typecheck, build, and tests
+- [ ] Create PR and wait for CI
 
-### Android E2E Failure
-- Removed expo-calendar dependency entirely (was causing Gradle plugin resolution errors)
-- The "Add to Calendar" feature is now temporarily disabled with a user-friendly message
-- This is a nice-to-have feature that can be re-enabled when expo-calendar is compatible with the current Expo SDK
+## Architecture
 
-### E2E Empty State Test
-- Added score threshold filtering in search router
-- Events with score of 0 are now filtered out when there's a search query
-- This ensures the "no results" state is shown for non-matching queries like "xyznonexistentevent12345"
+### User Profile Vector
+```typescript
+interface UserProfile {
+  catFreq: Record<Category, number>;  // Category frequency
+  priceP50: number;                    // Median price
+  preferredAreas: string[];            // Top cities
+  timeSlots: string[];                 // Preferred times
+}
+```
+
+### Scoring Formula
+```
+score = w_cat*catSim + w_price*priceBandSim + w_area*areaMatch + w_recency*recencyBoost + w_pop*popularity
+```
+
+### Database Model
+```prisma
+model UserReco {
+  userId    String
+  eventId   String
+  score     Float
+  reason    Json
+  createdAt DateTime @default(now())
+
+  @@id([userId, eventId])
+}
+```
 
 ## Notes
-- Using PostgreSQL FTS with tsvector for full-text search
-- Using pg_trgm for fuzzy matching
-- Optional pgvector for 384-dimensional MiniLM embeddings
-- Environment variable SEARCH_EMBEDDINGS_PROVIDER controls embedding mode
+- No external ML - all computation in Postgres SQL
+- Nightly refresh via cron
+- Top 50 recommendations per user
+- RECO_MF_PROVIDER flag controls optional local MF
