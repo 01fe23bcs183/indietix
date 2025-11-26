@@ -432,10 +432,21 @@ export const searchRouter = router({
 
         const recencyBoost = calculateRecencyBoost(event.date);
 
+        // Calculate base textual score (FTS + trigram)
+        const baseTextScore =
+          ftsRank * weights.fts + trigramSimilarity * weights.trigram;
+
+        // Only apply recency boost if there's a textual match OR no search query
+        // This ensures non-matching events get score 0 when searching
+        const hasSearchQuery = input.q && input.q.trim().length > 0;
+        const hasTextMatch = baseTextScore > 0;
+        const effectiveRecencyBoost =
+          !hasSearchQuery || hasTextMatch ? recencyBoost : 0;
+
         const components: ScoreComponents = {
           ftsRank,
           trigramSimilarity,
-          recencyBoost,
+          recencyBoost: effectiveRecencyBoost,
         };
 
         const score = calculateCombinedScore(components, weights);
