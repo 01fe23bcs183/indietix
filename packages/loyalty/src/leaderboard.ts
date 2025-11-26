@@ -83,7 +83,9 @@ export interface RecomputeResult {
   entriesCreated: number;
 }
 
-export async function recomputeLeaderboard(month: string): Promise<RecomputeResult> {
+export async function recomputeLeaderboard(
+  month: string
+): Promise<RecomputeResult> {
   const cities = await prisma.event.findMany({
     select: { city: true },
     distinct: ["city"],

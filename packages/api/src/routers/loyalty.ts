@@ -135,7 +135,9 @@ export const loyaltyRouter = router({
       .input(
         z.object({
           userId: z.string(),
-          status: z.enum(["PENDING", "ACTIVE", "USED", "EXPIRED", "CANCELLED"]).optional(),
+          status: z
+            .enum(["PENDING", "ACTIVE", "USED", "EXPIRED", "CANCELLED"])
+            .optional(),
         })
       )
       .query(async ({ input }) => {
@@ -162,9 +164,9 @@ export const loyaltyRouter = router({
   badges: router({
     list: publicProcedure.query(async () => {
       const badges = getAllBadges();
-      
+
       const dbBadges = await prisma.badge.findMany();
-      
+
       if (dbBadges.length === 0) {
         await prisma.badge.createMany({
           data: badges.map((b) => ({
@@ -234,18 +236,26 @@ export const loyaltyRouter = router({
           let earned = false;
 
           if (badge.category === "BOOKINGS") {
-            if (badge.key === "FIRST_BOOKING" && bookingCount >= 1) earned = true;
+            if (badge.key === "FIRST_BOOKING" && bookingCount >= 1)
+              earned = true;
             if (badge.key === "BOOKINGS_5" && bookingCount >= 5) earned = true;
-            if (badge.key === "BOOKINGS_10" && bookingCount >= 10) earned = true;
-            if (badge.key === "BOOKINGS_25" && bookingCount >= 25) earned = true;
-            if (badge.key === "BOOKINGS_50" && bookingCount >= 50) earned = true;
+            if (badge.key === "BOOKINGS_10" && bookingCount >= 10)
+              earned = true;
+            if (badge.key === "BOOKINGS_25" && bookingCount >= 25)
+              earned = true;
+            if (badge.key === "BOOKINGS_50" && bookingCount >= 50)
+              earned = true;
           }
 
           if (badge.category === "ATTENDANCE") {
-            if (badge.key === "FIRST_ATTENDANCE" && attendanceCount >= 1) earned = true;
-            if (badge.key === "ATTENDANCE_5" && attendanceCount >= 5) earned = true;
-            if (badge.key === "ATTENDANCE_10" && attendanceCount >= 10) earned = true;
-            if (badge.key === "ATTENDANCE_25" && attendanceCount >= 25) earned = true;
+            if (badge.key === "FIRST_ATTENDANCE" && attendanceCount >= 1)
+              earned = true;
+            if (badge.key === "ATTENDANCE_5" && attendanceCount >= 5)
+              earned = true;
+            if (badge.key === "ATTENDANCE_10" && attendanceCount >= 10)
+              earned = true;
+            if (badge.key === "ATTENDANCE_25" && attendanceCount >= 25)
+              earned = true;
           }
 
           if (badge.category === "KARMA") {
@@ -253,7 +263,8 @@ export const loyaltyRouter = router({
             if (badge.key === "KARMA_500" && user.karma >= 500) earned = true;
             if (badge.key === "KARMA_1000" && user.karma >= 1000) earned = true;
             if (badge.key === "KARMA_5000" && user.karma >= 5000) earned = true;
-            if (badge.key === "KARMA_10000" && user.karma >= 10000) earned = true;
+            if (badge.key === "KARMA_10000" && user.karma >= 10000)
+              earned = true;
           }
 
           if (earned) {
@@ -318,7 +329,8 @@ export const loyaltyRouter = router({
       return {
         flags: perks?.flags ?? [],
         hasEarlyAccess: perks?.flags.includes("EARLY_ACCESS") ?? false,
-        hasWaitlistPriority: perks?.flags.includes("WAITLIST_PRIORITY") ?? false,
+        hasWaitlistPriority:
+          perks?.flags.includes("WAITLIST_PRIORITY") ?? false,
         hasVIP: perks?.flags.includes("VIP") ?? false,
         hasGoldStatus: perks?.flags.includes("GOLD_STATUS") ?? false,
       };

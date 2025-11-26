@@ -82,7 +82,9 @@ describe("Badge Definitions", () => {
   describe("Badge thresholds", () => {
     it("should have increasing thresholds for booking badges", () => {
       const bookingBadges = getBadgesByCategory("BOOKINGS")
-        .filter((b) => b.key.startsWith("BOOKINGS_") || b.key === "FIRST_BOOKING")
+        .filter(
+          (b) => b.key.startsWith("BOOKINGS_") || b.key === "FIRST_BOOKING"
+        )
         .sort((a, b) => a.threshold - b.threshold);
 
       for (let i = 1; i < bookingBadges.length; i++) {

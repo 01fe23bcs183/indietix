@@ -1,5 +1,5 @@
 import { prisma, Prisma } from "@indietix/db";
-import { getReward, Reward } from "./rewards";
+import { getReward } from "./rewards";
 
 export interface SpendResult {
   success: boolean;
@@ -25,7 +25,9 @@ function generatePromoCode(): string {
   return code;
 }
 
-export async function redeemReward(options: RedeemOptions): Promise<SpendResult> {
+export async function redeemReward(
+  options: RedeemOptions
+): Promise<SpendResult> {
   const { userId, rewardKey } = options;
 
   const reward = getReward(rewardKey);
@@ -80,95 +82,99 @@ export async function redeemReward(options: RedeemOptions): Promise<SpendResult>
     }
   }
 
-  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const transaction = await tx.karmaTransaction.create({
-      data: {
-        userId,
-        delta: -reward.cost,
-        type: "SPEND",
-        reason: "REWARD_REDEEM",
-        refId: rewardKey,
-        meta: { rewardName: reward.name },
-      },
-    });
-
-    const updatedUser = await tx.user.update({
-      where: { id: userId },
-      data: {
-        karma: { decrement: reward.cost },
-      },
-    });
-
-    let promoCodeRecord = null;
-    let promoCode: string | undefined;
-
-    if (reward.type === "PROMO_CODE") {
-      promoCode = generatePromoCode();
-      
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
-
-      promoCodeRecord = await tx.promoCode.create({
+  const result = await prisma.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const transaction = await tx.karmaTransaction.create({
         data: {
-          code: promoCode,
-          type: reward.promoType === "PERCENT" ? "PERCENT" : "FLAT",
-          value: reward.promoValue ?? 0,
-          startAt: new Date(),
-          endAt: expiresAt,
-          usageLimit: 1,
-          perUserLimit: 1,
-          minPrice: reward.maxEventPrice ? 0 : undefined,
-          active: true,
+          userId,
+          delta: -reward.cost,
+          type: "SPEND",
+          reason: "REWARD_REDEEM",
+          refId: rewardKey,
+          meta: { rewardName: reward.name },
         },
       });
-    }
 
-    const rewardGrant = await tx.rewardGrant.create({
-      data: {
-        userId,
-        rewardKey,
-        status: reward.type === "PROMO_CODE" ? "ACTIVE" : "ACTIVE",
-        promoCodeId: promoCodeRecord?.id,
-        meta: {
-          rewardName: reward.name,
-          rewardType: reward.type,
-          promoCode,
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: {
+          karma: { decrement: reward.cost },
         },
-        expiresAt: reward.permanent ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      },
-    });
-
-    if (reward.type === "PERK" || reward.type === "STATUS") {
-      const existingPerks = await tx.userPerks.findUnique({
-        where: { userId },
       });
 
-      if (existingPerks) {
-        const flags = existingPerks.flags.includes(reward.perkFlag!)
-          ? existingPerks.flags
-          : [...existingPerks.flags, reward.perkFlag!];
-        
-        await tx.userPerks.update({
-          where: { userId },
-          data: { flags },
-        });
-      } else {
-        await tx.userPerks.create({
+      let promoCodeRecord = null;
+      let promoCode: string | undefined;
+
+      if (reward.type === "PROMO_CODE") {
+        promoCode = generatePromoCode();
+
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
+
+        promoCodeRecord = await tx.promoCode.create({
           data: {
-            userId,
-            flags: [reward.perkFlag!],
+            code: promoCode,
+            type: reward.promoType === "PERCENT" ? "PERCENT" : "FLAT",
+            value: reward.promoValue ?? 0,
+            startAt: new Date(),
+            endAt: expiresAt,
+            usageLimit: 1,
+            perUserLimit: 1,
+            minPrice: reward.maxEventPrice ? 0 : undefined,
+            active: true,
           },
         });
       }
-    }
 
-    return {
-      transaction,
-      rewardGrant,
-      newBalance: updatedUser.karma,
-      promoCode,
-    };
-  });
+      const rewardGrant = await tx.rewardGrant.create({
+        data: {
+          userId,
+          rewardKey,
+          status: reward.type === "PROMO_CODE" ? "ACTIVE" : "ACTIVE",
+          promoCodeId: promoCodeRecord?.id,
+          meta: {
+            rewardName: reward.name,
+            rewardType: reward.type,
+            promoCode,
+          },
+          expiresAt: reward.permanent
+            ? null
+            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      if (reward.type === "PERK" || reward.type === "STATUS") {
+        const existingPerks = await tx.userPerks.findUnique({
+          where: { userId },
+        });
+
+        if (existingPerks) {
+          const flags = existingPerks.flags.includes(reward.perkFlag!)
+            ? existingPerks.flags
+            : [...existingPerks.flags, reward.perkFlag!];
+
+          await tx.userPerks.update({
+            where: { userId },
+            data: { flags },
+          });
+        } else {
+          await tx.userPerks.create({
+            data: {
+              userId,
+              flags: [reward.perkFlag!],
+            },
+          });
+        }
+      }
+
+      return {
+        transaction,
+        rewardGrant,
+        newBalance: updatedUser.karma,
+        promoCode,
+      };
+    }
+  );
 
   return {
     success: true,
@@ -209,30 +215,32 @@ export async function adminAdjustKarma(
     };
   }
 
-  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const transaction = await tx.karmaTransaction.create({
-      data: {
-        userId,
-        delta,
-        type: "ADJUST",
-        reason: "ADMIN_ADJUST",
-        refId: `admin-${adminId}-${Date.now()}`,
-        meta: { reason, adminId },
-      },
-    });
+  const result = await prisma.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const transaction = await tx.karmaTransaction.create({
+        data: {
+          userId,
+          delta,
+          type: "ADJUST",
+          reason: "ADMIN_ADJUST",
+          refId: `admin-${adminId}-${Date.now()}`,
+          meta: { reason, adminId },
+        },
+      });
 
-    const updatedUser = await tx.user.update({
-      where: { id: userId },
-      data: {
-        karma: { increment: delta },
-      },
-    });
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: {
+          karma: { increment: delta },
+        },
+      });
 
-    return {
-      transaction,
-      newBalance: updatedUser.karma,
-    };
-  });
+      return {
+        transaction,
+        newBalance: updatedUser.karma,
+      };
+    }
+  );
 
   return {
     success: true,

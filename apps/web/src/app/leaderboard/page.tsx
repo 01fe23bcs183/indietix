@@ -21,7 +21,10 @@ export default function LeaderboardPage() {
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
-  const [userRank, setUserRank] = useState<{ rank: number; score: number } | null>(null);
+  const [userRank, setUserRank] = useState<{
+    rank: number;
+    score: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +55,7 @@ export default function LeaderboardPage() {
             setSelectedMonth(monthList[0]);
           }
         }
-      } catch (err) {
+      } catch {
         setError("Failed to load leaderboard data");
       } finally {
         setLoading(false);
@@ -70,12 +73,20 @@ export default function LeaderboardPage() {
         const [leaderboardRes, rankRes] = await Promise.all([
           fetch(
             `/api/trpc/loyalty.leaderboard.get?input=${encodeURIComponent(
-              JSON.stringify({ city: selectedCity, month: selectedMonth, limit: 50 })
+              JSON.stringify({
+                city: selectedCity,
+                month: selectedMonth,
+                limit: 50,
+              })
             )}`
           ),
           fetch(
             `/api/trpc/loyalty.leaderboard.userRank?input=${encodeURIComponent(
-              JSON.stringify({ userId, city: selectedCity, month: selectedMonth })
+              JSON.stringify({
+                userId,
+                city: selectedCity,
+                month: selectedMonth,
+              })
             )}`
           ),
         ]);
@@ -222,7 +233,9 @@ export default function LeaderboardPage() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-purple-600 font-medium">Your Score</p>
+                <p className="text-sm text-purple-600 font-medium">
+                  Your Score
+                </p>
                 <p className="text-2xl font-bold text-purple-900">
                   {userRank.score} karma
                 </p>

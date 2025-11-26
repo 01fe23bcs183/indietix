@@ -52,7 +52,8 @@ export const REWARDS_CATALOG: Record<string, Reward> = {
   VIP_PERKS: {
     key: "VIP_PERKS",
     name: "VIP Perks",
-    description: "Unlock VIP benefits including priority support and exclusive offers",
+    description:
+      "Unlock VIP benefits including priority support and exclusive offers",
     cost: 5000,
     type: "PERK",
     perkFlag: "VIP",
@@ -60,7 +61,8 @@ export const REWARDS_CATALOG: Record<string, Reward> = {
   GOLD_STATUS: {
     key: "GOLD_STATUS",
     name: "Gold Status",
-    description: "Permanent Gold member status with all VIP benefits plus exclusive access",
+    description:
+      "Permanent Gold member status with all VIP benefits plus exclusive access",
     cost: 10000,
     type: "STATUS",
     perkFlag: "GOLD_STATUS",
@@ -73,12 +75,18 @@ export function getReward(key: string): Reward | undefined {
 }
 
 export function getAvailableRewards(karma: number): Reward[] {
-  return Object.values(REWARDS_CATALOG).filter((reward) => karma >= reward.cost);
+  return Object.values(REWARDS_CATALOG).filter(
+    (reward) => karma >= reward.cost
+  );
 }
 
-export function getNextReward(karma: number): { reward: Reward; remaining: number } | null {
-  const sortedRewards = Object.values(REWARDS_CATALOG).sort((a, b) => a.cost - b.cost);
-  
+export function getNextReward(
+  karma: number
+): { reward: Reward; remaining: number } | null {
+  const sortedRewards = Object.values(REWARDS_CATALOG).sort(
+    (a, b) => a.cost - b.cost
+  );
+
   for (const reward of sortedRewards) {
     if (karma < reward.cost) {
       return {
@@ -87,11 +95,13 @@ export function getNextReward(karma: number): { reward: Reward; remaining: numbe
       };
     }
   }
-  
+
   return null;
 }
 
-export function getAllRewardsWithProgress(karma: number): Array<Reward & { unlocked: boolean; progress: number }> {
+export function getAllRewardsWithProgress(
+  karma: number
+): Array<Reward & { unlocked: boolean; progress: number }> {
   return Object.values(REWARDS_CATALOG)
     .sort((a, b) => a.cost - b.cost)
     .map((reward) => ({

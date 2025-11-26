@@ -25,7 +25,8 @@ export const EARNING_RULES: Record<string, EarningRule> = {
   REFERRAL: {
     reason: "REFERRAL",
     delta: 100,
-    description: "Karma earned when a referred friend makes their first booking",
+    description:
+      "Karma earned when a referred friend makes their first booking",
     maxPerMonth: 5,
     onePerRef: true,
   },
@@ -63,7 +64,8 @@ export const EARNING_RULES: Record<string, EarningRule> = {
   LOW_SALES_HELP: {
     reason: "LOW_SALES_HELP",
     delta: 40,
-    description: "Karma earned for booking a show with <50% capacity 24h before",
+    description:
+      "Karma earned for booking a show with <50% capacity 24h before",
     onePerRef: true,
   },
 };

@@ -175,7 +175,9 @@ export function getBadgeDefinition(key: string): BadgeDefinition | undefined {
   return BADGE_DEFINITIONS.find((b) => b.key === key);
 }
 
-export function getBadgesByCategory(category: BadgeCategory): BadgeDefinition[] {
+export function getBadgesByCategory(
+  category: BadgeCategory
+): BadgeDefinition[] {
   return BADGE_DEFINITIONS.filter((b) => b.category === category);
 }
 

@@ -75,11 +75,19 @@ export default function KarmaPage() {
       try {
         const [karmaRes, historyRes, rewardsRes, badgesRes, userBadgesRes] =
           await Promise.all([
-            fetch(`/api/trpc/loyalty.getKarma?input=${encodeURIComponent(JSON.stringify({ userId }))}`),
-            fetch(`/api/trpc/loyalty.history?input=${encodeURIComponent(JSON.stringify({ userId, limit: 20 }))}`),
-            fetch(`/api/trpc/loyalty.rewards.catalog?input=${encodeURIComponent(JSON.stringify({ userId }))}`),
+            fetch(
+              `/api/trpc/loyalty.getKarma?input=${encodeURIComponent(JSON.stringify({ userId }))}`
+            ),
+            fetch(
+              `/api/trpc/loyalty.history?input=${encodeURIComponent(JSON.stringify({ userId, limit: 20 }))}`
+            ),
+            fetch(
+              `/api/trpc/loyalty.rewards.catalog?input=${encodeURIComponent(JSON.stringify({ userId }))}`
+            ),
             fetch(`/api/trpc/loyalty.badges.list`),
-            fetch(`/api/trpc/loyalty.badges.userBadges?input=${encodeURIComponent(JSON.stringify({ userId }))}`),
+            fetch(
+              `/api/trpc/loyalty.badges.userBadges?input=${encodeURIComponent(JSON.stringify({ userId }))}`
+            ),
           ]);
 
         if (karmaRes.ok) {
@@ -106,7 +114,7 @@ export default function KarmaPage() {
           const data = await userBadgesRes.json();
           setUserBadges(data.result?.data || []);
         }
-      } catch (err) {
+      } catch {
         setError("Failed to load karma data");
       } finally {
         setLoading(false);
@@ -131,15 +139,19 @@ export default function KarmaPage() {
           setKarmaData((prev) =>
             prev ? { ...prev, karma: data.result.data.newBalance } : null
           );
-          alert(
-            data.result.data.promoCode
-              ? `Reward redeemed! Your promo code: ${data.result.data.promoCode}`
-              : "Reward redeemed successfully!"
-          );
+          if (typeof window !== "undefined") {
+            window.alert(
+              data.result.data.promoCode
+                ? `Reward redeemed! Your promo code: ${data.result.data.promoCode}`
+                : "Reward redeemed successfully!"
+            );
+          }
         }
       }
-    } catch (err) {
-      alert("Failed to redeem reward");
+    } catch {
+      if (typeof window !== "undefined") {
+        window.alert("Failed to redeem reward");
+      }
     } finally {
       setRedeeming(null);
     }

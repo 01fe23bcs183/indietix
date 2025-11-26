@@ -106,11 +106,6 @@ export async function earnKarma(options: EarnOptions): Promise<EarnResult> {
 
   let held = false;
   if (checkFraud) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true },
-    });
-
     const recentFraudCase = await prisma.fraudCase.findFirst({
       where: {
         booking: { userId },
@@ -124,38 +119,40 @@ export async function earnKarma(options: EarnOptions): Promise<EarnResult> {
     }
   }
 
-  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    const transaction = await tx.karmaTransaction.create({
-      data: {
-        userId,
-        delta: rule.delta,
-        type: "EARN",
-        reason,
-        refId: refId ?? "",
-        meta: meta ? (meta as Prisma.InputJsonValue) : Prisma.JsonNull,
-        held,
-      },
-    });
-
-    let updatedUser;
-    if (!held) {
-      updatedUser = await tx.user.update({
-        where: { id: userId },
+  const result = await prisma.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const transaction = await tx.karmaTransaction.create({
         data: {
-          karma: { increment: rule.delta },
+          userId,
+          delta: rule.delta,
+          type: "EARN",
+          reason,
+          refId: refId ?? "",
+          meta: meta ? (meta as Prisma.InputJsonValue) : Prisma.JsonNull,
+          held,
         },
       });
-    } else {
-      updatedUser = await tx.user.findUnique({
-        where: { id: userId },
-      });
-    }
 
-    return {
-      transaction,
-      newBalance: updatedUser?.karma ?? 0,
-    };
-  });
+      let updatedUser;
+      if (!held) {
+        updatedUser = await tx.user.update({
+          where: { id: userId },
+          data: {
+            karma: { increment: rule.delta },
+          },
+        });
+      } else {
+        updatedUser = await tx.user.findUnique({
+          where: { id: userId },
+        });
+      }
+
+      return {
+        transaction,
+        newBalance: updatedUser?.karma ?? 0,
+      };
+    }
+  );
 
   return {
     success: true,
@@ -166,7 +163,9 @@ export async function earnKarma(options: EarnOptions): Promise<EarnResult> {
   };
 }
 
-export async function checkAndAwardStreak(userId: string): Promise<EarnResult | null> {
+export async function checkAndAwardStreak(
+  userId: string
+): Promise<EarnResult | null> {
   const windowStart = new Date();
   windowStart.setDate(windowStart.getDate() - STREAK_WINDOW_DAYS);
 
@@ -254,7 +253,9 @@ export async function checkLowSalesHelp(
   });
 }
 
-export async function releaseHeldKarma(transactionId: string): Promise<boolean> {
+export async function releaseHeldKarma(
+  transactionId: string
+): Promise<boolean> {
   const transaction = await prisma.karmaTransaction.findUnique({
     where: { id: transactionId },
   });
