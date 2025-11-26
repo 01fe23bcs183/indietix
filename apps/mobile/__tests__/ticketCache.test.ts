@@ -29,7 +29,7 @@ describe("TicketCache", () => {
           bookingId: "booking123",
           userId: "user123",
           eventId: "event123",
-          timestamp: Date.now(),
+          ts: Date.now(),
         },
         signature: "signature123",
         meta: {
@@ -57,7 +57,7 @@ describe("TicketCache", () => {
           bookingId: "booking123",
           userId: "user123",
           eventId: "event123",
-          timestamp: Date.now(),
+          ts: Date.now(),
         },
         signature: "signature123",
         meta: {
@@ -88,7 +88,7 @@ describe("TicketCache", () => {
           bookingId: "booking123",
           userId: "user123",
           eventId: "event123",
-          timestamp: Date.now(),
+          ts: Date.now(),
         },
         signature: "signature123",
         meta: {
@@ -156,7 +156,7 @@ describe("TicketCache", () => {
           bookingId: "booking1",
           userId: "user1",
           eventId: "event1",
-          timestamp: Date.now(),
+          ts: Date.now(),
         },
         signature: "sig1",
         meta: {
@@ -175,7 +175,7 @@ describe("TicketCache", () => {
           bookingId: "booking2",
           userId: "user2",
           eventId: "event2",
-          timestamp: Date.now(),
+          ts: Date.now(),
         },
         signature: "sig2",
         meta: {
@@ -203,8 +203,8 @@ describe("TicketCache", () => {
       const result = await getAllCachedTickets();
 
       expect(result).toHaveLength(2);
-      expect(result[0].bookingId).toBe("booking1");
-      expect(result[1].bookingId).toBe("booking2");
+      expect(result[0]?.bookingId).toBe("booking1");
+      expect(result[1]?.bookingId).toBe("booking2");
     });
 
     it("should return empty array if no tickets found", async () => {
@@ -233,7 +233,7 @@ describe("TicketCache", () => {
           bookingId: "booking123",
           userId: "user123",
           eventId: "event123",
-          timestamp: Date.now(),
+          ts: Date.now(),
         },
         signature: "signature123",
       };
@@ -251,7 +251,7 @@ describe("TicketCache", () => {
           bookingId: "booking123",
           userId: "user123",
           eventId: "event123",
-          timestamp: Date.now(),
+          ts: Date.now(),
         },
         signature: "signature123",
         meta: {

@@ -13,7 +13,6 @@ export function initializeSentry(): void {
 
     Sentry.init({
       dsn,
-      enableInExpoDevelopment: false,
       debug: isDevelopment,
       tracesSampleRate: 1.0,
       environment: process.env.NODE_ENV || "development",
@@ -39,9 +38,11 @@ export function captureException(
   }
 }
 
+type SeverityLevel = "fatal" | "error" | "warning" | "log" | "info" | "debug";
+
 export function captureMessage(
   message: string,
-  level: Sentry.SeverityLevel = "info"
+  level: SeverityLevel = "info"
 ): void {
   try {
     Sentry.captureMessage(message, level);

@@ -35,45 +35,48 @@ export default function TicketDetail(): JSX.Element {
     data: booking,
     isLoading,
     error,
-  } = trpc.booking.get.useQuery(
+  } = trpc.booking.poll.useQuery(
     { bookingId: id! },
     {
       enabled: !!id,
-      onError: async () => {
-        console.log("Failed to fetch booking, loading from cache");
-        setIsOffline(true);
-        const cached = await getCachedTicket(id!);
-        setCachedTicket(cached);
-      },
-      onSuccess: async (data) => {
-        if (data.status === "CONFIRMED" && data.qrCode) {
-          try {
-            const ticketToCache: CachedTicket = {
-              payload: {
-                bookingId: data.id,
-                userId: data.userId,
-                eventId: data.eventId,
-                timestamp: Date.now(),
-              },
-              signature: data.ticketPayloadHash || "",
-              meta: {
-                eventTitle: data.event.title,
-                eventDate: new Date(data.event.startTime).toLocaleDateString(),
-                venue: data.event.venue,
-                city: data.event.city,
-                ticketNumber: data.id.slice(0, 8).toUpperCase(),
-                seats: data.seats,
-                cachedAt: Date.now(),
-              },
-            };
-            await cacheTicket(data.id, ticketToCache);
-          } catch (error) {
-            console.error("Failed to cache ticket:", error);
-          }
-        }
-      },
     }
   );
+
+  // Handle booking data changes - cache ticket when confirmed
+  useEffect(() => {
+    if (booking?.status === "CONFIRMED" && booking?.qrCode) {
+      const ticketToCache: CachedTicket = {
+        payload: {
+          bookingId: booking.id,
+          userId: booking.userId,
+          eventId: booking.eventId,
+          ts: Date.now(),
+        },
+        signature: booking.ticketPayloadHash || "",
+        meta: {
+          eventTitle: booking.event.title,
+          eventDate: new Date(booking.event.startTime).toLocaleDateString(),
+          venue: booking.event.venue,
+          city: booking.event.city,
+          ticketNumber: booking.id.slice(0, 8).toUpperCase(),
+          seats: booking.seats,
+          cachedAt: Date.now(),
+        },
+      };
+      cacheTicket(booking.id, ticketToCache).catch((err) => {
+        console.error("Failed to cache ticket:", err);
+      });
+    }
+  }, [booking]);
+
+  // Handle error - load from cache
+  useEffect(() => {
+    if (error && id) {
+      console.log("Failed to fetch booking, loading from cache");
+      setIsOffline(true);
+      getCachedTicket(id).then(setCachedTicket);
+    }
+  }, [error, id]);
 
   useEffect(() => {
     if (id) {
