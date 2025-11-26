@@ -23,6 +23,7 @@ import { campaignsRouter } from "./routers/campaigns";
 import { segmentsRouter } from "./routers/segments";
 import { commRouter } from "./routers/comm";
 import { inboxRouter } from "./routers/inbox";
+import { cmsRouter } from "./routers/cms";
 
 export const appRouter = router({
   health: healthRouter,
@@ -39,6 +40,7 @@ export const appRouter = router({
   segments: segmentsRouter,
   comm: commRouter,
   inbox: inboxRouter,
+  cms: cmsRouter,
   organizer: router({
     events: organizerEventsRouter,
     attendees: organizerAttendeesRouter,

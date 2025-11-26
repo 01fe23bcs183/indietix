@@ -1,11 +1,64 @@
-# IndieTix Mobile App v0 - Progress Tracker
+# IndieTix CMS Content Blocks - Progress Tracker
+
+## Overall Progress
+```
+[████████████████    ] 80% Complete (13/17 tasks)
+```
+
+## Current Status
+**Phase:** Phase 4 - Testing & Documentation  
+**Last Updated:** 2025-11-26 03:17 UTC  
+**Branch:** devin/1764126095-cms-content-blocks  
+**PR:** (pending)
+
+## Completed Tasks
+- [x] Create branch and set up documentation files
+- [x] Add ContentBlock and Post models to Prisma schema
+- [x] Run database migration via Supabase MCP
+- [x] Implement CMS tRPC router with all endpoints
+- [x] Create admin CMS UI at /admin/cms
+- [x] Implement rich-text editor (Tiptap) for type:"rich" blocks
+- [x] Implement JSON editor with schema validation for type:"json" blocks
+- [x] Implement version history with diff view and rollback
+- [x] Implement Next.js draft/preview mode with token verification
+- [x] Update web homepage to read ContentBlock entries with ISR (60s)
+- [x] Create /blog page with tag filtering
+- [x] Create /blog/[slug] for single posts
+- [x] Create /help page with search and category filtering
+- [x] Add SEO metadata generation
+- [x] Write unit tests (JSON schema, preview token, ISR)
+- [x] Write Playwright E2E tests (CMS, blog, help)
+- [x] Create docs/cms.md documentation
+
+## Pending Tasks
+- [ ] Run pnpm -w lint, typecheck, test, and build
+- [ ] Create PR with title '[cms] Content blocks + blog/help + preview/versioning (Next draft mode + ISR)'
+- [ ] Wait for CI checks to pass
+
+## Recent Actions
+1. Created ContentBlock, ContentBlockVersion, and Post Prisma models
+2. Applied migration to Supabase database via MCP server
+3. Implemented complete CMS tRPC router with ADMIN role checks and audit logging
+4. Created admin CMS UI with Tiptap rich-text editor and JSON editor
+5. Implemented version history with diff view and rollback functionality
+6. Created preview API route with token verification
+7. Updated homepage to read content blocks with ISR (60s revalidation)
+8. Created /blog and /blog/[slug] pages with tag filtering
+9. Created /help page with FAQ and search functionality
+10. Added unit tests for JSON schema validation, preview tokens, and ISR
+11. Added Playwright E2E tests for CMS, blog, and help pages
+12. Created comprehensive docs/cms.md documentation
+
+---
+
+# Previous: Mobile App v0 - Progress Tracker
 
 ## Overall Progress
 ```
 [████████████████████] 100% Complete (39/39 tasks)
 ```
 
-## Current Status
+## Previous Status
 **Phase:** Phase 2 - Implement Customer Features (COMPLETED)  
 **Last Updated:** 2025-11-04 16:04 UTC  
 **Branch:** devin/1762240276-mobile-app-v0  
