@@ -223,7 +223,10 @@ export default function ExperimentsPage() {
                 >
                   Create
                 </Button>
-                <Button variant="outline" onClick={() => setShowCreateForm(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCreateForm(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -333,7 +336,7 @@ export default function ExperimentsPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (
-                              confirm(
+                              window.confirm(
                                 "Are you sure you want to delete this experiment?"
                               )
                             ) {

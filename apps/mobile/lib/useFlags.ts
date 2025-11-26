@@ -4,6 +4,7 @@ import { trpc } from "./trpc";
 interface FlagsContextValue {
   flags: Record<string, boolean>;
   isLoading: boolean;
+  // eslint-disable-next-line no-unused-vars
   isEnabled: (key: string) => boolean;
   refetch: () => void;
 }

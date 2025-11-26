@@ -75,7 +75,9 @@ describe("assignToBucket", () => {
   });
 
   it("should return the only variant when there is one", () => {
-    const variant = assignToBucket("user1", "exp1", [{ name: "A", weight: 100 }]);
+    const variant = assignToBucket("user1", "exp1", [
+      { name: "A", weight: 100 },
+    ]);
     expect(variant).toBe("A");
   });
 

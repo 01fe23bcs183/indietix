@@ -16,7 +16,9 @@ describe("evaluateRules", () => {
   describe("deny list", () => {
     it("should return false when user is in deny list", () => {
       const userCtx: UserContext = { userId: "blocked-user" };
-      const rules: TargetingRules = { denyList: ["blocked-user", "other-user"] };
+      const rules: TargetingRules = {
+        denyList: ["blocked-user", "other-user"],
+      };
       expect(evaluateRules(userCtx, rules)).toBe(false);
     });
 

@@ -28,7 +28,15 @@ const CRITICAL_FLAGS = [
 ];
 
 const ROLES = ["CUSTOMER", "ORGANIZER", "ADMIN"];
-const CATEGORIES = ["MUSIC", "COMEDY", "SPORTS", "TECH", "FOOD", "ART", "OTHER"];
+const CATEGORIES = [
+  "MUSIC",
+  "COMEDY",
+  "SPORTS",
+  "TECH",
+  "FOOD",
+  "ART",
+  "OTHER",
+];
 
 export default function FlagsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -127,7 +135,10 @@ export default function FlagsPage() {
     if (cityInput && !newFlag.rules.cities.includes(cityInput)) {
       setNewFlag({
         ...newFlag,
-        rules: { ...newFlag.rules, cities: [...newFlag.rules.cities, cityInput] },
+        rules: {
+          ...newFlag.rules,
+          cities: [...newFlag.rules.cities, cityInput],
+        },
       });
       setCityInput("");
     }
@@ -269,9 +280,7 @@ export default function FlagsPage() {
                       {isEnabled ? "ON" : "OFF"}
                     </span>
                     <button
-                      onClick={() =>
-                        quickToggle(criticalFlag.key, !isEnabled)
-                      }
+                      onClick={() => quickToggle(criticalFlag.key, !isEnabled)}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                         isEnabled ? "bg-green-500" : "bg-gray-300"
                       }`}
@@ -357,7 +366,10 @@ export default function FlagsPage() {
                   max={100}
                   value={newFlag.rollout}
                   onChange={(e) =>
-                    setNewFlag({ ...newFlag, rollout: parseInt(e.target.value) })
+                    setNewFlag({
+                      ...newFlag,
+                      rollout: parseInt(e.target.value),
+                    })
                   }
                   className="mt-1 block w-full"
                 />
@@ -579,7 +591,9 @@ export default function FlagsPage() {
                       <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
                         <span>Rollout: {flag.rollout}%</span>
                         {flag.rules && (
-                          <span className="text-blue-600">Has targeting rules</span>
+                          <span className="text-blue-600">
+                            Has targeting rules
+                          </span>
                         )}
                       </div>
                     </div>
@@ -622,7 +636,7 @@ export default function FlagsPage() {
                         variant="outline"
                         onClick={() => {
                           if (
-                            confirm(
+                            window.confirm(
                               "Are you sure you want to delete this flag?"
                             )
                           ) {
