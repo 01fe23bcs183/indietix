@@ -20,6 +20,15 @@ export const pricingRouter = router({
           pricePhases: {
             orderBy: { createdAt: "asc" },
           },
+          flashSales: {
+            where: {
+              status: "ACTIVE",
+              startsAt: { lte: now },
+              endsAt: { gte: now },
+            },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
         },
       });
 
@@ -30,6 +39,33 @@ export const pricingRouter = router({
         });
       }
 
+      // Check for active flash sale first (takes precedence over price phases)
+      const activeFlashSale = event.flashSales[0];
+      if (activeFlashSale && activeFlashSale.soldSeats < activeFlashSale.maxSeats) {
+        const flashPrice = Math.round(
+          event.price * (1 - activeFlashSale.discountPercent / 100)
+        );
+        // Respect minimum flash price if set
+        const effectiveFlashPrice = activeFlashSale.minFlashPrice
+          ? Math.max(flashPrice, activeFlashSale.minFlashPrice)
+          : flashPrice;
+
+        return {
+          basePrice: event.price,
+          effectivePrice: effectiveFlashPrice,
+          activePhase: null,
+          flashSale: {
+            id: activeFlashSale.id,
+            discountPercent: activeFlashSale.discountPercent,
+            originalPrice: event.price,
+            flashPrice: effectiveFlashPrice,
+            endsAt: activeFlashSale.endsAt,
+            remainingSeats: activeFlashSale.maxSeats - activeFlashSale.soldSeats,
+          },
+        };
+      }
+
+      // Fall back to price phases
       let activePhase = null;
       for (const phase of event.pricePhases) {
         const timeValid =
@@ -57,6 +93,7 @@ export const pricingRouter = router({
               maxSeats: activePhase.maxSeats,
             }
           : null,
+        flashSale: null,
       };
     }),
 

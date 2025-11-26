@@ -1,83 +1,84 @@
-# Hybrid Recommendations v1 Progress
+# Flash Sales Engine + Organizer Team RBAC Progress
 
 ## Progress Bar
 ```
-[####..............] 20% Complete - Setting up infrastructure
+[####################] 100% Complete - Ready for PR
 ```
 
 ## Current Status
-- Branch: `devin/1764169732-reco-hybrid-recommendations`
+- Branch: `devin/1764180959-flash-sales-rbac`
 - PR: Not yet created
-- Building low-cost recommendation system with rule-based + lightweight CF
+- Building Flash Sales engine and Multi-User Organizer Teams with RBAC
 
 ## Task Overview
-Building a hybrid recommendation system that:
-1. Computes user profile vectors from views, bookings, categories, price band, city, time-of-day
-2. Generates candidates via Jaccard/cosine similarity on user profiles
-3. Scores candidates with configurable weights
-4. Batch computes UserReco table nightly via cron
-5. Falls back to popularity-by-segment for cold-start users
-6. Optionally uses local matrix factorization behind a flag
+Implementing two major platform features:
+
+### Part 1: Flash Sales Engine
+- Rule-driven detection of underperforming events
+- Time-bound discounts (20-40% off)
+- Geofenced notifications (5km radius)
+- Admin/Organizer controls
+- Cron scheduler for automatic evaluation
+
+### Part 2: Multi-User Organizer Teams with RBAC
+- Roles: OWNER, MANAGER, STAFF, SCANNER
+- Invite flow with email verification
+- Scanner quick-pass for limited scope access
+- Audit logging for all actions
 
 ## Completed Tasks
-- [x] Checkout git branch for reco feature
-- [x] Explore codebase structure - understand existing models, API patterns, and packages
-- [x] Create RECO_HYBRID_RECOMMENDATIONS_DOCUMENT.md
+- [x] Checkout git branch for feature
+- [x] Explore codebase structure
+- [x] Create FLASH_SALES_RBAC_DOCUMENT.md
+- [x] Create progress.md
+- [x] Create Prisma models for FlashSale, OrgMember, OrgInvite, OrgAction, ScannerPass
+- [x] Implement Flash Sales package (packages/flash/rules.ts)
+- [x] Implement RBAC package (packages/auth/perm.ts)
+- [x] Create Flash Sales tRPC routers (flash.create/update/cancel/suggestions)
+- [x] Create RBAC tRPC routers (org.team, org.invite, org.scanner)
+- [x] Update pricing.effectivePrice for flash sale precedence
+- [x] Implement cron endpoint /api/cron/flash
+- [x] Build Organizer /events/[id]/sales tab UI
+- [x] Build Admin /sales dashboard UI
+- [x] Build Web event detail flash sale banner with countdown
+- [x] Build Organizer /settings/team UI
+- [x] Build Accept-invite page
+- [x] Implement scanner quick-pass functionality
+- [x] Write unit tests for Flash Sales rules and RBAC permissions
+- [x] Create docs/flash.md
+- [x] Create docs/org-team.md
 
 ## In Progress
-- [ ] Create progress.md documentation
-- [ ] Create Prisma schema for UserReco model
+- [ ] Run lint, typecheck, build
 
 ## Pending Tasks
-- [ ] Create packages/reco package with engine.ts and config.ts
-- [ ] Implement user profile vector computation
-- [ ] Implement candidate generation (Jaccard/cosine similarity)
-- [ ] Implement scoring function with configurable weights
-- [ ] Implement batch compute for UserReco table
-- [ ] Implement cold-start fallback (popularity-by-segment)
-- [ ] Add optional local MF behind RECO_MF_PROVIDER flag
-- [ ] Create tRPC reco.forUser endpoint
-- [ ] Create cron API endpoint /api/cron/reco
-- [ ] Create GitHub workflow for nightly cron
-- [ ] Update Web/Mobile home to show "Recommended for you" row
-- [ ] Write unit tests
-- [ ] Write Playwright test
-- [ ] Create docs/reco.md
-- [ ] Run lint, typecheck, build, and tests
+- [ ] Write Playwright E2E tests
 - [ ] Create PR and wait for CI
 
 ## Architecture
 
-### User Profile Vector
-```typescript
-interface UserProfile {
-  catFreq: Record<Category, number>;  // Category frequency
-  priceP50: number;                    // Median price
-  preferredAreas: string[];            // Top cities
-  timeSlots: string[];                 // Preferred times
-}
+### Flash Sale Detection Rules
+```
+timeToStart <= 6h AND sell-through < 50% -> trigger flash sale
+- Discount: 20-40% based on urgency
+- Cap: <=50% of remaining seats
+- City radius: 5km (geofence)
 ```
 
-### Scoring Formula
-```
-score = w_cat*catSim + w_price*priceBandSim + w_area*areaMatch + w_recency*recencyBoost + w_pop*popularity
-```
-
-### Database Model
-```prisma
-model UserReco {
-  userId    String
-  eventId   String
-  score     Float
-  reason    Json
-  createdAt DateTime @default(now())
-
-  @@id([userId, eventId])
-}
-```
+### RBAC Permissions Matrix
+| Permission | OWNER | MANAGER | STAFF | SCANNER |
+|------------|-------|---------|-------|---------|
+| All actions | Yes | - | - | - |
+| Create/edit events | Yes | Yes | - | - |
+| View payouts | Yes | Yes | - | - |
+| Approve refunds | Yes | Yes | - | - |
+| Access attendees | Yes | Yes | Yes | - |
+| View events | Yes | Yes | Yes | - |
+| Export CSV | Yes | Yes | Yes | - |
+| Scanner page | Yes | Yes | Yes | Yes |
 
 ## Notes
-- No external ML - all computation in Postgres SQL
-- Nightly refresh via cron
-- Top 50 recommendations per user
-- RECO_MF_PROVIDER flag controls optional local MF
+- Flash sale overrides phase price during active window
+- One flash sale per event per 24h
+- Min price guard prevents too-low prices
+- Scanner quick-pass expires in 24h

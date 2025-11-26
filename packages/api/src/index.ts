@@ -8,6 +8,9 @@ import { waitlistRouter } from "./routers/waitlist";
 import { organizerEventsRouter } from "./routers/organizer/events";
 import { organizerAttendeesRouter } from "./routers/organizer/attendees";
 import { organizerAnalyticsRouter } from "./routers/organizer/analytics";
+import { organizerTeamRouter } from "./routers/organizer/team";
+import { organizerInviteRouter } from "./routers/organizer/invite";
+import { organizerScannerRouter } from "./routers/organizer/scanner";
 import { payoutsRouter } from "./routers/payouts";
 import { adminUsersRouter } from "./routers/admin/users";
 import { adminOrganizersRouter } from "./routers/admin/organizers";
@@ -28,6 +31,7 @@ import { flagsRouter } from "./routers/flags";
 import { experimentsRouter } from "./routers/experiments";
 import { loyaltyRouter } from "./routers/loyalty";
 import { recoRouter } from "./routers/reco";
+import { flashRouter } from "./routers/flash";
 
 export const appRouter = router({
   health: healthRouter,
@@ -49,10 +53,14 @@ export const appRouter = router({
   experiments: experimentsRouter,
   loyalty: loyaltyRouter,
   reco: recoRouter,
+  flash: flashRouter,
   organizer: router({
     events: organizerEventsRouter,
     attendees: organizerAttendeesRouter,
     analytics: organizerAnalyticsRouter,
+    team: organizerTeamRouter,
+    invite: organizerInviteRouter,
+    scanner: organizerScannerRouter,
   }),
   admin: router({
     dashboard: adminDashboardRouter,
