@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
 
-function validateJsonSchema(data: unknown, schema: { type?: string; required?: string[]; properties?: Record<string, unknown> }): string | null {
+function validateJsonSchema(
+  data: unknown,
+  schema: {
+    type?: string;
+    required?: string[];
+    properties?: Record<string, unknown>;
+  }
+): string | null {
   if (!schema || typeof schema !== "object") return null;
 
   if (schema.type === "object" && (typeof data !== "object" || data === null)) {
@@ -11,7 +18,12 @@ function validateJsonSchema(data: unknown, schema: { type?: string; required?: s
     return "Expected an array";
   }
 
-  if (schema.required && Array.isArray(schema.required) && typeof data === "object" && data !== null) {
+  if (
+    schema.required &&
+    Array.isArray(schema.required) &&
+    typeof data === "object" &&
+    data !== null
+  ) {
     for (const field of schema.required) {
       if (!(field in data)) {
         return `Missing required field: ${field}`;
@@ -22,10 +34,14 @@ function validateJsonSchema(data: unknown, schema: { type?: string; required?: s
   return null;
 }
 
-function verifyPreviewToken(token: string): { valid: boolean; key?: string; error?: string } {
+function verifyPreviewToken(token: string): {
+  valid: boolean;
+  key?: string;
+  error?: string;
+} {
   try {
-    const decoded = JSON.parse(atob(token));
-    
+    const decoded = JSON.parse(globalThis.atob(token));
+
     if (!decoded.key || !decoded.exp) {
       return { valid: false, error: "Invalid token format" };
     }
@@ -40,11 +56,18 @@ function verifyPreviewToken(token: string): { valid: boolean; key?: string; erro
   }
 }
 
-function createPreviewToken(key: string, expiresInMs: number = 3600000): string {
-  return btoa(JSON.stringify({ key, exp: Date.now() + expiresInMs }));
+function createPreviewToken(
+  key: string,
+  expiresInMs: number = 3600000
+): string {
+  return globalThis.btoa(
+    JSON.stringify({ key, exp: Date.now() + expiresInMs })
+  );
 }
 
-async function revalidatePath(path: string): Promise<{ revalidated: boolean; path: string }> {
+async function revalidatePath(
+  path: string
+): Promise<{ revalidated: boolean; path: string }> {
   return { revalidated: true, path };
 }
 
@@ -74,7 +97,9 @@ describe("CMS JSON Schema Validation", () => {
     const invalidData = {
       title: "Welcome to IndieTix",
     };
-    expect(validateJsonSchema(invalidData, heroSchema)).toBe("Missing required field: subtitle");
+    expect(validateJsonSchema(invalidData, heroSchema)).toBe(
+      "Missing required field: subtitle"
+    );
   });
 
   it("should reject non-object data when object expected", () => {
@@ -112,7 +137,7 @@ describe("Preview Token Verification", () => {
   });
 
   it("should reject invalid token format", () => {
-    const invalidToken = btoa(JSON.stringify({ foo: "bar" }));
+    const invalidToken = globalThis.btoa(JSON.stringify({ foo: "bar" }));
     const result = verifyPreviewToken(invalidToken);
     expect(result.valid).toBe(false);
     expect(result.error).toBe("Invalid token format");

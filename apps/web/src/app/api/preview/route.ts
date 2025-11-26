@@ -14,8 +14,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const decoded = JSON.parse(atob(token));
-    
+    const decoded = JSON.parse(globalThis.atob(token));
+
     if (!decoded.key || !decoded.exp) {
       return NextResponse.json(
         { error: "Invalid token format" },
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(_request: NextRequest) {
+export async function POST() {
   try {
     (await draftMode()).disable();
     return NextResponse.json({ success: true });

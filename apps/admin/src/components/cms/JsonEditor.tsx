@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 interface JsonEditorProps {
   value: unknown;
+  // eslint-disable-next-line no-unused-vars
   onChange: (value: unknown) => void;
   schema?: object;
 }
@@ -61,7 +62,11 @@ export function JsonEditor({ value, onChange, schema }: JsonEditorProps) {
 function validateSchema(data: unknown, schema: object): string | null {
   if (!schema || typeof schema !== "object") return null;
 
-  const schemaObj = schema as { type?: string; required?: string[]; properties?: Record<string, unknown> };
+  const schemaObj = schema as {
+    type?: string;
+    required?: string[];
+    properties?: Record<string, unknown>;
+  };
 
   if (schemaObj.type === "object" && typeof data !== "object") {
     return "Expected an object";
@@ -71,7 +76,12 @@ function validateSchema(data: unknown, schema: object): string | null {
     return "Expected an array";
   }
 
-  if (schemaObj.required && Array.isArray(schemaObj.required) && typeof data === "object" && data !== null) {
+  if (
+    schemaObj.required &&
+    Array.isArray(schemaObj.required) &&
+    typeof data === "object" &&
+    data !== null
+  ) {
     for (const field of schemaObj.required) {
       if (!(field in data)) {
         return `Missing required field: ${field}`;

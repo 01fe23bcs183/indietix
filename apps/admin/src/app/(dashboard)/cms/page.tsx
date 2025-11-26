@@ -7,7 +7,11 @@ import { Button } from "@indietix/ui";
 const PREDEFINED_KEYS = [
   { key: "home.hero", label: "Homepage Hero", type: "json" as const },
   { key: "home.featured", label: "Featured Events", type: "json" as const },
-  { key: "home.categories", label: "Categories Section", type: "json" as const },
+  {
+    key: "home.categories",
+    label: "Categories Section",
+    type: "json" as const,
+  },
   { key: "home.testimonials", label: "Testimonials", type: "json" as const },
   { key: "legal.terms", label: "Terms of Service", type: "rich" as const },
   { key: "legal.privacy", label: "Privacy Policy", type: "rich" as const },

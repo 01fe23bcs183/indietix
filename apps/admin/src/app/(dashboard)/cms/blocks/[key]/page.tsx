@@ -112,12 +112,14 @@ const DEFAULT_VALUES: Record<string, unknown> = {
     items: [],
   },
   "legal.terms": "<h1>Terms of Service</h1><p>Your terms content here...</p>",
-  "legal.privacy": "<h1>Privacy Policy</h1><p>Your privacy policy content here...</p>",
+  "legal.privacy":
+    "<h1>Privacy Policy</h1><p>Your privacy policy content here...</p>",
   "faq.items": {
     items: [
       {
         question: "How do I book tickets?",
-        answer: "Browse events, select your tickets, and complete the checkout process.",
+        answer:
+          "Browse events, select your tickets, and complete the checkout process.",
       },
     ],
   },
@@ -222,7 +224,9 @@ export default function BlockEditorPage() {
   };
 
   const generatePreviewUrl = () => {
-    const token = btoa(JSON.stringify({ key, exp: Date.now() + 3600000 }));
+    const token = globalThis.btoa(
+      JSON.stringify({ key, exp: Date.now() + 3600000 })
+    );
     return `/preview?token=${token}&block=${encodeURIComponent(key)}`;
   };
 

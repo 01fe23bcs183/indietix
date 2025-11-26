@@ -32,7 +32,7 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  
+
   const post = await prisma.post.findUnique({
     where: { slug, status: "PUBLISHED" },
     include: {
@@ -62,7 +62,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </Link>
 
         <header className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            {post.title}
+          </h1>
           <div className="flex items-center gap-4 text-gray-600">
             <span>By {post.author.name}</span>
             {post.publishedAt && (

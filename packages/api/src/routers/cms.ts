@@ -572,7 +572,8 @@ export const cmsRouter = router({
         if (input.newSlug) updateData.slug = input.newSlug;
         if (input.title) updateData.title = input.title;
         if (input.excerpt) updateData.excerpt = input.excerpt;
-        if (input.body !== undefined) updateData.body = input.body as Prisma.InputJsonValue;
+        if (input.body !== undefined)
+          updateData.body = input.body as Prisma.InputJsonValue;
         if (input.tags) updateData.tags = input.tags;
 
         const post = await prisma.post.update({

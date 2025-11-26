@@ -70,7 +70,9 @@ export default async function HelpPage({ searchParams }: HelpPageProps) {
     return true;
   });
 
-  const categories = [...new Set(faqItems.map((item) => item.category).filter(Boolean))];
+  const categories = [
+    ...new Set(faqItems.map((item) => item.category).filter(Boolean)),
+  ];
 
   return (
     <main className="min-h-screen bg-gray-50">

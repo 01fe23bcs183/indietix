@@ -8,6 +8,7 @@ import { useCallback } from "react";
 
 interface RichTextEditorProps {
   content: string;
+  // eslint-disable-next-line no-unused-vars
   onChange: (content: string) => void;
   placeholder?: string;
 }

@@ -42,7 +42,10 @@ interface TestimonialsContent {
   items: Testimonial[];
 }
 
-async function getContentBlock<T>(key: string, isDraft: boolean): Promise<T | null> {
+async function getContentBlock<T>(
+  key: string,
+  isDraft: boolean
+): Promise<T | null> {
   try {
     const block = await prisma.contentBlock.findUnique({
       where: { key },
@@ -87,10 +90,14 @@ export default async function Home(): Promise<JSX.Element> {
             {hero?.title || "Discover Amazing Events"}
           </h1>
           <p className="text-xl mb-8 text-blue-100">
-            {hero?.subtitle || "Find and book tickets for the best events in your city"}
+            {hero?.subtitle ||
+              "Find and book tickets for the best events in your city"}
           </p>
           <Link href={hero?.ctaLink || "/events"}>
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+            <Button
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100"
+            >
               {hero?.ctaText || "Browse Events"}
             </Button>
           </Link>
@@ -100,9 +107,13 @@ export default async function Home(): Promise<JSX.Element> {
       {featured && (
         <section className="py-16 bg-gray-50">
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-4">{featured.title}</h2>
+            <h2 className="text-3xl font-bold text-center mb-4">
+              {featured.title}
+            </h2>
             {featured.subtitle && (
-              <p className="text-gray-600 text-center mb-8">{featured.subtitle}</p>
+              <p className="text-gray-600 text-center mb-8">
+                {featured.subtitle}
+              </p>
             )}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {(featured.eventIds || []).length === 0 ? (
@@ -122,7 +133,9 @@ export default async function Home(): Promise<JSX.Element> {
       {categories && categories.categories.length > 0 && (
         <section className="py-16">
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-8">{categories.title}</h2>
+            <h2 className="text-3xl font-bold text-center mb-8">
+              {categories.title}
+            </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {categories.categories.map((category) => (
                 <Link
@@ -130,8 +143,12 @@ export default async function Home(): Promise<JSX.Element> {
                   href={`/events?category=${category.slug}`}
                   className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
                 >
-                  <span className="text-4xl mb-2">{getCategoryEmoji(category.icon)}</span>
-                  <span className="font-medium text-gray-900">{category.name}</span>
+                  <span className="text-4xl mb-2">
+                    {getCategoryEmoji(category.icon)}
+                  </span>
+                  <span className="font-medium text-gray-900">
+                    {category.name}
+                  </span>
                 </Link>
               ))}
             </div>
@@ -142,20 +159,28 @@ export default async function Home(): Promise<JSX.Element> {
       {testimonials && testimonials.items.length > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-8">{testimonials.title}</h2>
+            <h2 className="text-3xl font-bold text-center mb-8">
+              {testimonials.title}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {testimonials.items.map((testimonial, index) => (
                 <div
                   key={index}
                   className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
                 >
-                  <p className="text-gray-600 mb-4">&ldquo;{testimonial.content}&rdquo;</p>
+                  <p className="text-gray-600 mb-4">
+                    &ldquo;{testimonial.content}&rdquo;
+                  </p>
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-gray-300 rounded-full mr-3" />
                     <div>
-                      <p className="font-medium text-gray-900">{testimonial.name}</p>
+                      <p className="font-medium text-gray-900">
+                        {testimonial.name}
+                      </p>
                       {testimonial.role && (
-                        <p className="text-sm text-gray-500">{testimonial.role}</p>
+                        <p className="text-sm text-gray-500">
+                          {testimonial.role}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -173,7 +198,10 @@ export default async function Home(): Promise<JSX.Element> {
             Join thousands of event-goers and find your next experience
           </p>
           <Link href="/events">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+            <Button
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100"
+            >
               Explore Events
             </Button>
           </Link>
