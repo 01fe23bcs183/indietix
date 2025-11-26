@@ -207,6 +207,10 @@ export default async function Home(): Promise<JSX.Element> {
           </Link>
         </div>
       </section>
+
+      <div className="py-2 text-center text-xs text-gray-400">
+        IndieTix Web OK
+      </div>
     </main>
   );
 }
