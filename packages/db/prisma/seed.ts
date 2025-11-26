@@ -580,25 +580,22 @@ async function main() {
     (e) => e.slug === "booking-test-event-future"
   );
   if (flashSaleEvent) {
+    // Delete any existing flash sales for this event first
+    await prisma.flashSale.deleteMany({
+      where: { eventId: flashSaleEvent.id },
+    });
+
     // Create an active flash sale for testing
     const flashSaleStartsAt = new Date();
     const flashSaleEndsAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
 
-    await prisma.flashSale.upsert({
-      where: {
-        eventId_startsAt: {
-          eventId: flashSaleEvent.id,
-          startsAt: flashSaleStartsAt,
-        },
-      },
-      update: {},
-      create: {
+    await prisma.flashSale.create({
+      data: {
         eventId: flashSaleEvent.id,
         discountPercent: 25,
         startsAt: flashSaleStartsAt,
         endsAt: flashSaleEndsAt,
         maxSeats: 50,
-        bookedSeats: 0,
         status: "ACTIVE",
       },
     });
@@ -626,8 +623,8 @@ async function main() {
   });
   console.log(`✅ Created STAFF member for ${organizer1.businessName}`);
 
-  // Create a pending invite for testing
-  const inviteToken = "test-invite-token-" + Date.now().toString(36);
+  // Create a pending invite for testing with a deterministic token for E2E tests
+  const inviteToken = "test-invite-token";
   await prisma.orgInvite.upsert({
     where: { token: inviteToken },
     update: {},
