@@ -176,12 +176,35 @@ export default function EventDetailPage(): JSX.Element {
 
             <div className="lg:col-span-1">
               <div className="sticky top-8 space-y-6">
+                {effectivePrice?.flashSale && (
+                  <FlashSaleBanner flashSale={effectivePrice.flashSale} />
+                )}
+
                 <div className="border rounded-lg p-6 bg-card">
                   <div className="mb-4">
                     <p className="text-sm text-muted-foreground mb-1">
                       Ticket Price
                     </p>
-                    {effectivePrice?.activePhase ? (
+                    {effectivePrice?.flashSale ? (
+                      <div>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-3xl font-bold text-orange-600">
+                            {formatINR(effectivePrice.effectivePrice)}
+                          </p>
+                          <p className="text-xl text-gray-400 line-through">
+                            {formatINR(effectivePrice.flashSale.originalPrice)}
+                          </p>
+                        </div>
+                        <div className="mt-2 px-3 py-1 bg-orange-100 text-orange-800 text-sm font-semibold rounded-full inline-block">
+                          {effectivePrice.flashSale.discountPercent}% OFF -
+                          Flash Sale
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {effectivePrice.flashSale.remainingSeats} seats left
+                          at this price
+                        </p>
+                      </div>
+                    ) : effectivePrice?.activePhase ? (
                       <div>
                         <div className="flex items-baseline gap-2">
                           <p className="text-3xl font-bold text-green-600">
@@ -260,5 +283,66 @@ export default function EventDetailPage(): JSX.Element {
         </div>
       </div>
     </>
+  );
+}
+
+function FlashSaleBanner({
+  flashSale,
+}: {
+  flashSale: {
+    id: string;
+    discountPercent: number;
+    originalPrice: number;
+    flashPrice: number;
+    endsAt: Date | string;
+    remainingSeats: number;
+  };
+}) {
+  const [countdown, setCountdown] = useState<string>("");
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const now = new Date();
+      const endsAt = new Date(flashSale.endsAt);
+      const diff = endsAt.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setCountdown("Ended");
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setCountdown(
+        `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+      );
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [flashSale.endsAt]);
+
+  return (
+    <div className="border-2 border-orange-400 rounded-lg p-4 bg-gradient-to-r from-orange-50 to-yellow-50">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">⚡</span>
+            <span className="font-bold text-orange-600">FLASH SALE</span>
+          </div>
+          <p className="text-sm text-orange-700 mt-1">
+            {flashSale.discountPercent}% OFF - Limited time offer!
+          </p>
+        </div>
+        <div className="text-right">
+          <div className="text-2xl font-bold text-orange-600">{countdown}</div>
+          <p className="text-xs text-orange-500">Time remaining</p>
+        </div>
+      </div>
+    </div>
   );
 }

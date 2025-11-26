@@ -369,6 +369,9 @@ importers:
       '@indietix/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@indietix/flash':
+        specifier: workspace:*
+        version: link:../../packages/flash
       '@indietix/loyalty':
         specifier: workspace:*
         version: link:../../packages/loyalty
@@ -469,6 +472,9 @@ importers:
       '@auth/core':
         specifier: ^0.34.3
         version: 0.34.3
+      '@indietix/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@indietix/comm':
         specifier: workspace:*
         version: link:../comm
@@ -478,6 +484,9 @@ importers:
       '@indietix/flags':
         specifier: workspace:*
         version: link:../flags
+      '@indietix/flash':
+        specifier: workspace:*
+        version: link:../flash
       '@indietix/fraud':
         specifier: workspace:*
         version: link:../fraud
@@ -533,6 +542,22 @@ importers:
       vitest:
         specifier: ^1.2.1
         version: 1.6.1(@types/node@20.19.24)(jsdom@27.1.0)(terser@5.44.0)
+
+  packages/auth:
+    dependencies:
+      '@indietix/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^24.9.2
+        version: 24.9.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.1
+        version: 1.6.1(@types/node@24.9.2)(jsdom@27.1.0)(terser@5.44.0)
 
   packages/comm:
     dependencies:
@@ -632,6 +657,22 @@ importers:
       vitest:
         specifier: ^1.2.1
         version: 1.6.1(@types/node@20.19.24)(jsdom@27.1.0)(terser@5.44.0)
+
+  packages/flash:
+    dependencies:
+      '@indietix/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^24.9.2
+        version: 24.9.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.6.1
+        version: 1.6.1(@types/node@24.9.2)(jsdom@27.1.0)(terser@5.44.0)
 
   packages/fraud:
     dependencies:
@@ -12662,7 +12703,7 @@ snapshots:
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 24.9.2
+      '@types/node': 20.19.24
 
   '@types/linkify-it@5.0.0': {}
 

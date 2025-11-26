@@ -574,6 +574,92 @@ async function main() {
   console.log(`✅ Created ${totalViews} synthetic event views across 30 days`);
   console.log(`✅ Created ${totalBookings} synthetic bookings across 30 days`);
 
+  // Create Flash Sale test data
+  console.log("⚡ Creating flash sale test data...");
+  const flashSaleEvent = createdEvents.find(
+    (e) => e.slug === "booking-test-event-future"
+  );
+  if (flashSaleEvent) {
+    // Delete any existing flash sales for this event first
+    await prisma.flashSale.deleteMany({
+      where: { eventId: flashSaleEvent.id },
+    });
+
+    // Create an active flash sale for testing
+    const flashSaleStartsAt = new Date();
+    const flashSaleEndsAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now
+
+    await prisma.flashSale.create({
+      data: {
+        eventId: flashSaleEvent.id,
+        discountPercent: 25,
+        startsAt: flashSaleStartsAt,
+        endsAt: flashSaleEndsAt,
+        maxSeats: 50,
+        status: "ACTIVE",
+      },
+    });
+    console.log(`✅ Created active flash sale for ${flashSaleEvent.title}`);
+  }
+
+  // Create RBAC test data (OrgMember and OrgInvite)
+  console.log("👥 Creating RBAC test data...");
+
+  // Create a team member for organizer1
+  await prisma.orgMember.upsert({
+    where: {
+      organizerId_userId: {
+        organizerId: organizer1.id,
+        userId: customer1.id,
+      },
+    },
+    update: {},
+    create: {
+      organizerId: organizer1.id,
+      userId: customer1.id,
+      role: "STAFF",
+      invitedBy: organizer1User.id,
+    },
+  });
+  console.log(`✅ Created STAFF member for ${organizer1.businessName}`);
+
+  // Create a pending invite for testing with a deterministic token for E2E tests
+  const inviteToken = "test-invite-token";
+  await prisma.orgInvite.upsert({
+    where: { token: inviteToken },
+    update: {},
+    create: {
+      organizerId: organizer1.id,
+      email: "newinvite@example.com",
+      role: "MANAGER",
+      token: inviteToken,
+      status: "PENDING",
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      createdBy: organizer1User.id,
+    },
+  });
+  console.log(`✅ Created pending invite for ${organizer1.businessName}`);
+
+  // Create an expired invite for testing
+  const expiredToken = "expired-invite-token";
+  await prisma.orgInvite.upsert({
+    where: { token: expiredToken },
+    update: {
+      status: "EXPIRED",
+      expiresAt: new Date(Date.now() - 60 * 60 * 1000),
+    },
+    create: {
+      organizerId: organizer1.id,
+      email: "expired@example.com",
+      role: "STAFF",
+      token: expiredToken,
+      status: "EXPIRED",
+      expiresAt: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
+      createdBy: organizer1User.id,
+    },
+  });
+  console.log(`✅ Created expired invite for ${organizer1.businessName}`);
+
   console.log("🔔 Creating default notification preferences for all users...");
   const allUsers = [
     admin,

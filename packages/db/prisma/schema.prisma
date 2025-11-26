@@ -147,21 +147,43 @@ enum FraudCaseStatus {
   REJECTED
 }
 
+// Flash Sales Enums
+enum FlashSaleStatus {
+  PENDING
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+// Organizer Team RBAC Enums
+enum OrgRole {
+  OWNER
+  MANAGER
+  STAFF
+  SCANNER
+}
+
+enum OrgInviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
 model User {
-  id                      String    @id @default(cuid())
-  email                   String    @unique
-  passwordHash            String
-  name                    String
-  phone                   String?
-  role                    Role      @default(CUSTOMER)
-  banned                  Boolean   @default(false)
-  pushTokens              String[]  @default([])
-  karma                   Int       @default(0)
-  profileCompleted        Boolean   @default(false)
-  referralCode            String?   @unique
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String
+  name             String
+  phone            String?
+  role             Role     @default(CUSTOMER)
+  banned           Boolean  @default(false)
+  pushTokens       String[] @default([])
+  karma            Int      @default(0)
+  profileCompleted Boolean  @default(false)
+  referralCode     String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
   sessions                Session[]
   organizer               Organizer?
   bookings                Booking[]
@@ -169,22 +191,25 @@ model User {
   notificationPreferences NotificationPreference?
   notifications           Notification[]
   consents                UserConsent[]
-  contentBlocks           ContentBlock[] @relation("ContentBlockAuthor")
-  posts                   Post[]         @relation("PostAuthor")
-  
+  contentBlocks           ContentBlock[]          @relation("ContentBlockAuthor")
+  posts                   Post[]                  @relation("PostAuthor")
+
   // Karma/Loyalty relations
-  karmaTransactions       KarmaTransaction[]
-  userBadges              UserBadge[]
-  leaderboardEntries      LeaderboardEntry[]
-  rewardGrants            RewardGrant[]
-  userPerks               UserPerks?
-  referralsGiven          Referral[]     @relation("ReferrerUser")
-  referralsReceived       Referral[]     @relation("RefereeUser")
-  reviews                 Review[]
-  
+  karmaTransactions  KarmaTransaction[]
+  userBadges         UserBadge[]
+  leaderboardEntries LeaderboardEntry[]
+  rewardGrants       RewardGrant[]
+  userPerks          UserPerks?
+  referralsGiven     Referral[]         @relation("ReferrerUser")
+  referralsReceived  Referral[]         @relation("RefereeUser")
+  reviews            Review[]
+
   // Recommendation relations
-  recommendations         UserReco[]
-  userProfile             UserProfile?
+  recommendations UserReco[]
+  userProfile     UserProfile?
+
+  // RBAC relations
+  orgMemberships OrgMember[]
 
   @@index([email])
   @@index([role])
@@ -198,29 +223,35 @@ model Session {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
 }
 
 model Organizer {
-  id                  String   @id @default(cuid())
-  userId              String   @unique
-  businessName        String
-  description         String?
-  verified            Boolean  @default(false)
-  verificationDocs    Json?
-  bankAccountMasked   String?
-  commissionOverride  Float?
-  meta                Json?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events              Event[]
-  payouts             Payout[]
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  businessName       String
+  description        String?
+  verified           Boolean  @default(false)
+  verificationDocs   Json?
+  bankAccountMasked  String?
+  commissionOverride Float?
+  meta               Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events  Event[]
+  payouts Payout[]
+
+  // RBAC relations
+  members       OrgMember[]
+  invites       OrgInvite[]
+  actions       OrgAction[]
+  scannerPasses ScannerPass[]
 
   @@index([userId])
   @@index([verified])
@@ -248,13 +279,14 @@ model Event {
   cancelReason              String?
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
-  
-  organizer                 Organizer        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
-  bookings                  Booking[]
-  waitlistEntries           WaitlistEntry[]
-  views                     EventView[]
-  pricePhases               EventPricePhase[]
-  recommendations           UserReco[]
+
+  organizer       Organizer         @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  bookings        Booking[]
+  waitlistEntries WaitlistEntry[]
+  views           EventView[]
+  pricePhases     EventPricePhase[]
+  recommendations UserReco[]
+  flashSales      FlashSale[]
 
   @@index([slug])
   @@index([organizerId])
@@ -270,47 +302,47 @@ model EventView {
   eventId   String
   userId    String?
   createdAt DateTime @default(now())
-  
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId, createdAt])
 }
 
 model Booking {
-  id                 String        @id @default(cuid())
-  eventId            String
-  userId             String
-  ticketNumber       String        @unique
-  seats              Int
-  ticketPrice        Int
-  convenienceFee     Int
-  platformFee        Int
-  finalAmount        Int
-  paymentStatus      PaymentStatus @default(PENDING)
-  status             BookingStatus @default(PENDING)
-  razorpayOrderId    String?
-  razorpayPaymentId  String?
-  holdExpiresAt      DateTime
-  cancelledAt        DateTime?
-  attendedAt         DateTime?
-  qrCode             String?
-  ticketPayloadHash  String?
-  promoCodeId        String?
-  campaignId         String?
-  riskScore          Int?
-  riskTags           String[]      @default([])
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  
-  event              Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  promoCode          PromoCode?    @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
-  campaign           Campaign?     @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  paymentEvents      PaymentEvent[]
-  scanLogs           ScanLog[]
-  refunds            Refund[]
-  bookingAttempts    BookingAttempt[]
-  fraudCases         FraudCase[]
+  id                String        @id @default(cuid())
+  eventId           String
+  userId            String
+  ticketNumber      String        @unique
+  seats             Int
+  ticketPrice       Int
+  convenienceFee    Int
+  platformFee       Int
+  finalAmount       Int
+  paymentStatus     PaymentStatus @default(PENDING)
+  status            BookingStatus @default(PENDING)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  holdExpiresAt     DateTime
+  cancelledAt       DateTime?
+  attendedAt        DateTime?
+  qrCode            String?
+  ticketPayloadHash String?
+  promoCodeId       String?
+  campaignId        String?
+  riskScore         Int?
+  riskTags          String[]      @default([])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  event           Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoCode       PromoCode?       @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  campaign        Campaign?        @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  paymentEvents   PaymentEvent[]
+  scanLogs        ScanLog[]
+  refunds         Refund[]
+  bookingAttempts BookingAttempt[]
+  fraudCases      FraudCase[]
 
   @@index([eventId])
   @@index([userId])
@@ -324,36 +356,36 @@ model Booking {
 }
 
 model Payout {
-  id                String       @id @default(cuid())
-  organizerId       String
-  
-  periodStart       DateTime
-  periodEnd         DateTime
-  
-  amount            Int          // in paise
-  currency          String       @default("INR")
-  
-  status            PayoutStatus @default(PENDING)
-  
+  id          String @id @default(cuid())
+  organizerId String
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  amount   Int // in paise
+  currency String @default("INR")
+
+  status PayoutStatus @default(PENDING)
+
   // Audit fields
-  beneficiaryName   String
-  accountMasked     String?
-  breakdown         Json         // { gmv, refunds, fees, netPayable, eventCount, bookingCount }
-  
+  beneficiaryName String
+  accountMasked   String?
+  breakdown       Json // { gmv, refunds, fees, netPayable, eventCount, bookingCount }
+
   // Provider fields
-  provider          String?      // "FAKE" | "RAZORPAYX"
-  providerPayoutId  String?
-  providerResponse  Json?
-  
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  approvedAt        DateTime?
-  approvedBy        String?
-  processedAt       DateTime?
-  completedAt       DateTime?
-  
-  organizer         Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
-  paymentEvents     PaymentEvent[]
+  provider         String? // "FAKE" | "RAZORPAYX"
+  providerPayoutId String?
+  providerResponse Json?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  approvedAt  DateTime?
+  approvedBy  String?
+  processedAt DateTime?
+  completedAt DateTime?
+
+  organizer     Organizer      @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  paymentEvents PaymentEvent[]
 
   @@index([organizerId])
   @@index([status])
@@ -361,19 +393,19 @@ model Payout {
 }
 
 model PaymentEvent {
-  id                 String   @id @default(cuid())
-  provider           String
-  eventId            String   @unique
-  providerEventType  String?
-  bookingId          String?
-  refundId           String?
-  payoutId           String?
-  payload            Json
-  createdAt          DateTime @default(now())
-  
-  booking            Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  refund             Refund?  @relation(fields: [refundId], references: [id], onDelete: Cascade)
-  payout             Payout?  @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  id                String   @id @default(cuid())
+  provider          String
+  eventId           String   @unique
+  providerEventType String?
+  bookingId         String?
+  refundId          String?
+  payoutId          String?
+  payload           Json
+  createdAt         DateTime @default(now())
+
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  refund  Refund?  @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  payout  Payout?  @relation(fields: [payoutId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
   @@index([refundId])
@@ -389,30 +421,30 @@ model ScanLog {
   reason      String?
   deviceInfo  String?
   createdAt   DateTime @default(now())
-  
-  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId, createdAt])
   @@index([organizerId])
 }
 
 model Refund {
-  id                String       @id @default(cuid())
-  bookingId         String
-  amount            Int
-  currency          String       @default("INR")
-  status            RefundStatus @default(PENDING)
-  reason            String?
-  provider          String
-  providerRefundId  String?
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  processedAt       DateTime?
-  failedAt          DateTime?
-  failureReason     String?
-  
-  booking           Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  paymentEvents     PaymentEvent[]
+  id               String       @id @default(cuid())
+  bookingId        String
+  amount           Int
+  currency         String       @default("INR")
+  status           RefundStatus @default(PENDING)
+  reason           String?
+  provider         String
+  providerRefundId String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  processedAt      DateTime?
+  failedAt         DateTime?
+  failureReason    String?
+
+  booking       Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  paymentEvents PaymentEvent[]
 
   @@index([bookingId])
   @@index([status])
@@ -420,19 +452,19 @@ model Refund {
 }
 
 model WaitlistEntry {
-  id         String         @id @default(cuid())
-  eventId    String
-  userId     String?
-  email      String
-  phone      String?
-  status     WaitlistStatus @default(ACTIVE)
-  createdAt  DateTime       @default(now())
-  invitedAt  DateTime?
-  claimedAt  DateTime?
-  expiredAt  DateTime?
-  
-  event      Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  offers     WaitlistOffer[]
+  id        String         @id @default(cuid())
+  eventId   String
+  userId    String?
+  email     String
+  phone     String?
+  status    WaitlistStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  invitedAt DateTime?
+  claimedAt DateTime?
+  expiredAt DateTime?
+
+  event  Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  offers WaitlistOffer[]
 
   @@index([eventId, status])
   @@index([email])
@@ -440,17 +472,17 @@ model WaitlistEntry {
 }
 
 model WaitlistOffer {
-  id         String              @id @default(cuid())
-  eventId    String
-  entryId    String
-  quantity   Int                 @default(1)
-  expiresAt  DateTime
-  status     WaitlistOfferStatus @default(PENDING)
-  createdAt  DateTime            @default(now())
-  claimedAt  DateTime?
-  expiredAt  DateTime?
-  
-  entry      WaitlistEntry       @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  id        String              @id @default(cuid())
+  eventId   String
+  entryId   String
+  quantity  Int                 @default(1)
+  expiresAt DateTime
+  status    WaitlistOfferStatus @default(PENDING)
+  createdAt DateTime            @default(now())
+  claimedAt DateTime?
+  expiredAt DateTime?
+
+  entry WaitlistEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
 
   @@index([entryId])
   @@index([status])
@@ -473,8 +505,8 @@ model AdminAction {
   prev       Json?
   next       Json?
   ts         DateTime @default(now())
-  
-  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([entityType, entityId])
   @@index([adminId])
@@ -482,64 +514,65 @@ model AdminAction {
 }
 
 model NotificationPreference {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  
+  id     String @id @default(cuid())
+  userId String @unique
+
   // Channel preferences
-  emailEnabled      Boolean  @default(true)
-  smsEnabled        Boolean  @default(false)
-  pushEnabled       Boolean  @default(true)
-  
+  emailEnabled Boolean @default(true)
+  smsEnabled   Boolean @default(false)
+  pushEnabled  Boolean @default(true)
+
   // Category preferences
-  transactional     Boolean  @default(true)
-  reminders         Boolean  @default(true)
-  marketing         Boolean  @default(false)
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactional Boolean @default(true)
+  reminders     Boolean @default(true)
+  marketing     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Notification {
-  id            String             @id @default(cuid())
-  userId        String?
-  type          String             // Template key: booking_confirmed, event_reminder_T24, etc.
-  channel       NotificationChannel
-  category      NotificationCategory
-  
+  id       String               @id @default(cuid())
+  userId   String?
+  type     String // Template key: booking_confirmed, event_reminder_T24, etc.
+  channel  NotificationChannel
+  category NotificationCategory
+
   // Recipient info (can override user's contact info)
-  to            String             // Email address, phone number, or push token
-  
+  to String // Email address, phone number, or push token
+
   // Content payload (JSON for template rendering)
-  payload       Json
-  
+  payload Json
+
   // Scheduling
-  scheduledAt   DateTime
-  sentAt        DateTime?
-  
+  scheduledAt DateTime
+  sentAt      DateTime?
+
   // Status tracking
   status        NotificationStatus @default(PENDING)
   attempts      Int                @default(0)
   lastAttemptAt DateTime?
   errorMessage  String?
-  
+
   // Provider response
   providerMessageId String?
-  
-  // Communication Center fields
-  campaignId    String?
-  readAt        DateTime?
-  error         String?
-  
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  
-  user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
-  campaign      Campaign?          @relation(fields: [campaignId], references: [id], onDelete: SetNull)
 
+  // Communication Center fields
+  campaignId String?
+  readAt     DateTime?
+  error      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, campaignId, channel], name: "idempotency_key")
   @@index([userId])
   @@index([status, scheduledAt])
   @@index([type])
@@ -547,38 +580,37 @@ model Notification {
   @@index([scheduledAt])
   @@index([campaignId])
   @@index([readAt])
-  @@unique([userId, campaignId, channel], name: "idempotency_key")
 }
 
 model PromoCode {
-  id                    String         @id @default(cuid())
-  code                  String         @unique
-  type                  PromoCodeType
-  value                 Int            // Percentage (1-100) or flat amount in paise
-  
+  id    String        @id @default(cuid())
+  code  String        @unique
+  type  PromoCodeType
+  value Int // Percentage (1-100) or flat amount in paise
+
   // Time constraints
-  startAt               DateTime?
-  endAt                 DateTime?
-  
+  startAt DateTime?
+  endAt   DateTime?
+
   // Usage constraints
-  usageLimit            Int?           // Total usage limit across all users
-  perUserLimit          Int?           // Per-user usage limit
-  minPrice              Int?           // Minimum ticket price in paise
-  
+  usageLimit   Int? // Total usage limit across all users
+  perUserLimit Int? // Per-user usage limit
+  minPrice     Int? // Minimum ticket price in paise
+
   // Scope constraints
-  organizerId           String?        // If set, only this organizer's events
-  applicableEvents      String[]       @default([]) // Event IDs
-  applicableCategories  String[]       @default([]) // Category names
-  applicableCities      String[]       @default([]) // City names
-  
+  organizerId          String? // If set, only this organizer's events
+  applicableEvents     String[] @default([]) // Event IDs
+  applicableCategories String[] @default([]) // Category names
+  applicableCities     String[] @default([]) // City names
+
   // Status
-  active                Boolean        @default(true)
-  
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
-  
-  bookings              Booking[]
-  rewardGrants          RewardGrant[]
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings     Booking[]
+  rewardGrants RewardGrant[]
 
   @@index([code])
   @@index([organizerId])
@@ -587,45 +619,140 @@ model PromoCode {
 }
 
 model EventPricePhase {
-  id        String    @id @default(cuid())
-  eventId   String
-  name      String    // e.g., "Early Bird", "Last Minute"
-  startsAt  DateTime?
-  endsAt    DateTime?
-  maxSeats  Int?      // Phase ends when this many seats are booked
-  price     Int       // Price in paise for this phase
-  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  
-  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id       String    @id @default(cuid())
+  eventId  String
+  name     String // e.g., "Early Bird", "Last Minute"
+  startsAt DateTime?
+  endsAt   DateTime?
+  maxSeats Int? // Phase ends when this many seats are booked
+  price    Int // Price in paise for this phase
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
   @@index([startsAt, endsAt])
 }
 
+// Flash Sales Model
+model FlashSale {
+  id              String          @id @default(cuid())
+  eventId         String
+  discountPercent Int // 20-40%
+  startsAt        DateTime
+  endsAt          DateTime
+  maxSeats        Int // Cap: <=50% of remaining seats
+  soldSeats       Int             @default(0)
+  status          FlashSaleStatus @default(PENDING)
+  minFlashPrice   Int? // Guard against too-low prices
+  cityRadius      Int             @default(5) // Geofence radius in km
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, startsAt])
+  @@index([status])
+  @@index([endsAt])
+}
+
+// Organizer Team RBAC Models
+model OrgMember {
+  id          String   @id @default(cuid())
+  organizerId String
+  userId      String
+  role        OrgRole
+  invitedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizer Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizerId, userId])
+  @@index([organizerId])
+  @@index([userId])
+}
+
+model OrgInvite {
+  id          String          @id @default(cuid())
+  organizerId String
+  email       String
+  role        OrgRole
+  token       String          @unique
+  status      OrgInviteStatus @default(PENDING)
+  expiresAt   DateTime
+  createdBy   String // User ID who created the invite
+  createdAt   DateTime        @default(now())
+
+  organizer Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@index([organizerId])
+  @@index([email])
+  @@index([token])
+  @@index([status])
+}
+
+model OrgAction {
+  id          String   @id @default(cuid())
+  organizerId String
+  actorUserId String
+  action      String // e.g., "event.create", "member.invite", "refund.approve"
+  entityType  String // e.g., "Event", "OrgMember", "Booking"
+  entityId    String?
+  prev        Json? // Previous state
+  next        Json? // New state
+  ts          DateTime @default(now())
+
+  organizer Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@index([organizerId])
+  @@index([actorUserId])
+  @@index([ts])
+  @@index([entityType, entityId])
+}
+
+model ScannerPass {
+  id          String    @id @default(cuid())
+  organizerId String
+  eventId     String? // Optional: limit to specific event
+  token       String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdBy   String // User ID who created the pass
+  createdAt   DateTime  @default(now())
+
+  organizer Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@index([organizerId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
 model Campaign {
-  id           String          @id @default(cuid())
-  name         String
-  channel      CampaignChannel
-  status       CampaignStatus  @default(DRAFT)
-  templateKey  String          // Template identifier for rendering
-  scheduledAt  DateTime?
-  createdBy    String          // User ID of creator
-  
+  id          String          @id @default(cuid())
+  name        String
+  channel     CampaignChannel
+  status      CampaignStatus  @default(DRAFT)
+  templateKey String // Template identifier for rendering
+  scheduledAt DateTime?
+  createdBy   String // User ID of creator
+
   // Communication Center fields
-  paused       Boolean         @default(false)
-  stats        Json?           // { queued, sent, failed, openRate, clickRate }
-  segmentId    String?         // Link to segment used
-  payload      Json?           // Template payload data
-  rateLimit    Int?            // Per-channel rate limit (e.g., 20/sec for email)
-  utmEnabled   Boolean         @default(true)
-  
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  
-  recipients   CampaignRecipient[]
-  bookings     Booking[]
+  paused     Boolean @default(false)
+  stats      Json? // { queued, sent, failed, openRate, clickRate }
+  segmentId  String? // Link to segment used
+  payload    Json? // Template payload data
+  rateLimit  Int? // Per-channel rate limit (e.g., 20/sec for email)
+  utmEnabled Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  recipients    CampaignRecipient[]
+  bookings      Booking[]
   notifications Notification[]
 
   @@index([status])
@@ -635,10 +762,10 @@ model Campaign {
 }
 
 model Segment {
-  id        String   @id @default(cuid())
-  name      String
-  query     Json     // JSON DSL for segment query
-  
+  id    String @id @default(cuid())
+  name  String
+  query Json // JSON DSL for segment query
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -652,16 +779,16 @@ model CampaignRecipient {
   email      String
   phone      String?
   status     CampaignRecipientStatus @default(PENDING)
-  
+
   // Tracking
-  sentAt     DateTime?
-  openedAt   DateTime?
-  clickedAt  DateTime?
-  
-  createdAt  DateTime                @default(now())
-  updatedAt  DateTime                @updatedAt
-  
-  campaign   Campaign                @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sentAt    DateTime?
+  openedAt  DateTime?
+  clickedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
   @@index([userId])
@@ -670,7 +797,7 @@ model CampaignRecipient {
 }
 
 model BookingAttempt {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   bookingId       String?
   userId          String?
   eventId         String
@@ -680,13 +807,13 @@ model BookingAttempt {
   emailDomain     String?
   phonePrefix     String?
   qty             Int
-  paymentProvider String?  // "razorpay" | "fake"
-  result          String?  // "success" | "failed" | "cancelled"
+  paymentProvider String? // "razorpay" | "fake"
+  result          String? // "success" | "failed" | "cancelled"
   paidAt          DateTime?
   razorpayOrderId String?
-  createdAt       DateTime @default(now())
-  
-  booking         Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
   @@index([userId])
@@ -702,7 +829,7 @@ model FraudRule {
   name       String
   enabled    Boolean     @default(true)
   priority   Int         @default(0)
-  definition Json        // Rule conditions in JSON format
+  definition Json // Rule conditions in JSON format
   action     FraudAction
   weight     Int         @default(10) // Weight for risk scoring
   createdAt  DateTime    @default(now())
@@ -724,18 +851,18 @@ model FraudList {
 }
 
 model FraudCase {
-  id        String           @id @default(cuid())
-  bookingId String
-  status    FraudCaseStatus  @default(OPEN)
-  riskScore Int
-  riskTags  String[]         @default([])
-  notes     Json[]           @default([]) // Array of {text, createdBy, createdAt}
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id         String          @id @default(cuid())
+  bookingId  String
+  status     FraudCaseStatus @default(OPEN)
+  riskScore  Int
+  riskTags   String[]        @default([])
+  notes      Json[]          @default([]) // Array of {text, createdBy, createdAt}
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
   resolvedAt DateTime?
   resolvedBy String?
-  
-  booking   Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@index([bookingId])
   @@index([status])
@@ -748,8 +875,8 @@ model UserConsent {
   type      ConsentType
   value     Boolean
   createdAt DateTime    @default(now())
-  
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, type])
   @@index([createdAt])
@@ -777,9 +904,9 @@ model ContentBlock {
   authorId  String
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
-  
-  author    User             @relation("ContentBlockAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  versions  ContentBlockVersion[]
+
+  author   User                  @relation("ContentBlockAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  versions ContentBlockVersion[]
 
   @@index([key])
   @@index([published])
@@ -787,14 +914,14 @@ model ContentBlock {
 }
 
 model ContentBlockVersion {
-  id             String       @id @default(cuid())
+  id             String   @id @default(cuid())
   contentBlockId String
   version        Int
   value          Json
   authorId       String
-  createdAt      DateTime     @default(now())
-  
-  contentBlock   ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+
+  contentBlock ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
 
   @@unique([contentBlockId, version])
   @@index([contentBlockId])
@@ -813,8 +940,8 @@ model Post {
   authorId    String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  
-  author      User       @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  author User @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([slug])
   @@index([status])
@@ -833,13 +960,13 @@ enum ExperimentStatus {
 }
 
 model FeatureFlag {
-  key         String    @id
+  key         String   @id
   description String?
-  enabled     Boolean   @default(false)
-  rollout     Int       @default(100) // Percentage 0-100
-  rules       Json?     // Targeting rules: { roles, cities, categories, allowList, denyList }
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  enabled     Boolean  @default(false)
+  rollout     Int      @default(100) // Percentage 0-100
+  rules       Json? // Targeting rules: { roles, cities, categories, allowList, denyList }
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([enabled])
 }
@@ -847,7 +974,7 @@ model FeatureFlag {
 model Experiment {
   key         String           @id
   description String?
-  variants    Json             // [{ name: "A", weight: 50 }, { name: "B", weight: 50 }]
+  variants    Json // [{ name: "A", weight: 50 }, { name: "B", weight: 50 }]
   status      ExperimentStatus @default(DRAFT)
   startAt     DateTime?
   stopAt      DateTime?
@@ -862,13 +989,13 @@ model Experiment {
 }
 
 model ExperimentAssignment {
-  id            String     @id @default(cuid())
+  id            String   @id @default(cuid())
   experimentKey String
   userId        String
   variant       String
-  assignedAt    DateTime   @default(now())
+  assignedAt    DateTime @default(now())
 
-  experiment    Experiment @relation(fields: [experimentKey], references: [key], onDelete: Cascade)
+  experiment Experiment @relation(fields: [experimentKey], references: [key], onDelete: Cascade)
 
   @@unique([experimentKey, userId])
   @@index([experimentKey])
@@ -876,13 +1003,13 @@ model ExperimentAssignment {
 }
 
 model ExperimentExposure {
-  id            String     @id @default(cuid())
+  id            String   @id @default(cuid())
   experimentKey String
   userId        String
   variant       String
-  ts            DateTime   @default(now())
+  ts            DateTime @default(now())
 
-  experiment    Experiment @relation(fields: [experimentKey], references: [key], onDelete: Cascade)
+  experiment Experiment @relation(fields: [experimentKey], references: [key], onDelete: Cascade)
 
   @@index([experimentKey])
   @@index([userId])
@@ -929,15 +1056,15 @@ enum RewardGrantStatus {
 model KarmaTransaction {
   id        String               @id @default(cuid())
   userId    String
-  delta     Int                  // Positive for earn, negative for spend
+  delta     Int // Positive for earn, negative for spend
   type      KarmaTransactionType
   reason    KarmaReason
-  refId     String?              // Reference ID (bookingId, eventId, etc.)
-  meta      Json?                // Additional metadata
+  refId     String? // Reference ID (bookingId, eventId, etc.)
+  meta      Json? // Additional metadata
   held      Boolean              @default(false) // For fraud review
   createdAt DateTime             @default(now())
 
-  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, reason, refId], name: "karma_idempotency_key")
   @@index([userId])
@@ -952,26 +1079,26 @@ model Badge {
   key         String        @unique
   name        String
   description String
-  icon        String        // Icon name or URL
-  threshold   Int           // Karma/count threshold to earn
+  icon        String // Icon name or URL
+  threshold   Int // Karma/count threshold to earn
   category    BadgeCategory
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  userBadges  UserBadge[]
+  userBadges UserBadge[]
 
   @@index([category])
   @@index([threshold])
 }
 
 model UserBadge {
-  id        String   @id @default(cuid())
-  userId    String
-  badgeKey  String
-  earnedAt  DateTime @default(now())
+  id       String   @id @default(cuid())
+  userId   String
+  badgeKey String
+  earnedAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge     Badge    @relation(fields: [badgeKey], references: [key], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeKey], references: [key], onDelete: Cascade)
 
   @@unique([userId, badgeKey])
   @@index([userId])
@@ -980,13 +1107,13 @@ model UserBadge {
 }
 
 model LeaderboardEntry {
-  id        String   @id @default(cuid())
-  city      String
-  month     String   // Format: "YYYY-MM"
-  userId    String
-  score     Int
+  id     String @id @default(cuid())
+  city   String
+  month  String // Format: "YYYY-MM"
+  userId String
+  score  Int
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([city, month, userId])
   @@index([city, month])
@@ -997,17 +1124,17 @@ model LeaderboardEntry {
 model RewardGrant {
   id          String            @id @default(cuid())
   userId      String
-  rewardKey   String            // e.g., "DISCOUNT_200", "EARLY_ACCESS", etc.
+  rewardKey   String // e.g., "DISCOUNT_200", "EARLY_ACCESS", etc.
   status      RewardGrantStatus @default(PENDING)
-  promoCodeId String?           // Link to generated promo code for monetary rewards
-  meta        Json?             // Additional metadata
+  promoCodeId String? // Link to generated promo code for monetary rewards
+  meta        Json? // Additional metadata
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   usedAt      DateTime?
   expiresAt   DateTime?
 
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  promoCode   PromoCode?        @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoCode PromoCode? @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([rewardKey])
@@ -1022,21 +1149,21 @@ model UserPerks {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Referral {
-  id           String   @id @default(cuid())
-  referrerId   String   // User who referred
-  refereeId    String   // User who was referred
-  bookingId    String?  // First booking by referee
-  credited     Boolean  @default(false) // Whether karma was credited
-  createdAt    DateTime @default(now())
+  id         String   @id @default(cuid())
+  referrerId String // User who referred
+  refereeId  String // User who was referred
+  bookingId  String? // First booking by referee
+  credited   Boolean  @default(false) // Whether karma was credited
+  createdAt  DateTime @default(now())
 
-  referrer     User     @relation("ReferrerUser", fields: [referrerId], references: [id], onDelete: Cascade)
-  referee      User     @relation("RefereeUser", fields: [refereeId], references: [id], onDelete: Cascade)
+  referrer User @relation("ReferrerUser", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User @relation("RefereeUser", fields: [refereeId], references: [id], onDelete: Cascade)
 
   @@unique([referrerId, refereeId])
   @@index([referrerId])
@@ -1050,12 +1177,12 @@ model Review {
   userId    String
   eventId   String
   bookingId String   @unique // One review per booking
-  rating    Int      // 1-5
+  rating    Int // 1-5
   comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([eventId])
@@ -1069,11 +1196,11 @@ model UserReco {
   userId    String
   eventId   String
   score     Float
-  reason    Json      // { type: "category_match" | "similar_users" | "popular" | "mf", details: {...} }
-  createdAt DateTime  @default(now())
+  reason    Json // { type: "category_match" | "similar_users" | "popular" | "mf", details: {...} }
+  createdAt DateTime @default(now())
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@id([userId, eventId])
   @@index([userId, score(sort: Desc)])
@@ -1082,14 +1209,14 @@ model UserReco {
 }
 
 model UserProfile {
-  userId          String    @id
-  catFreq         Json      // Record<Category, number> - category frequency from bookings/views
-  priceP50        Int       // Median price of booked events in paise
-  preferredAreas  String[]  @default([]) // Top cities from bookings
-  timeSlots       String[]  @default([]) // Preferred time slots (morning/afternoon/evening)
-  updatedAt       DateTime  @updatedAt
+  userId         String   @id
+  catFreq        Json // Record<Category, number> - category frequency from bookings/views
+  priceP50       Int // Median price of booked events in paise
+  preferredAreas String[] @default([]) // Top cities from bookings
+  timeSlots      String[] @default([]) // Preferred time slots (morning/afternoon/evening)
+  updatedAt      DateTime @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([priceP50])
 }
