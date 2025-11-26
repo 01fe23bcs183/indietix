@@ -1,0 +1,63 @@
+import type { EmailTemplate, TemplateData } from "../../types";
+
+export function renderEventReminderT2(data: TemplateData): EmailTemplate {
+  const { userName, eventTitle, eventDate, eventVenue, ticketNumber } = data;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background-color: #EC4899; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; background-color: #f9f9f9; }
+    .info { background-color: white; padding: 15px; margin: 15px 0; border-radius: 5px; }
+    .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Event Starting Soon!</h1>
+    </div>
+    <div class="content">
+      <p>Hi ${userName},</p>
+      <p>Your event is starting in 2 hours! Time to head to the venue.</p>
+      <div class="info">
+        <p><strong>Event:</strong> ${eventTitle}</p>
+        <p><strong>Date:</strong> ${eventDate}</p>
+        <p><strong>Venue:</strong> ${eventVenue}</p>
+        <p><strong>Ticket Number:</strong> ${ticketNumber}</p>
+      </div>
+      <p>Make sure you have your ticket QR code ready for quick entry. Enjoy the event!</p>
+    </div>
+    <div class="footer">
+      <p>IndieTix - Your trusted event ticketing platform</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+
+  const text = `
+Hi ${userName},
+
+Your event is starting in 2 hours! Time to head to the venue.
+
+Event: ${eventTitle}
+Date: ${eventDate}
+Venue: ${eventVenue}
+Ticket Number: ${ticketNumber}
+
+Make sure you have your ticket QR code ready for quick entry. Enjoy the event!
+
+IndieTix - Your trusted event ticketing platform
+  `;
+
+  return {
+    subject: `Starting Soon: ${eventTitle}`,
+    html,
+    text,
+  };
+}

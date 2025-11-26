@@ -1,17 +1,28 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useAuth } from "../contexts/AuthContext";
 
-export default function HomeScreen() {
+export default function Index(): JSX.Element {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (user) {
+        router.replace("/(tabs)/home");
+      } else {
+        router.replace("/auth/signin");
+      }
+    }
+  }, [user, isLoading]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to IndieTix</Text>
-      <Text style={styles.subtitle}>Discover and book amazing events</Text>
-      
-      <Link href="/search" asChild>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Search Events</Text>
-        </TouchableOpacity>
-      </Link>
+      <Text style={styles.title}>IndieTix</Text>
+      <ActivityIndicator size="large" color="#0066cc" />
+      <StatusBar style="auto" />
     </View>
   );
 }
@@ -19,31 +30,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#1a1a1a',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 32,
-  },
-  button: {
-    backgroundColor: '#2563eb',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 24,
+    color: "#0066cc",
   },
 });

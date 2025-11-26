@@ -1,23 +1,20 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { TRPCProvider } from '@/lib/trpc-provider';
-
-const inter = Inter({ subsets: ['latin'] });
+import type { Metadata } from "next";
+import "./globals.css";
+import { TRPCProvider } from "@/lib/trpc-provider";
 
 export const metadata: Metadata = {
-  title: 'IndieTix - Event Discovery',
-  description: 'Discover and book events in your city',
+  title: "IndieTix - Event Booking Platform",
+  description: "All-in-one event booking platform for India",
 };
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}): JSX.Element {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <TRPCProvider>{children}</TRPCProvider>
       </body>
     </html>

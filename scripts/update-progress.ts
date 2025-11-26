@@ -1,0 +1,224 @@
+#!/usr/bin/env node
+
+/**
+ * Progress Automation Script for IndieTix
+ *
+ * This script:
+ * 1. Reads project/tasks.json to get all milestones and tasks
+ * 2. Scans recent git commits for task tokens (T01, T02, etc.)
+ * 3. Updates task status to "done" when found in merged commits
+ * 4. Calculates progress by milestone and overall
+ * 5. Generates PROGRESS.md with ASCII progress bars
+ */
+
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { execSync } from "child_process";
+import { join } from "path";
+
+interface Task {
+  id: string;
+  name: string;
+  description: string;
+  status: "pending" | "in_progress" | "done";
+  assignee: string;
+}
+
+interface Milestone {
+  id: string;
+  name: string;
+  description: string;
+  weight: number;
+  tasks: Task[];
+}
+
+interface ProjectData {
+  project: string;
+  description: string;
+  milestones: Milestone[];
+}
+
+const TASKS_FILE = join(process.cwd(), "project/tasks.json");
+const PROGRESS_FILE = join(process.cwd(), "PROGRESS.md");
+
+function loadTasks(): ProjectData {
+  if (!existsSync(TASKS_FILE)) {
+    console.error(`❌ Tasks file not found: ${TASKS_FILE}`);
+    process.exit(1);
+  }
+
+  const content = readFileSync(TASKS_FILE, "utf-8");
+  return JSON.parse(content);
+}
+
+function getRecentCommits(limit: number = 50): string[] {
+  try {
+    const output = execSync(`git log -${limit} --oneline --no-merges`, {
+      encoding: "utf-8",
+      cwd: process.cwd(),
+    });
+    return output.trim().split("\n");
+  } catch {
+    console.warn("⚠️  Could not fetch git commits, using empty list");
+    return [];
+  }
+}
+
+function extractTaskTokens(commits: string[]): Set<string> {
+  const taskPattern = /\b(T\d{2})\b/gi;
+  const tokens = new Set<string>();
+
+  for (const commit of commits) {
+    const matches = commit.matchAll(taskPattern);
+    for (const match of matches) {
+      tokens.add(match[1].toUpperCase());
+    }
+  }
+
+  return tokens;
+}
+
+function updateTaskStatus(
+  data: ProjectData,
+  completedTokens: Set<string>
+): ProjectData {
+  const updated = { ...data };
+
+  for (const milestone of updated.milestones) {
+    for (const task of milestone.tasks) {
+      if (completedTokens.has(task.id)) {
+        task.status = "done";
+      }
+    }
+  }
+
+  return updated;
+}
+
+function calculateProgress(milestone: Milestone): number {
+  if (milestone.tasks.length === 0) return 0;
+
+  const doneCount = milestone.tasks.filter((t) => t.status === "done").length;
+  return Math.round((doneCount / milestone.tasks.length) * 100);
+}
+
+function calculateOverallProgress(data: ProjectData): number {
+  let totalWeight = 0;
+  let weightedProgress = 0;
+
+  for (const milestone of data.milestones) {
+    const progress = calculateProgress(milestone);
+    weightedProgress += progress * milestone.weight;
+    totalWeight += milestone.weight;
+  }
+
+  return totalWeight > 0 ? Math.round(weightedProgress / totalWeight) : 0;
+}
+
+function generateProgressBar(percentage: number, width: number = 30): string {
+  const filled = Math.round((percentage / 100) * width);
+  const empty = width - filled;
+  return `[${"█".repeat(filled)}${"░".repeat(empty)}] ${percentage}%`;
+}
+
+function getStatusEmoji(status: string): string {
+  switch (status) {
+    case "done":
+      return "✅";
+    case "in_progress":
+      return "🔄";
+    case "pending":
+      return "⏳";
+    default:
+      return "❓";
+  }
+}
+
+function generateProgressMarkdown(data: ProjectData): string {
+  const overallProgress = calculateOverallProgress(data);
+  const lastUpdated = new Date().toISOString().split("T")[0];
+
+  let md = `# 📊 ${data.project} - Build Progress\n\n`;
+  md += `${data.description}\n\n`;
+  md += `**Last Updated:** ${lastUpdated}\n\n`;
+  md += `## Overall Progress\n\n`;
+  md += `${generateProgressBar(overallProgress, 50)}\n\n`;
+  md += `---\n\n`;
+
+  for (const milestone of data.milestones) {
+    const progress = calculateProgress(milestone);
+    const doneCount = milestone.tasks.filter((t) => t.status === "done").length;
+    const totalCount = milestone.tasks.length;
+
+    md += `## ${milestone.id}: ${milestone.name}\n\n`;
+    md += `${milestone.description}\n\n`;
+    md += `**Progress:** ${generateProgressBar(progress, 40)} (${doneCount}/${totalCount} tasks)\n\n`;
+
+    md += `| Task | Status | Description | Assignee |\n`;
+    md += `|------|--------|-------------|----------|\n`;
+
+    for (const task of milestone.tasks) {
+      const emoji = getStatusEmoji(task.status);
+      const status = task.status.replace("_", " ");
+      md += `| ${task.id} | ${emoji} ${status} | ${task.name} | @${task.assignee} |\n`;
+    }
+
+    md += `\n`;
+  }
+
+  md += `---\n\n`;
+  md += `## Legend\n\n`;
+  md += `- ✅ **Done**: Task completed and merged to main\n`;
+  md += `- 🔄 **In Progress**: Task currently being worked on\n`;
+  md += `- ⏳ **Pending**: Task not yet started\n\n`;
+  md += `---\n\n`;
+  md += `*This progress report is automatically generated by \`scripts/update-progress.ts\`*\n`;
+
+  return md;
+}
+
+function main() {
+  console.log("🚀 Starting progress update...\n");
+
+  console.log("📖 Loading tasks from project/tasks.json...");
+  const data = loadTasks();
+  console.log(`   Found ${data.milestones.length} milestones\n`);
+
+  console.log("🔍 Scanning recent git commits...");
+  const commits = getRecentCommits();
+  console.log(`   Analyzed ${commits.length} commits\n`);
+
+  const completedTokens = extractTaskTokens(commits);
+  console.log("📝 Found completed task tokens:");
+  if (completedTokens.size > 0) {
+    console.log(`   ${Array.from(completedTokens).join(", ")}\n`);
+  } else {
+    console.log("   None found\n");
+  }
+
+  console.log("🔄 Updating task status...");
+  const updatedData = updateTaskStatus(data, completedTokens);
+
+  const overallProgress = calculateOverallProgress(updatedData);
+  console.log(`\n📊 Overall Progress: ${overallProgress}%\n`);
+
+  for (const milestone of updatedData.milestones) {
+    const progress = calculateProgress(milestone);
+    console.log(`   ${milestone.id}: ${progress}% - ${milestone.name}`);
+  }
+
+  console.log("\n📄 Generating PROGRESS.md...");
+  const markdown = generateProgressMarkdown(updatedData);
+  writeFileSync(PROGRESS_FILE, markdown, "utf-8");
+  console.log(`   ✅ Written to ${PROGRESS_FILE}\n`);
+
+  console.log("✨ Progress update complete!\n");
+}
+
+main();
+
+export {
+  loadTasks,
+  updateTaskStatus,
+  calculateProgress,
+  calculateOverallProgress,
+};

@@ -1,42 +1,36 @@
 {
   "name": "@indietix/db",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
-  "type": "module",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
+      "types": "./src/index.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./client": {
-      "import": "./dist/client.js",
-      "types": "./dist/client.d.ts"
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "generate": "prisma generate",
-    "push": "prisma db push",
-    "migrate": "prisma migrate dev",
-    "migrate:deploy": "prisma migrate deploy",
-    "seed": "tsx prisma/seed.ts",
-    "studio": "prisma studio",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
-    "test": "echo 'No tests for db package'",
-    "typecheck": "tsc --noEmit"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "prisma:gen": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0"
+    "@prisma/client": "^5.8.1"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "prisma": "^5.22.0",
-    "tsx": "^4.7.0",
-    "typescript": "^5.9.3",
-    "vitest": "^1.6.0"
+    "@indietix/config": "workspace:*",
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^20.11.5",
+    "bcrypt": "^6.0.0",
+    "prisma": "^5.8.1",
+    "typescript": "^5.3.3"
   }
 }

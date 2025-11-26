@@ -1,0 +1,22 @@
+PR,Title,Merged,Author,CI Status,Tests Added,Unresolved Threads,Risky Files,Files Changed,TODOs Added,Critical,Major,Minor,URL
+60,"[UI] Marketing tooling UI components (promos; campaigns; price phases)",2025-11-02T06:30:53Z,devin-ai-integration,no-ci,true,0,21,89,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/60
+59,"[mkt] Promos + price phases + campaigns + tracking + reports (CI-safe)",2025-11-02T06:30:42Z,devin-ai-integration,failed,true,0,9,26,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/59
+57,"[notify] Providers + templates + preferences + schedulers + preview (CI-safe)",2025-11-02T03:41:21Z,devin-ai-integration,no-ci,true,0,9,54,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/57
+56,"[admin] Tier 1.5 panel: dashboard + entities + moderation + settings + audit",2025-11-01T18:32:20Z,devin-ai-integration,no-ci,true,0,22,66,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/56
+55,"[money] Payouts engine + dashboards + CSV export (+RazorpayX optional)",2025-11-01T17:35:26Z,devin-ai-integration,failed,true,0,10,67,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/55
+54,"[org][analytics] v1 summary + timeseries + funnels + exports",2025-11-01T16:44:24Z,devin-ai-integration,failed,true,0,7,12,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/54
+53,"[refunds] Cancellations + Refunds + Waitlist (policy-driven; idempotent; CI-safe)",2025-11-01T16:09:47Z,devin-ai-integration,failed,true,0,16,21,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/53
+52,"[ticket] QR generation + organizer scanner + offline tickets",2025-11-01T15:05:40Z,devin-ai-integration,failed,true,0,7,23,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/52
+51,"[book] Booking core + Razorpay orders + idempotent webhooks + seat holds",2025-11-01T14:12:17Z,devin-ai-integration,failed,true,0,6,100,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/51
+50,"[web] Discovery listing + detail + transparent fee breakdown (no ""convenience fee"")",2025-11-01T12:19:58Z,devin-ai-integration,failed,true,0,4,13,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/50
+49,"[org] Events CRUD + Attendees API + CSV export",2025-11-01T12:01:19Z,devin-ai-integration,passed,true,0,14,28,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/49
+48,"[core] Prisma schema + NextAuth v5 + RBAC + seed + public tRPC (events; auth)",2025-11-01T11:07:53Z,devin-ai-integration,failed,true,0,12,35,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/48
+47,"[test] Vitest + Jest (mobile) + Playwright + Maestro CI scaffolding",2025-11-01T10:28:04Z,devin-ai-integration,passed,true,0,1,21,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/47
+45,"Fix: Resolve all 178 ESLint errors",2025-11-01T09:42:03Z,devin-ai-integration,passed,false,0,2,8,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/45
+42,"chore(deps-dev): update @babel/core requirement from ^7.23.9 to ^7.28.5",2025-11-01T09:43:24Z,dependabot,failed,false,0,0,1,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/42
+41,"chore(deps-dev): bump eslint from 9.38.0 to 9.39.0",2025-11-01T09:46:04Z,dependabot,passed,false,0,0,7,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/41
+34,"chore(deps): update class-variance-authority requirement from ^0.7.0 to ^0.7.1",2025-11-01T09:46:11Z,dependabot,failed,false,0,0,1,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/34
+31,"chore(deps): bump lucide-react from 0.309.0 to 0.552.0 in /packages/ui",2025-11-01T09:46:18Z,dependabot,failed,false,0,0,1,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/31
+23,"chore(deps-dev): update autoprefixer requirement from ^10.4.17 to ^10.4.21",2025-11-01T09:46:53Z,dependabot,failed,false,0,0,4,0,1,0,0,https://github.com/01fe23bcs183/indietix/pull/23
+2,"[infra] Reviews; security scans; progress automation",2025-11-01T05:33:00Z,devin-ai-integration,failed,false,0,2,20,0,1,0,1,https://github.com/01fe23bcs183/indietix/pull/2
+1,"[setup] Turborepo foundation + CI",2025-11-01T05:25:25Z,devin-ai-integration,passed,true,0,23,100,0,0,0,0,https://github.com/01fe23bcs183/indietix/pull/1

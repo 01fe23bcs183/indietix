@@ -1,358 +1,614 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import { hash } from "bcrypt";
+import {
+  createSignedTicket,
+  encodeTicketForQR,
+  hashTicketPayload,
+} from "@indietix/utils";
 
 const prisma = new PrismaClient();
 
-// Bengaluru areas
-const AREAS = [
-  'Indiranagar',
-  'Koramangala',
-  'HSR Layout',
-  'Whitefield',
-  'Jayanagar',
-  'JP Nagar',
-  'Marathahalli',
-  'Electronic City',
-  'MG Road',
-  'Brigade Road',
-  'Malleshwaram',
-  'Rajajinagar',
-  'Yelahanka',
-  'Hebbal',
-  'BTM Layout',
-  'Bannerghatta Road',
-  'Sarjapur Road',
-  'Bellandur',
-];
-
-// Categories
-const CATEGORIES = [
-  'comedy',
-  'music',
-  'theatre',
-  'workshop',
-  'art',
-  'food',
-  'sports',
-  'networking',
-  'open-mic',
-  'party',
-];
-
-// Venues by area
-const VENUES: Record<string, string[]> = {
-  Indiranagar: ['The Humming Tree', 'Toit Brewpub', 'BFlat Bar', 'Fandom at Gilly\'s'],
-  Koramangala: ['The Laugh Store', 'Hard Rock Cafe', 'Vapour Pub', 'Koramangala Social'],
-  'HSR Layout': ['Lahe Lahe', 'Byg Brewski', 'The Permit Room', 'HSR Social'],
-  Whitefield: ['Phoenix Marketcity', 'VR Bengaluru', 'Whitefield Social', 'The Forum'],
-  Jayanagar: ['Ranga Shankara', 'Jayanagar Cultural Centre', 'The Art Cafe'],
-  'JP Nagar': ['JP Nagar Social', 'The Biere Club', 'Hangover Pub'],
-  Marathahalli: ['Marathahalli Social', 'The Irish House', 'Glocal Junction'],
-  'Electronic City': ['EC Social', 'The Brew Estate', 'Infosys Convention Center'],
-  'MG Road': ['UB City', 'Church Street Social', 'The Permit Room MG'],
-  'Brigade Road': ['Hard Rock Cafe Brigade', 'Pecos', 'Opus'],
-  Malleshwaram: ['Rangoli Metro Art Center', 'Malleshwaram Grounds', 'The Coffee Board'],
-  Rajajinagar: ['Orion Mall', 'Elements Mall', 'Rajajinagar Cultural Hub'],
-  Yelahanka: ['Yelahanka Convention Center', 'The Park', 'Air Force Station Grounds'],
-  Hebbal: ['Manyata Tech Park', 'Hebbal Lake View', 'The Leela Palace'],
-  'BTM Layout': ['BTM Social', 'The Biere Club BTM', 'Hangout Hub'],
-  'Bannerghatta Road': ['Bannerghatta Zoo Amphitheatre', 'The Forum Value Mall', 'BGS Grounds'],
-  'Sarjapur Road': ['Total Environment', 'Sarjapur Social', 'The Brew House'],
-  Bellandur: ['Bellandur Lake View', 'The Brew Estate Bellandur', 'Prestige Tech Park'],
-};
-
-// Event templates
-const EVENT_TEMPLATES = [
-  // Comedy
-  { category: 'comedy', titleTemplate: 'Stand-up Comedy Night with {artist}', tags: ['standup', 'comedy', 'live', 'entertainment'] },
-  { category: 'comedy', titleTemplate: 'Comedy Open Mic - {theme}', tags: ['open-mic', 'comedy', 'amateur', 'fun'] },
-  { category: 'comedy', titleTemplate: 'Improv Comedy Show', tags: ['improv', 'comedy', 'interactive', 'live'] },
-  { category: 'comedy', titleTemplate: 'Hindi Stand-up Special', tags: ['hindi', 'standup', 'comedy', 'desi'] },
-  { category: 'comedy', titleTemplate: 'English Comedy Night', tags: ['english', 'standup', 'comedy', 'premium'] },
-  
-  // Music
-  { category: 'music', titleTemplate: 'Live Jazz Evening', tags: ['jazz', 'live', 'music', 'chill'] },
-  { category: 'music', titleTemplate: 'Indie Music Festival', tags: ['indie', 'festival', 'music', 'bands'] },
-  { category: 'music', titleTemplate: 'Acoustic Night with {artist}', tags: ['acoustic', 'live', 'music', 'intimate'] },
-  { category: 'music', titleTemplate: 'Rock Concert - {band}', tags: ['rock', 'concert', 'live', 'loud'] },
-  { category: 'music', titleTemplate: 'Classical Music Recital', tags: ['classical', 'indian', 'music', 'traditional'] },
-  { category: 'music', titleTemplate: 'EDM Night - DJ {artist}', tags: ['edm', 'dj', 'party', 'dance'] },
-  
-  // Theatre
-  { category: 'theatre', titleTemplate: 'Play: {title}', tags: ['theatre', 'drama', 'stage', 'acting'] },
-  { category: 'theatre', titleTemplate: 'Musical Theatre: {title}', tags: ['musical', 'theatre', 'singing', 'dance'] },
-  { category: 'theatre', titleTemplate: 'Kannada Drama Night', tags: ['kannada', 'drama', 'local', 'theatre'] },
-  
-  // Workshop
-  { category: 'workshop', titleTemplate: 'Pottery Workshop for Beginners', tags: ['pottery', 'art', 'hands-on', 'creative'] },
-  { category: 'workshop', titleTemplate: 'Photography Masterclass', tags: ['photography', 'learning', 'creative', 'skill'] },
-  { category: 'workshop', titleTemplate: 'Cooking Class: {cuisine}', tags: ['cooking', 'food', 'learning', 'fun'] },
-  { category: 'workshop', titleTemplate: 'Dance Workshop: {style}', tags: ['dance', 'fitness', 'learning', 'fun'] },
-  { category: 'workshop', titleTemplate: 'Painting Workshop', tags: ['painting', 'art', 'creative', 'relaxing'] },
-  
-  // Art
-  { category: 'art', titleTemplate: 'Art Exhibition: {theme}', tags: ['art', 'exhibition', 'gallery', 'visual'] },
-  { category: 'art', titleTemplate: 'Street Art Walk', tags: ['street-art', 'walking', 'urban', 'tour'] },
-  
-  // Food
-  { category: 'food', titleTemplate: 'Wine Tasting Evening', tags: ['wine', 'tasting', 'premium', 'social'] },
-  { category: 'food', titleTemplate: 'Craft Beer Festival', tags: ['beer', 'craft', 'festival', 'tasting'] },
-  { category: 'food', titleTemplate: 'Food Walk: {area}', tags: ['food', 'walking', 'local', 'culinary'] },
-  
-  // Sports
-  { category: 'sports', titleTemplate: 'Yoga in the Park', tags: ['yoga', 'fitness', 'outdoor', 'wellness'] },
-  { category: 'sports', titleTemplate: 'Marathon Training Run', tags: ['running', 'marathon', 'fitness', 'outdoor'] },
-  { category: 'sports', titleTemplate: 'Cricket Tournament', tags: ['cricket', 'sports', 'tournament', 'team'] },
-  
-  // Networking
-  { category: 'networking', titleTemplate: 'Startup Meetup', tags: ['startup', 'networking', 'business', 'tech'] },
-  { category: 'networking', titleTemplate: 'Tech Conference: {topic}', tags: ['tech', 'conference', 'learning', 'networking'] },
-  { category: 'networking', titleTemplate: 'Women in Tech Meetup', tags: ['women', 'tech', 'networking', 'empowerment'] },
-  
-  // Open Mic
-  { category: 'open-mic', titleTemplate: 'Poetry Open Mic', tags: ['poetry', 'open-mic', 'spoken-word', 'creative'] },
-  { category: 'open-mic', titleTemplate: 'Music Open Mic Night', tags: ['music', 'open-mic', 'live', 'amateur'] },
-  { category: 'open-mic', titleTemplate: 'Storytelling Open Mic', tags: ['storytelling', 'open-mic', 'narrative', 'creative'] },
-  
-  // Party
-  { category: 'party', titleTemplate: 'Saturday Night Party', tags: ['party', 'nightlife', 'dance', 'fun'] },
-  { category: 'party', titleTemplate: 'Bollywood Night', tags: ['bollywood', 'party', 'dance', 'music'] },
-  { category: 'party', titleTemplate: 'Retro Theme Party', tags: ['retro', 'party', 'theme', 'fun'] },
-];
-
-// Artists/Names for templates
-const ARTISTS = ['Rahul', 'Priya', 'Karthik', 'Sneha', 'Arjun', 'Divya', 'Vikram', 'Ananya', 'Rohan', 'Meera'];
-const BANDS = ['The Local Train', 'Parvaaz', 'When Chai Met Toast', 'Thaikkudam Bridge', 'Agam'];
-const THEMES = ['Life in Bangalore', 'Tech Tales', 'Dating Disasters', 'Office Politics', 'Family Drama'];
-const CUISINES = ['Italian', 'Thai', 'South Indian', 'Japanese', 'Mexican'];
-const DANCE_STYLES = ['Salsa', 'Bollywood', 'Hip Hop', 'Contemporary', 'Bharatanatyam'];
-const PLAY_TITLES = ['The Glass Menagerie', 'Waiting for Godot', 'Tughlaq', 'Hayavadana'];
-const ART_THEMES = ['Urban Landscapes', 'Abstract Emotions', 'Nature\'s Beauty', 'Modern India'];
-const TECH_TOPICS = ['AI/ML', 'Web3', 'Cloud Computing', 'DevOps', 'Product Management'];
-
-function getRandomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 50) + '-' + Math.random().toString(36).slice(2, 8);
-}
-
-function generateTitle(template: string): string {
-  return template
-    .replace('{artist}', getRandomElement(ARTISTS))
-    .replace('{band}', getRandomElement(BANDS))
-    .replace('{theme}', getRandomElement(THEMES))
-    .replace('{cuisine}', getRandomElement(CUISINES))
-    .replace('{style}', getRandomElement(DANCE_STYLES))
-    .replace('{title}', getRandomElement(PLAY_TITLES))
-    .replace('{area}', getRandomElement(AREAS))
-    .replace('{topic}', getRandomElement(TECH_TOPICS));
-}
-
-function generateDescription(title: string, category: string, venue: string, area: string): string {
-  const descriptions: Record<string, string[]> = {
-    comedy: [
-      `Get ready for a night of non-stop laughter at ${venue}! Join us for an evening of hilarious stand-up comedy that will leave you in splits.`,
-      `Experience the best of comedy at ${venue} in ${area}. Our talented comedians will take you on a journey of humor and wit.`,
-    ],
-    music: [
-      `Immerse yourself in the magic of live music at ${venue}. An unforgettable evening of melodies awaits you.`,
-      `Join us for an incredible musical experience at ${venue}, ${area}. Feel the rhythm and let the music move you.`,
-    ],
-    theatre: [
-      `Witness the magic of live theatre at ${venue}. A captivating performance that will stay with you long after the curtains close.`,
-      `Experience the art of storytelling through drama at ${venue} in ${area}. A must-watch for theatre enthusiasts.`,
-    ],
-    workshop: [
-      `Learn something new and exciting at ${venue}! Our expert instructors will guide you through this hands-on workshop.`,
-      `Unlock your creativity at this engaging workshop in ${area}. Perfect for beginners and enthusiasts alike.`,
-    ],
-    art: [
-      `Explore the world of art at ${venue}. A visual feast that celebrates creativity and expression.`,
-      `Discover stunning artworks at this exhibition in ${area}. A journey through colors, forms, and emotions.`,
-    ],
-    food: [
-      `Indulge your taste buds at ${venue}! A culinary experience that celebrates flavors from around the world.`,
-      `Join fellow food lovers for an unforgettable gastronomic adventure in ${area}.`,
-    ],
-    sports: [
-      `Get active and energized at ${venue}! A perfect opportunity to challenge yourself and have fun.`,
-      `Join the fitness community in ${area} for an exciting sports event. All skill levels welcome!`,
-    ],
-    networking: [
-      `Connect with like-minded professionals at ${venue}. Expand your network and discover new opportunities.`,
-      `Join the community of innovators and entrepreneurs in ${area}. Great conversations and connections await!`,
-    ],
-    'open-mic': [
-      `Take the stage or enjoy the show at ${venue}! An open platform for emerging talent and creative expression.`,
-      `Discover raw talent and authentic performances at this open mic night in ${area}.`,
-    ],
-    party: [
-      `Let loose and dance the night away at ${venue}! The best music, drinks, and vibes await you.`,
-      `Get ready for an epic night of fun and celebration in ${area}. The party starts here!`,
-    ],
-  };
-
-  const categoryDescriptions = descriptions[category] || descriptions.comedy;
-  return getRandomElement(categoryDescriptions);
-}
-
-function generateFutureDate(daysFromNow: number): Date {
-  const date = new Date();
-  date.setDate(date.getDate() + daysFromNow);
-  date.setHours(Math.floor(Math.random() * 12) + 10, 0, 0, 0); // 10 AM to 10 PM
-  return date;
-}
+const SALT_ROUNDS = 10;
 
 async function main() {
-  console.log('Starting seed...');
+  console.log("🌱 Starting database seed...");
 
-  // Create admin user
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@indietix.com' },
+  const password = await hash("password123", SALT_ROUNDS);
+
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@indietix.com" },
     update: {},
     create: {
-      email: 'admin@indietix.com',
-      name: 'Admin User',
-      role: 'ADMIN',
-      passwordHash: 'hashed_password_placeholder',
+      email: "admin@indietix.com",
+      name: "Admin User",
+      passwordHash: password,
+      role: "ADMIN",
+      phone: "+919876543210",
     },
   });
-  console.log('Created admin user:', adminUser.email);
+  console.log("✅ Created ADMIN user:", admin.email);
 
-  // Create organizer user
-  const organizerUser = await prisma.user.upsert({
-    where: { email: 'organizer@indietix.com' },
+  const organizer1User = await prisma.user.upsert({
+    where: { email: "organizer1@indietix.com" },
     update: {},
     create: {
-      email: 'organizer@indietix.com',
-      name: 'Event Organizer',
-      role: 'ORGANIZER',
-      passwordHash: 'hashed_password_placeholder',
+      email: "organizer1@indietix.com",
+      name: "Ravi Kumar",
+      passwordHash: password,
+      role: "ORGANIZER",
+      phone: "+919876543211",
     },
   });
-  console.log('Created organizer user:', organizerUser.email);
 
-  // Create organizer profile
-  const organizer = await prisma.organizer.upsert({
-    where: { userId: organizerUser.id },
+  const organizer1 = await prisma.organizer.upsert({
+    where: { userId: organizer1User.id },
     update: {},
     create: {
-      userId: organizerUser.id,
-      companyName: 'IndieTix Events',
+      userId: organizer1User.id,
+      businessName: "EventPro India",
+      description: "Leading event management company in India",
       verified: true,
     },
   });
-  console.log('Created organizer profile:', organizer.companyName);
+  console.log("✅ Created ORGANIZER 1:", organizer1.businessName);
 
-  // Seed category synonyms
-  const categorySynonyms = [
-    { synonym: 'standup', category: 'comedy' },
-    { synonym: 'stand-up', category: 'comedy' },
-    { synonym: 'comic', category: 'comedy' },
-    { synonym: 'funny', category: 'comedy' },
-    { synonym: 'concert', category: 'music' },
-    { synonym: 'gig', category: 'music' },
-    { synonym: 'band', category: 'music' },
-    { synonym: 'live', category: 'music' },
-    { synonym: 'play', category: 'theatre' },
-    { synonym: 'drama', category: 'theatre' },
-    { synonym: 'class', category: 'workshop' },
-    { synonym: 'learn', category: 'workshop' },
-    { synonym: 'exhibition', category: 'art' },
-    { synonym: 'gallery', category: 'art' },
-    { synonym: 'tasting', category: 'food' },
-    { synonym: 'culinary', category: 'food' },
-    { synonym: 'fitness', category: 'sports' },
-    { synonym: 'yoga', category: 'sports' },
-    { synonym: 'meetup', category: 'networking' },
-    { synonym: 'conference', category: 'networking' },
-    { synonym: 'mic', category: 'open-mic' },
-    { synonym: 'openmic', category: 'open-mic' },
-    { synonym: 'club', category: 'party' },
-    { synonym: 'nightlife', category: 'party' },
-  ];
+  const organizer2User = await prisma.user.upsert({
+    where: { email: "organizer2@indietix.com" },
+    update: {},
+    create: {
+      email: "organizer2@indietix.com",
+      name: "Priya Sharma",
+      passwordHash: password,
+      role: "ORGANIZER",
+      phone: "+919876543212",
+    },
+  });
 
-  for (const syn of categorySynonyms) {
-    await prisma.categorySynonym.upsert({
-      where: { synonym: syn.synonym },
-      update: { category: syn.category },
-      create: syn,
-    });
-  }
-  console.log('Seeded category synonyms');
+  const organizer2 = await prisma.organizer.upsert({
+    where: { userId: organizer2User.id },
+    update: {},
+    create: {
+      userId: organizer2User.id,
+      businessName: "Mumbai Events Co",
+      description: "Premium event experiences in Mumbai",
+      verified: true,
+    },
+  });
+  console.log("✅ Created ORGANIZER 2:", organizer2.businessName);
 
-  // Seed area aliases
-  const areaAliases = [
-    { alias: 'indira', area: 'Indiranagar', city: 'Bengaluru' },
-    { alias: 'kora', area: 'Koramangala', city: 'Bengaluru' },
-    { alias: 'hsr', area: 'HSR Layout', city: 'Bengaluru' },
-    { alias: 'ec', area: 'Electronic City', city: 'Bengaluru' },
-    { alias: 'mg', area: 'MG Road', city: 'Bengaluru' },
-    { alias: 'btm', area: 'BTM Layout', city: 'Bengaluru' },
-    { alias: 'jp', area: 'JP Nagar', city: 'Bengaluru' },
-    { alias: 'blr', area: '', city: 'Bengaluru' },
-    { alias: 'bangalore', area: '', city: 'Bengaluru' },
-  ];
-
-  for (const alias of areaAliases) {
-    await prisma.areaAlias.upsert({
-      where: { alias: alias.alias },
-      update: { area: alias.area, city: alias.city },
-      create: alias,
-    });
-  }
-  console.log('Seeded area aliases');
-
-  // Generate 55 events
-  const events = [];
-  for (let i = 0; i < 55; i++) {
-    const template = getRandomElement(EVENT_TEMPLATES);
-    const area = getRandomElement(AREAS);
-    const venueList = VENUES[area] || ['Community Hall'];
-    const venue = getRandomElement(venueList);
-    const title = generateTitle(template.titleTemplate);
-    const daysFromNow = Math.floor(Math.random() * 60) - 5; // -5 to +55 days
-    const price = [0, 199, 299, 399, 499, 599, 699, 799, 999, 1499, 1999][Math.floor(Math.random() * 11)];
-
-    events.push({
-      slug: generateSlug(title),
-      title,
-      description: generateDescription(title, template.category, venue, area),
-      venue,
-      address: `${venue}, ${area}, Bengaluru`,
-      city: 'Bengaluru',
-      area,
-      category: template.category,
-      tags: template.tags,
-      startDate: generateFutureDate(daysFromNow),
-      price,
-      totalSeats: [50, 100, 150, 200, 300][Math.floor(Math.random() * 5)],
+  const events = [
+    {
+      organizerId: organizer1.id,
+      title: "Sunburn Festival 2025",
+      slug: "sunburn-festival-2025-bengaluru",
+      description:
+        "Asia's biggest electronic music festival returns to Bengaluru",
+      category: "MUSIC" as const,
+      city: "Bengaluru",
+      venue: "Jayamahal Palace Grounds",
+      date: new Date("2025-12-15T18:00:00Z"),
+      price: 2500,
+      totalSeats: 5000,
       bookedSeats: 0,
-      status: 'PUBLISHED' as const,
-      organizerId: organizer.id,
-    });
-  }
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Booking Test Event - Future Date",
+      slug: "booking-test-event-future",
+      description: "Test event for booking system with 100 available seats",
+      category: "TECH" as const,
+      city: "Bengaluru",
+      venue: "Test Venue",
+      date: new Date("2026-06-15T18:00:00Z"),
+      price: 500,
+      totalSeats: 100,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Stand-Up Comedy Night with Zakir Khan",
+      slug: "zakir-khan-comedy-bengaluru",
+      description: "An evening of laughter with India's favorite comedian",
+      category: "COMEDY" as const,
+      city: "Bengaluru",
+      venue: "Chowdiah Memorial Hall",
+      date: new Date("2025-11-20T19:30:00Z"),
+      price: 800,
+      totalSeats: 1200,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "IPL 2025: Mumbai Indians vs RCB",
+      slug: "ipl-2025-mi-vs-rcb",
+      description: "Witness the clash of titans at Wankhede Stadium",
+      category: "SPORTS" as const,
+      city: "Mumbai",
+      venue: "Wankhede Stadium",
+      date: new Date("2025-04-10T19:30:00Z"),
+      price: 1500,
+      totalSeats: 33000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "TechCrunch Disrupt Mumbai 2025",
+      slug: "techcrunch-disrupt-mumbai-2025",
+      description: "India's premier startup and technology conference",
+      category: "TECH" as const,
+      city: "Mumbai",
+      venue: "Jio World Convention Centre",
+      date: new Date("2025-09-25T09:00:00Z"),
+      price: 5000,
+      totalSeats: 2000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Delhi Food Festival 2025",
+      slug: "delhi-food-festival-2025",
+      description: "Celebrate India's culinary diversity",
+      category: "FOOD" as const,
+      city: "Delhi",
+      venue: "Jawaharlal Nehru Stadium",
+      date: new Date("2025-11-05T11:00:00Z"),
+      price: 500,
+      totalSeats: 10000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "India Art Fair 2025",
+      slug: "india-art-fair-2025-delhi",
+      description: "South Asia's leading international art fair",
+      category: "ART" as const,
+      city: "Delhi",
+      venue: "NSIC Exhibition Grounds",
+      date: new Date("2025-02-08T10:00:00Z"),
+      price: 1200,
+      totalSeats: 5000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "NH7 Weekender Bengaluru",
+      slug: "nh7-weekender-bengaluru-2025",
+      description: "India's happiest music festival",
+      category: "MUSIC" as const,
+      city: "Bengaluru",
+      venue: "Backyard Sports Club",
+      date: new Date("2025-11-28T14:00:00Z"),
+      price: 3500,
+      totalSeats: 8000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "Mumbai Marathon 2025",
+      slug: "mumbai-marathon-2025",
+      description: "Asia's largest marathon event",
+      category: "SPORTS" as const,
+      city: "Mumbai",
+      venue: "Chhatrapati Shivaji Terminus",
+      date: new Date("2025-01-19T06:00:00Z"),
+      price: 1000,
+      totalSeats: 50000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Photography Workshop with Raghu Rai",
+      slug: "photography-workshop-delhi-2025",
+      description:
+        "Learn the art of photography from India's legendary photographer",
+      category: "OTHER" as const,
+      city: "Delhi",
+      venue: "India Habitat Centre",
+      date: new Date("2025-03-15T10:00:00Z"),
+      price: 2000,
+      totalSeats: 50,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "Biswa Kalyan Rath Live in Mumbai",
+      slug: "biswa-comedy-mumbai-2025",
+      description: "Stand-up comedy special by Biswa Kalyan Rath",
+      category: "COMEDY" as const,
+      city: "Mumbai",
+      venue: "NCPA Tata Theatre",
+      date: new Date("2025-05-20T20:00:00Z"),
+      price: 999,
+      totalSeats: 800,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer1.id,
+      title: "Arijit Singh Live in Concert",
+      slug: "arijit-singh-delhi-2025",
+      description: "Experience the magic of Arijit Singh live in Delhi",
+      category: "MUSIC" as const,
+      city: "Delhi",
+      venue: "Indira Gandhi Indoor Stadium",
+      date: new Date("2025-06-10T19:00:00Z"),
+      price: 1999,
+      totalSeats: 15000,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+    {
+      organizerId: organizer2.id,
+      title: "Digital Marketing Masterclass",
+      slug: "digital-marketing-workshop-bengaluru-2025",
+      description: "Hands-on workshop on modern digital marketing strategies",
+      category: "OTHER" as const,
+      city: "Bengaluru",
+      venue: "WeWork Prestige Central",
+      date: new Date("2025-07-05T09:30:00Z"),
+      price: 1500,
+      totalSeats: 100,
+      bookedSeats: 0,
+      status: "PUBLISHED" as const,
+    },
+  ];
 
-  // Create events
+  console.log("🎉 Creating events...");
+  const createdEvents = [];
   for (const eventData of events) {
-    const event = await prisma.event.create({
-      data: eventData,
+    const event = await prisma.event.upsert({
+      where: { slug: eventData.slug },
+      update: {},
+      create: eventData,
     });
-    console.log(`Created event: ${event.title}`);
+    createdEvents.push(event);
+    console.log(`✅ Created event: ${event.title}`);
   }
 
-  console.log(`\nSeeded ${events.length} events`);
-  console.log('Seed completed successfully!');
+  const customer1 = await prisma.user.upsert({
+    where: { email: "customer1@example.com" },
+    update: {},
+    create: {
+      email: "customer1@example.com",
+      name: "Amit Patel",
+      passwordHash: password,
+      role: "CUSTOMER",
+      phone: "+919876543213",
+    },
+  });
+
+  const customer2 = await prisma.user.upsert({
+    where: { email: "customer2@example.com" },
+    update: {},
+    create: {
+      email: "customer2@example.com",
+      name: "Neha Singh",
+      passwordHash: password,
+      role: "CUSTOMER",
+      phone: "+919876543214",
+    },
+  });
+
+  console.log("🎫 Creating sample bookings...");
+  const sunburnEvent = createdEvents[0];
+
+  if (sunburnEvent) {
+    const bookings = [
+      {
+        eventId: sunburnEvent.id,
+        userId: customer1.id,
+        quantity: 2,
+        totalAmount: 5000,
+        paymentStatus: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer2.id,
+        quantity: 1,
+        totalAmount: 2500,
+        paymentStatus: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer1.id,
+        quantity: 3,
+        totalAmount: 7500,
+        paymentStatus: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer2.id,
+        quantity: 2,
+        totalAmount: 5000,
+        paymentStatus: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
+      },
+      {
+        eventId: sunburnEvent.id,
+        userId: customer1.id,
+        quantity: 1,
+        totalAmount: 2500,
+        paymentStatus: "COMPLETED" as const,
+        status: "CONFIRMED" as const,
+      },
+    ];
+
+    for (const bookingData of bookings) {
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const ticketNumber = `TIX-${timestamp}-${random}`;
+      const { eventId, userId, paymentStatus, status, quantity } = bookingData;
+      const ticketPrice = sunburnEvent.price * quantity;
+      const convenienceFee = Math.round(ticketPrice * 0.05);
+      const platformFee = Math.round(ticketPrice * 0.03);
+      const finalAmount = ticketPrice + convenienceFee + platformFee;
+
+      await prisma.booking.create({
+        data: {
+          eventId,
+          userId,
+          paymentStatus,
+          status,
+          ticketNumber,
+          seats: quantity,
+          ticketPrice,
+          convenienceFee,
+          platformFee,
+          finalAmount,
+          holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        },
+      });
+    }
+    console.log(`✅ Created 5 sample bookings for ${sunburnEvent.title}`);
+  }
+
+  console.log("🎫 Creating organizer-owned event with attendees for DX...");
+  const dxEvent = await prisma.event.create({
+    data: {
+      organizerId: organizer1.id,
+      title: "Bangalore Tech Meetup 2025",
+      slug: "bangalore-tech-meetup-2025",
+      description:
+        "A networking event for tech enthusiasts and developers in Bangalore",
+      category: "TECH",
+      city: "Bengaluru",
+      venue: "Koramangala Social",
+      date: new Date("2025-12-01T18:00:00Z"),
+      price: 500,
+      totalSeats: 100,
+      bookedSeats: 0,
+      status: "PUBLISHED",
+    },
+  });
+  console.log(`✅ Created DX event: ${dxEvent.title}`);
+
+  const customer3 = await prisma.user.create({
+    data: {
+      email: "customer3@example.com",
+      name: "Rajesh Kumar",
+      passwordHash: password,
+      role: "CUSTOMER",
+      phone: "+919876543215",
+    },
+  });
+
+  const dxBookings = [
+    {
+      eventId: dxEvent.id,
+      userId: customer1.id,
+      quantity: 2,
+      totalAmount: 1000,
+      paymentStatus: "COMPLETED" as const,
+      status: "CONFIRMED" as const,
+    },
+    {
+      eventId: dxEvent.id,
+      userId: customer2.id,
+      quantity: 1,
+      totalAmount: 500,
+      paymentStatus: "COMPLETED" as const,
+      status: "CONFIRMED" as const,
+    },
+    {
+      eventId: dxEvent.id,
+      userId: customer3.id,
+      quantity: 3,
+      totalAmount: 1500,
+      paymentStatus: "COMPLETED" as const,
+      status: "CONFIRMED" as const,
+    },
+  ];
+
+  for (const bookingData of dxBookings) {
+    const { eventId, userId, paymentStatus, status, quantity } = bookingData;
+    const ticketPrice = dxEvent.price * quantity;
+    const convenienceFee = Math.round(ticketPrice * 0.05);
+    const platformFee = Math.round(ticketPrice * 0.03);
+    const finalAmount = ticketPrice + convenienceFee + platformFee;
+
+    const booking = await prisma.booking.create({
+      data: {
+        eventId,
+        userId,
+        paymentStatus,
+        status,
+        ticketNumber: `TIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        seats: quantity,
+        ticketPrice,
+        convenienceFee,
+        platformFee,
+        finalAmount,
+        holdExpiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    });
+
+    const ticket = createSignedTicket(
+      booking.id,
+      booking.userId,
+      booking.eventId
+    );
+    const qrCode = encodeTicketForQR(ticket);
+    const ticketPayloadHash = hashTicketPayload(ticket.payload);
+
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        qrCode,
+        ticketPayloadHash,
+      },
+    });
+  }
+  console.log(`✅ Created 3 attendees with tickets for ${dxEvent.title}`);
+
+  console.log("📊 Creating synthetic analytics data (30 days)...");
+
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const organizer1Events = createdEvents.filter(
+    (e) => e.organizerId === organizer1.id
+  );
+  const organizer2Events = createdEvents.filter(
+    (e) => e.organizerId === organizer2.id
+  );
+
+  let totalViews = 0;
+  let totalBookings = 0;
+
+  for (let day = 0; day < 30; day++) {
+    const date = new Date(thirtyDaysAgo);
+    date.setDate(date.getDate() + day);
+
+    for (const event of [...organizer1Events, ...organizer2Events]) {
+      const viewsPerDay = Math.floor(Math.random() * 50) + 10;
+
+      for (let i = 0; i < viewsPerDay; i++) {
+        const viewTime = new Date(date);
+        viewTime.setHours(Math.floor(Math.random() * 24));
+        viewTime.setMinutes(Math.floor(Math.random() * 60));
+
+        await prisma.eventView.create({
+          data: {
+            eventId: event.id,
+            userId: Math.random() > 0.5 ? customer1.id : null,
+            createdAt: viewTime,
+          },
+        });
+        totalViews++;
+      }
+
+      const bookingsPerDay = Math.floor(Math.random() * 5);
+
+      for (let i = 0; i < bookingsPerDay; i++) {
+        const bookingTime = new Date(date);
+        bookingTime.setHours(Math.floor(Math.random() * 24));
+        bookingTime.setMinutes(Math.floor(Math.random() * 60));
+
+        const quantity = Math.floor(Math.random() * 3) + 1;
+        const ticketPrice = event.price * quantity;
+        const convenienceFee = Math.round(ticketPrice * 0.05);
+        const platformFee = Math.round(ticketPrice * 0.03);
+        const finalAmount = ticketPrice + convenienceFee + platformFee;
+
+        const booking = await prisma.booking.create({
+          data: {
+            eventId: event.id,
+            userId: Math.random() > 0.5 ? customer1.id : customer2.id,
+            ticketNumber: `TIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+            seats: quantity,
+            ticketPrice,
+            convenienceFee,
+            platformFee,
+            finalAmount,
+            paymentStatus: "COMPLETED",
+            status: "CONFIRMED",
+            holdExpiresAt: new Date(bookingTime.getTime() + 15 * 60 * 1000),
+            createdAt: bookingTime,
+          },
+        });
+
+        const ticket = createSignedTicket(
+          booking.id,
+          booking.userId,
+          booking.eventId
+        );
+        const qrCode = encodeTicketForQR(ticket);
+        const ticketPayloadHash = hashTicketPayload(ticket.payload);
+
+        await prisma.booking.update({
+          where: { id: booking.id },
+          data: {
+            qrCode,
+            ticketPayloadHash,
+          },
+        });
+
+        await prisma.event.update({
+          where: { id: event.id },
+          data: {
+            bookedSeats: {
+              increment: quantity,
+            },
+          },
+        });
+
+        totalBookings++;
+      }
+    }
+  }
+
+  console.log(`✅ Created ${totalViews} synthetic event views across 30 days`);
+  console.log(`✅ Created ${totalBookings} synthetic bookings across 30 days`);
+
+  console.log("🔔 Creating default notification preferences for all users...");
+  const allUsers = [
+    admin,
+    organizer1User,
+    organizer2User,
+    customer1,
+    customer2,
+    customer3,
+  ];
+
+  for (const user of allUsers) {
+    await prisma.notificationPreference.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: {
+        userId: user.id,
+        emailEnabled: true,
+        smsEnabled: false,
+        pushEnabled: true,
+        transactional: true,
+        reminders: true,
+        marketing: false,
+      },
+    });
+  }
+  console.log(
+    `✅ Created notification preferences for ${allUsers.length} users`
+  );
+
+  console.log("🎉 Database seeding completed successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error('Seed error:', e);
+    console.error("❌ Error seeding database:", e);
     process.exit(1);
   })
   .finally(async () => {

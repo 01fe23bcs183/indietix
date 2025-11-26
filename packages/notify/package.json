@@ -1,0 +1,52 @@
+{
+  "name": "@indietix/notify",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@indietix/db": "workspace:*",
+    "handlebars": "^4.7.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@indietix/config": "workspace:*",
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.1"
+  },
+  "peerDependencies": {
+    "resend": "^3.0.0",
+    "twilio": "^4.0.0",
+    "expo-server-sdk": "^3.7.0"
+  },
+  "peerDependenciesMeta": {
+    "resend": {
+      "optional": true
+    },
+    "twilio": {
+      "optional": true
+    },
+    "expo-server-sdk": {
+      "optional": true
+    }
+  }
+}
