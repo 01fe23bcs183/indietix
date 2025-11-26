@@ -27,6 +27,6 @@
     "@indietix/config": "workspace:*",
     "@types/node": "^20.11.5",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.1"
+    "vitest": "^4.0.14"
   }
 }
