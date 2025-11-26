@@ -181,6 +181,10 @@ model User {
   referralsGiven          Referral[]     @relation("ReferrerUser")
   referralsReceived       Referral[]     @relation("RefereeUser")
   reviews                 Review[]
+  
+  // Recommendation relations
+  recommendations         UserReco[]
+  userProfile             UserProfile?
 
   @@index([email])
   @@index([role])
@@ -250,6 +254,7 @@ model Event {
   waitlistEntries           WaitlistEntry[]
   views                     EventView[]
   pricePhases               EventPricePhase[]
+  recommendations           UserReco[]
 
   @@index([slug])
   @@index([organizerId])
@@ -1056,4 +1061,35 @@ model Review {
   @@index([eventId])
   @@index([bookingId])
   @@index([createdAt])
+}
+
+// Recommendation System
+
+model UserReco {
+  userId    String
+  eventId   String
+  score     Float
+  reason    Json      // { type: "category_match" | "similar_users" | "popular" | "mf", details: {...} }
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([userId, eventId])
+  @@index([userId, score(sort: Desc)])
+  @@index([eventId])
+  @@index([createdAt])
+}
+
+model UserProfile {
+  userId          String    @id
+  catFreq         Json      // Record<Category, number> - category frequency from bookings/views
+  priceP50        Int       // Median price of booked events in paise
+  preferredAreas  String[]  @default([]) // Top cities from bookings
+  timeSlots       String[]  @default([]) // Preferred time slots (morning/afternoon/evening)
+  updatedAt       DateTime  @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([priceP50])
 }

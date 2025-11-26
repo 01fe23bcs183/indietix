@@ -2,6 +2,7 @@ import { draftMode } from "next/headers";
 import Link from "next/link";
 import { Button } from "@indietix/ui";
 import { prisma } from "@indietix/db";
+import { RecommendationsSection } from "@/components/RecommendationsSection";
 
 export const revalidate = 60;
 
@@ -103,6 +104,8 @@ export default async function Home(): Promise<JSX.Element> {
           </Link>
         </div>
       </section>
+
+      <RecommendationsSection />
 
       {featured && (
         <section className="py-16 bg-gray-50">

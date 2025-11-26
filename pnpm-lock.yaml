@@ -375,6 +375,9 @@ importers:
       '@indietix/notify':
         specifier: workspace:*
         version: link:../../packages/notify
+      '@indietix/reco':
+        specifier: workspace:*
+        version: link:../../packages/reco
       '@indietix/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -490,6 +493,9 @@ importers:
       '@indietix/payments':
         specifier: workspace:*
         version: link:../payments
+      '@indietix/reco':
+        specifier: workspace:*
+        version: link:../reco
       '@indietix/utils':
         specifier: workspace:*
         version: link:../utils
@@ -741,6 +747,22 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^1.6.1
+        version: 1.6.1(@types/node@20.19.24)(jsdom@27.1.0)(terser@5.44.0)
+
+  packages/reco:
+    dependencies:
+      '@indietix/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.24
+      typescript:
+        specifier: ^5.3.2
+        version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.24)(jsdom@27.1.0)(terser@5.44.0)
 
   packages/search:
