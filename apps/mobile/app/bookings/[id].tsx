@@ -17,7 +17,6 @@ import {
   type CachedTicket,
 } from "../../utils/TicketCache";
 import QRCode from "react-native-qrcode-svg";
-import * as Calendar from "expo-calendar";
 import * as Sharing from "expo-sharing";
 import * as Haptics from "expo-haptics";
 import { captureRef } from "react-native-view-shot";
@@ -149,60 +148,16 @@ export default function TicketDetail(): JSX.Element {
   }
 
   async function handleAddToCalendar() {
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Required",
-          "Calendar permission is required to add events"
-        );
-        return;
-      }
-
-      const calendars = await Calendar.getCalendarsAsync(
-        Calendar.EntityTypes.EVENT
-      );
-      const defaultCalendar =
-        calendars.find((cal) => cal.allowsModifications) || calendars[0];
-
-      if (!defaultCalendar) {
-        Alert.alert("Error", "No calendar available");
-        return;
-      }
-
-      const eventDate =
-        typeof ticketData.event.startTime === "string"
-          ? new Date(ticketData.event.startTime)
-          : new Date(ticketData.event.startTime);
-
-      const endDate = new Date(eventDate);
-      endDate.setHours(endDate.getHours() + 3);
-
-      const eventId = await Calendar.createEventAsync(defaultCalendar.id, {
-        title: ticketData.event.title,
-        startDate: eventDate,
-        endDate: endDate,
-        location: `${ticketData.event.venue}, ${ticketData.event.city}`,
-        notes: `Booking ID: ${ticketData.id.slice(0, 8).toUpperCase()}\nTickets: ${ticketData.seats}`,
-        alarms: [{ relativeOffset: -60 }, { relativeOffset: -1440 }],
-      });
-
-      if (eventId) {
-        await Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Success
-        );
-        Alert.alert("Success", "Event added to your calendar!");
-      }
-    } catch (error) {
-      console.error("Error adding to calendar:", error);
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert(
-        "Error",
-        "Failed to add event to calendar. Please try again."
-      );
-    }
+    // Calendar integration temporarily disabled for CI compatibility
+    // TODO: Re-enable when expo-calendar is compatible with current Expo SDK
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      "Coming Soon",
+      "Calendar integration will be available in a future update. You can manually add this event to your calendar:\n\n" +
+        `Event: ${ticketData.event.title}\n` +
+        `Date: ${typeof ticketData.event.startTime === "string" ? ticketData.event.startTime : new Date(ticketData.event.startTime).toLocaleDateString()}\n` +
+        `Venue: ${ticketData.event.venue}, ${ticketData.event.city}`
+    );
   }
 
   function handleTransferTicket() {
