@@ -640,6 +640,26 @@ async function main() {
   });
   console.log(`✅ Created pending invite for ${organizer1.businessName}`);
 
+  // Create an expired invite for testing
+  const expiredToken = "expired-invite-token";
+  await prisma.orgInvite.upsert({
+    where: { token: expiredToken },
+    update: {
+      status: "EXPIRED",
+      expiresAt: new Date(Date.now() - 60 * 60 * 1000),
+    },
+    create: {
+      organizerId: organizer1.id,
+      email: "expired@example.com",
+      role: "STAFF",
+      token: expiredToken,
+      status: "EXPIRED",
+      expiresAt: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
+      createdBy: organizer1User.id,
+    },
+  });
+  console.log(`✅ Created expired invite for ${organizer1.businessName}`);
+
   console.log("🔔 Creating default notification preferences for all users...");
   const allUsers = [
     admin,

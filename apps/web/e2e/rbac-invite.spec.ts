@@ -23,9 +23,16 @@ test.describe("RBAC Invite Accept Page", () => {
 
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator("text=Invalid Invite")).toBeVisible({
-      timeout: 10000,
-    });
+    // Wait for API response
+    await page.waitForTimeout(3000);
+
+    // Check for either "Invalid Invite" or "Invalid Invite Link" message
+    const hasInvalidInvite = await page
+      .locator("text=/Invalid Invite/i")
+      .isVisible()
+      .catch(() => false);
+
+    expect(hasInvalidInvite).toBe(true);
   });
 
   test("should show invite details for valid token", async ({ page }) => {
