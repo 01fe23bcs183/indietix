@@ -166,6 +166,8 @@ model User {
     notificationPreferences NotificationPreference?
     notifications           Notification[]
     consents                UserConsent[]
+    contentBlocks           ContentBlock[] @relation("ContentBlockAuthor")
+    posts                   Post[]         @relation("PostAuthor")
 
     @@index([email])
   @@index([role])
@@ -730,4 +732,72 @@ model UserConsent {
 
   @@index([userId, type])
   @@index([createdAt])
+}
+
+// CMS Models
+
+enum ContentBlockType {
+  RICH
+  JSON
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model ContentBlock {
+  id        String           @id @default(cuid())
+  key       String           @unique
+  type      ContentBlockType
+  value     Json
+  version   Int              @default(1)
+  published Boolean          @default(false)
+  authorId  String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  
+  author    User             @relation("ContentBlockAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  versions  ContentBlockVersion[]
+
+  @@index([key])
+  @@index([published])
+  @@index([authorId])
+}
+
+model ContentBlockVersion {
+  id             String       @id @default(cuid())
+  contentBlockId String
+  version        Int
+  value          Json
+  authorId       String
+  createdAt      DateTime     @default(now())
+  
+  contentBlock   ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+
+  @@unique([contentBlockId, version])
+  @@index([contentBlockId])
+  @@index([createdAt])
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  excerpt     String
+  body        Json
+  tags        String[]   @default([])
+  status      PostStatus @default(DRAFT)
+  publishedAt DateTime?
+  authorId    String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  author      User       @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@index([tags])
 }
