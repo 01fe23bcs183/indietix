@@ -8,7 +8,6 @@ import {
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { trpc } from "../../lib/trpc";
 import { useEffect, useState } from "react";
 import {
   getAllCachedTickets,
@@ -32,50 +31,34 @@ export default function Bookings(): JSX.Element {
     Array<{ bookingId: string; ticket: CachedTicket }>
   >([]);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-
-  const {
-    data: bookings,
-    isLoading,
-    refetch,
-  } = trpc.booking.list.useQuery(undefined, {
-    onError: () => {
-      console.log("Failed to fetch bookings, using cached tickets only");
-    },
-  });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadCachedTickets();
   }, []);
 
   async function loadCachedTickets() {
-    const cached = await getAllCachedTickets();
-    setCachedTickets(cached);
+    setIsLoading(true);
+    try {
+      const cached = await getAllCachedTickets();
+      setCachedTickets(cached);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  const allBookings: BookingItem[] = [
-    ...(bookings?.map((b) => ({
-      id: b.id,
-      eventTitle: b.event.title,
-      eventDate: new Date(b.event.startTime).toLocaleDateString(),
-      venue: b.event.venue,
-      city: b.event.city,
-      seats: b.seats,
-      status: b.status,
-      isCached: false,
-    })) || []),
-    ...cachedTickets
-      .filter((ct) => !bookings?.some((b) => b.id === ct.bookingId))
-      .map((ct) => ({
-        id: ct.bookingId,
-        eventTitle: ct.ticket.meta.eventTitle,
-        eventDate: ct.ticket.meta.eventDate,
-        venue: ct.ticket.meta.venue,
-        city: ct.ticket.meta.city,
-        seats: ct.ticket.meta.seats,
-        status: "CONFIRMED",
-        isCached: true,
-      })),
-  ];
+  // Note: Online booking list API not yet available - using cached tickets only
+  // This provides offline-first experience for confirmed tickets
+  const allBookings: BookingItem[] = cachedTickets.map((ct) => ({
+    id: ct.bookingId,
+    eventTitle: ct.ticket.meta.eventTitle,
+    eventDate: ct.ticket.meta.eventDate,
+    venue: ct.ticket.meta.venue,
+    city: ct.ticket.meta.city,
+    seats: ct.ticket.meta.seats,
+    status: "CONFIRMED",
+    isCached: true,
+  }));
 
   const filteredBookings = statusFilter
     ? allBookings.filter((b) => b.status === statusFilter)
@@ -235,10 +218,7 @@ export default function Bookings(): JSX.Element {
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
-              onRefresh={() => {
-                refetch();
-                loadCachedTickets();
-              }}
+              onRefresh={loadCachedTickets}
             />
           }
         />

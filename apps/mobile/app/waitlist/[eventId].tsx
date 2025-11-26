@@ -23,7 +23,7 @@ export default function WaitlistJoin(): JSX.Element {
   const [phone, setPhone] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
-  const { data: event, isLoading } = trpc.events.get.useQuery({
+  const { data: event, isLoading } = trpc.events.getById.useQuery({
     id: eventId,
   });
 

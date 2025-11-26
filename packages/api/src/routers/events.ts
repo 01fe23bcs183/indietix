@@ -119,4 +119,30 @@ export const eventsRouter = router({
 
       return event;
     }),
+
+  getById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const event = await prisma.event.findUnique({
+        where: { id: input.id },
+        include: {
+          organizer: {
+            select: {
+              businessName: true,
+              description: true,
+              verified: true,
+            },
+          },
+        },
+      });
+
+      if (!event) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Event not found",
+        });
+      }
+
+      return event;
+    }),
 });

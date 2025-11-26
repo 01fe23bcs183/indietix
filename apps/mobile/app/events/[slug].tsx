@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { trpc } from "../../lib/trpc";
-import { formatINR, FEES, GST_RATE } from "@indietix/utils";
+import { formatINR, computeBookingAmounts } from "@indietix/utils";
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -57,18 +57,23 @@ export default function EventDetail(): JSX.Element {
   const isSoldOut = seatsLeft <= 0;
   const currentPrice = effectivePrice?.effectivePrice || event.price;
 
-  const ticketPrice = currentPrice * quantity;
-  const convenienceFee = Math.round(ticketPrice * FEES.CONVENIENCE_FEE_PERCENT);
-  const platformFee = Math.round(ticketPrice * FEES.PLATFORM_FEE_PERCENT);
-  const subtotal = ticketPrice + convenienceFee + platformFee;
-  const gst = Math.round(subtotal * GST_RATE);
-  const finalAmount = subtotal + gst;
+  // Use computeBookingAmounts for consistent fee calculation
+  const bookingAmounts = computeBookingAmounts(currentPrice, quantity);
+  const ticketPrice = bookingAmounts.subtotal;
+  const convenienceFee =
+    (bookingAmounts.breakdown?.paymentGateway ?? 0) +
+    (bookingAmounts.breakdown?.serverMaintenance ?? 0);
+  const platformFee = bookingAmounts.breakdown?.platformSupport ?? 0;
+  const gst = bookingAmounts.gst;
+  const finalAmount = bookingAmounts.finalAmount;
 
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     `${event.venue}, ${event.city}`
   )}`;
 
   async function handleBookNow() {
+    if (!event) return;
+
     if (!user) {
       Alert.alert("Sign In Required", "Please sign in to book tickets", [
         { text: "Cancel", style: "cancel" },

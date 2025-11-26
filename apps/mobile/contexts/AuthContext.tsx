@@ -52,9 +52,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
 
-      await AsyncStorage.setItem("user", JSON.stringify(result.user));
+      const userData: User = {
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.name,
+        role: result.user.role,
+      };
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
       await AsyncStorage.setItem("auth_token", result.token);
-      setUser(result.user);
+      setUser(userData);
     } catch (error) {
       console.error("Sign in failed:", error);
       throw error;
@@ -69,9 +75,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name,
       });
 
-      await AsyncStorage.setItem("user", JSON.stringify(result.user));
+      const userData: User = {
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.name,
+        role: result.user.role,
+      };
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
       await AsyncStorage.setItem("auth_token", result.token);
-      setUser(result.user);
+      setUser(userData);
     } catch (error) {
       console.error("Sign up failed:", error);
       throw error;
