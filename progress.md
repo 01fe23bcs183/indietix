@@ -1,48 +1,51 @@
-# Search Feature Implementation Progress
+# PR #129 CI Fix Progress
 
 ## Progress Bar
 ```
-[#########-] 95% Complete
+[##################] 90% Complete - Pushing fixes
 ```
 
 ## Current Status
 - Branch: `devin/1764146639-search-nl-filters-fts-trgm-embeddings`
-- Creating PR and waiting for CI checks
+- PR: https://github.com/01fe23bcs183/indietix/pull/129
+- Fixing CI failures and pushing changes
+
+## CI Check Status
+| Check | Status |
+|-------|--------|
+| Lint & Type Check | PASS |
+| Unit Tests | PASS |
+| Code Coverage | PASS |
+| SonarCloud Analysis | PASS |
+| Secret Scanning | PASS |
+| GitGuardian | PASS |
+| Auto Label PR | PASS |
+| lint-typecheck-test-build (E2E) | FIXING |
+| android-e2e | FIXING |
 
 ## Completed Tasks
-- [x] Create feature branch
+- [x] Analyze previous Devin session to understand what was tried
+- [x] Clone repo and checkout PR branch
+- [x] Review CI logs to identify exact failures
 - [x] Create documentation files
-- [x] Set up monorepo structure with packages/search, packages/db, packages/api
-- [x] Implement NL-to-filter parser with synonym tables
-- [x] Implement ranking function (FTS, trigram, recency boost, embeddings)
-- [x] Implement embeddings module with local/remote/none providers
-- [x] Add EventEmbedding model and Prisma schema
-- [x] Implement search.query and search.suggest tRPC procedures
-- [x] Update /events page with search bar and filter chips
-- [x] Update mobile search screen
-- [x] Add seeding for Bengaluru areas and 55 events
-- [x] Write unit tests (Vitest) - 75 tests passing
-- [x] Write Playwright tests
-- [x] Create docs/search.md
-- [x] Run lint, typecheck, build checks - All passing
+- [x] Fix E2E test failures - update seed data with future-dated COMEDY events
+- [x] Fix Android E2E failure - downgrade expo-calendar to SDK 50 compatible version (~12.0.0)
+- [x] Run pnpm install to update lockfile
+- [x] Run local build and unit tests - All passing
 
 ## In Progress
-- [ ] Create PR
+- [ ] Push changes to PR #129
+- [ ] Wait for CI to complete
 
-## Pending Tasks
-- [ ] Wait for CI checks
+## Fixes Applied
+### E2E Test Failures
+- Updated COMEDY event dates in seed.ts to be in the future:
+  - "Stand-Up Comedy Night with Zakir Khan": 2025-11-20 → 2026-01-20
+  - "Biswa Kalyan Rath Live in Mumbai": 2025-05-20 → 2026-02-20
 
-## Files Created
-- `packages/search/src/parser.ts` - NL query parser
-- `packages/search/src/rank.ts` - Ranking function
-- `packages/search/src/embeddings.ts` - Embedding providers
-- `packages/search/src/types.ts` - TypeScript types
-- `packages/db/prisma/schema.prisma` - Database schema
-- `packages/db/prisma/seed.ts` - 55 events seeding
-- `packages/api/src/routers/search.ts` - tRPC router
-- `apps/web/src/app/events/page.tsx` - Events page with search
-- `apps/mobile/app/search.tsx` - Mobile search screen
-- `docs/search.md` - Full documentation
+### Android E2E Failure
+- Downgraded expo-calendar from ^15.0.7 to ~12.0.0 (SDK 50 compatible)
+- This resolves the expo-module-gradle-plugin not found error
 
 ## Notes
 - Using PostgreSQL FTS with tsvector for full-text search
