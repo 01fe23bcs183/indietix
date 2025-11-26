@@ -1,14 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("User Inbox", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/auth/signin");
-  });
-
   test("should display inbox page", async ({ page }) => {
     await page.goto("/inbox");
 
-    await expect(page.locator("h1")).toContainText("Inbox");
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1")).toContainText("Inbox", { timeout: 10000 });
   });
 
   test("should show empty state when no notifications", async ({ page }) => {

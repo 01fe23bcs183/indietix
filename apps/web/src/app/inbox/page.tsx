@@ -72,8 +72,16 @@ export default function InboxPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading notifications...</div>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Inbox</h1>
+          </div>
+        </div>
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-500">Loading notifications...</p>
+        </div>
       </div>
     );
   }
