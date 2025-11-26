@@ -2,11 +2,7 @@ import { z } from "zod";
 import { router, publicProcedure } from "../../trpc";
 import { prisma } from "@indietix/db";
 import { TRPCError } from "@trpc/server";
-import {
-  requireOrgPerm,
-  generateSecureToken,
-  type OrgRole,
-} from "@indietix/auth";
+import { requireOrgPerm, generateSecureToken } from "@indietix/auth";
 
 const requireAuth = (ctx: {
   session?: { user?: { id: string; email: string; role: string } };
@@ -236,7 +232,11 @@ export const organizerInviteRouter = router({
       }
 
       // Check permission
-      const perm = await requireOrgPerm(user.id, invite.organizerId, "team.invite");
+      const perm = await requireOrgPerm(
+        user.id,
+        invite.organizerId,
+        "team.invite"
+      );
       if (!perm.allowed) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -303,7 +303,11 @@ export const organizerInviteRouter = router({
       }
 
       // Check permission
-      const perm = await requireOrgPerm(user.id, invite.organizerId, "team.invite");
+      const perm = await requireOrgPerm(
+        user.id,
+        invite.organizerId,
+        "team.invite"
+      );
       if (!perm.allowed) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -427,7 +431,7 @@ export const organizerInviteRouter = router({
       }
 
       // Create member and mark invite as accepted
-      const [member] = await prisma.$transaction([
+      await prisma.$transaction([
         prisma.orgMember.create({
           data: {
             organizerId: invite.organizerId,
@@ -486,7 +490,8 @@ export const organizerInviteRouter = router({
         });
       }
 
-      const isExpired = invite.expiresAt < new Date() || invite.status !== "PENDING";
+      const isExpired =
+        invite.expiresAt < new Date() || invite.status !== "PENDING";
 
       return {
         id: invite.id,

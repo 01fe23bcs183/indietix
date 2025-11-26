@@ -41,7 +41,10 @@ export const pricingRouter = router({
 
       // Check for active flash sale first (takes precedence over price phases)
       const activeFlashSale = event.flashSales[0];
-      if (activeFlashSale && activeFlashSale.soldSeats < activeFlashSale.maxSeats) {
+      if (
+        activeFlashSale &&
+        activeFlashSale.soldSeats < activeFlashSale.maxSeats
+      ) {
         const flashPrice = Math.round(
           event.price * (1 - activeFlashSale.discountPercent / 100)
         );
@@ -60,7 +63,8 @@ export const pricingRouter = router({
             originalPrice: event.price,
             flashPrice: effectiveFlashPrice,
             endsAt: activeFlashSale.endsAt,
-            remainingSeats: activeFlashSale.maxSeats - activeFlashSale.soldSeats,
+            remainingSeats:
+              activeFlashSale.maxSeats - activeFlashSale.soldSeats,
           },
         };
       }

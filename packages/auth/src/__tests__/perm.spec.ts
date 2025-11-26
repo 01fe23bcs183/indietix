@@ -7,9 +7,8 @@ import {
   canManageRole,
   generateSecureToken,
   PERMISSION_MATRIX,
-  type OrgRole,
-  type OrgPermission,
 } from "../perm";
+import type { OrgRole } from "../perm";
 
 describe("RBAC Permissions", () => {
   describe("hasPermission", () => {

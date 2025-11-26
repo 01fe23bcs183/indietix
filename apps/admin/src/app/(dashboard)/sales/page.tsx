@@ -43,8 +43,11 @@ export default function AdminSalesDashboard() {
             value={statusFilter ?? ""}
             onChange={(e) =>
               setStatusFilter(
-                (e.target.value as "PENDING" | "ACTIVE" | "ENDED" | "CANCELLED") ||
-                  undefined
+                (e.target.value as
+                  | "PENDING"
+                  | "ACTIVE"
+                  | "ENDED"
+                  | "CANCELLED") || undefined
               )
             }
             className="border rounded px-3 py-2"

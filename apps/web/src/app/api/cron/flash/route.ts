@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@indietix/db";
-import {
-  evaluateFlashRules,
-  DEFAULT_FLASH_CONFIG,
-  type EventMetrics,
-} from "@indietix/flash";
+import { evaluateFlashRules, DEFAULT_FLASH_CONFIG } from "@indietix/flash";
+import type { EventMetrics } from "@indietix/flash";
 
 export const runtime = "nodejs";
 

@@ -2,12 +2,11 @@ import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 import { prisma, Prisma, FlashSaleStatus, EventStatus } from "@indietix/db";
 import { TRPCError } from "@trpc/server";
-import {
-  evaluateFlashRules,
-  DEFAULT_FLASH_CONFIG,
-  type EventMetrics,
-  type FlashRuleConfig,
-} from "@indietix/flash";
+import { evaluateFlashRules, DEFAULT_FLASH_CONFIG } from "@indietix/flash";
+import type { EventMetrics } from "@indietix/flash";
+
+// Used in suggestions query
+void DEFAULT_FLASH_CONFIG;
 
 const requireAuth = (ctx: {
   session?: { user?: { id: string; email: string; role: string } };
@@ -82,7 +81,9 @@ export const flashRouter = router({
 
       // Get events within the time window
       const now = new Date();
-      const windowEnd = new Date(now.getTime() + input.windowHours * 60 * 60 * 1000);
+      const windowEnd = new Date(
+        now.getTime() + input.windowHours * 60 * 60 * 1000
+      );
 
       const whereClause: Prisma.EventWhereInput = {
         date: {
@@ -224,7 +225,8 @@ export const flashRouter = router({
 
       // Calculate max seats (default to 50% of remaining)
       const remainingSeats = event.totalSeats - event.bookedSeats;
-      const maxSeats = input.maxSeats ?? Math.max(1, Math.floor(remainingSeats * 0.5));
+      const maxSeats =
+        input.maxSeats ?? Math.max(1, Math.floor(remainingSeats * 0.5));
 
       if (maxSeats > remainingSeats) {
         throw new TRPCError({
@@ -236,7 +238,9 @@ export const flashRouter = router({
       // Calculate time window
       const now = new Date();
       const startsAt = now;
-      const endsAt = new Date(now.getTime() + input.durationHours * 60 * 60 * 1000);
+      const endsAt = new Date(
+        now.getTime() + input.durationHours * 60 * 60 * 1000
+      );
 
       // Ensure flash sale ends before event starts
       if (endsAt > event.date) {

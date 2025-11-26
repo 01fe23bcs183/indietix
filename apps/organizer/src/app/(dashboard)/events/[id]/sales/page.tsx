@@ -235,7 +235,9 @@ export default function EventSalesPage() {
                 className="p-4 border rounded-lg flex justify-between items-center"
               >
                 <div>
-                  <div className="font-semibold">{sale.discountPercent}% OFF</div>
+                  <div className="font-semibold">
+                    {sale.discountPercent}% OFF
+                  </div>
                   <div className="text-sm text-gray-500">
                     {new Date(sale.startsAt).toLocaleString()} -{" "}
                     {new Date(sale.endsAt).toLocaleString()}
@@ -289,7 +291,8 @@ function CreateFlashSaleDialog({
     suggestedDurationHours: number;
   };
   onClose: () => void;
-  onSubmit: (data: {
+  // eslint-disable-next-line no-unused-vars
+  onSubmit: (formData: {
     eventId: string;
     discountPercent: number;
     durationHours: number;

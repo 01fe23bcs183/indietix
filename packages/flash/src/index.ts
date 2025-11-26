@@ -11,8 +11,4 @@ export {
   getTriggeredSuggestions,
 } from "./rules";
 
-export type {
-  FlashRuleConfig,
-  EventMetrics,
-  FlashSuggestion,
-} from "./rules";
+export type { FlashRuleConfig, EventMetrics, FlashSuggestion } from "./rules";

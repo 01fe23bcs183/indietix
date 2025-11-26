@@ -196,10 +196,12 @@ export default function EventDetailPage(): JSX.Element {
                           </p>
                         </div>
                         <div className="mt-2 px-3 py-1 bg-orange-100 text-orange-800 text-sm font-semibold rounded-full inline-block">
-                          {effectivePrice.flashSale.discountPercent}% OFF - Flash Sale
+                          {effectivePrice.flashSale.discountPercent}% OFF -
+                          Flash Sale
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {effectivePrice.flashSale.remainingSeats} seats left at this price
+                          {effectivePrice.flashSale.remainingSeats} seats left
+                          at this price
                         </p>
                       </div>
                     ) : effectivePrice?.activePhase ? (

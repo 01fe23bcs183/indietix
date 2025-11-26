@@ -226,7 +226,11 @@ export const organizerScannerRouter = router({
       }
 
       // Check permission
-      const perm = await requireOrgPerm(user.id, pass.organizerId, "team.remove");
+      const perm = await requireOrgPerm(
+        user.id,
+        pass.organizerId,
+        "team.remove"
+      );
       if (!perm.allowed) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -309,7 +313,11 @@ export const organizerScannerRouter = router({
     .query(async ({ input, ctx }) => {
       const user = requireAuth(ctx);
 
-      const perm = await requireOrgPerm(user.id, input.organizerId, "scanner.access");
+      const perm = await requireOrgPerm(
+        user.id,
+        input.organizerId,
+        "scanner.access"
+      );
 
       if (!perm.allowed) {
         return {

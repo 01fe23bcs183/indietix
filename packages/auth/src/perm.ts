@@ -129,7 +129,10 @@ export const PERMISSION_MATRIX: Record<OrgRole, OrgPermission[]> = {
 /**
  * Check if a role has a specific permission
  */
-export function hasPermission(role: OrgRole, permission: OrgPermission): boolean {
+export function hasPermission(
+  role: OrgRole,
+  permission: OrgPermission
+): boolean {
   return PERMISSION_MATRIX[role].includes(permission);
 }
 
@@ -163,7 +166,11 @@ export function getRoleLevel(role: OrgRole): number {
 /**
  * Check if a role can manage another role (for role updates)
  */
-export function canManageRole(actorRole: OrgRole, targetRole: OrgRole): boolean {
+export function canManageRole(
+  actorRole: OrgRole,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  targetRole: OrgRole
+): boolean {
   // Only OWNER can manage roles
   if (actorRole !== "OWNER") return false;
   // OWNER cannot demote themselves
@@ -192,7 +199,11 @@ export async function requireOrgPerm(
   // If user is the organizer owner, they have OWNER role
   if (organizer.userId === userId) {
     const allowed = hasPermission("OWNER", permission);
-    return { allowed, role: "OWNER", reason: allowed ? undefined : "Permission denied" };
+    return {
+      allowed,
+      role: "OWNER",
+      reason: allowed ? undefined : "Permission denied",
+    };
   }
 
   // Check OrgMember table for team membership
@@ -207,7 +218,10 @@ export async function requireOrgPerm(
   });
 
   if (!member) {
-    return { allowed: false, reason: "User is not a member of this organization" };
+    return {
+      allowed: false,
+      reason: "User is not a member of this organization",
+    };
   }
 
   const role = member.role as OrgRole;
@@ -264,9 +278,7 @@ export async function isOrgMember(
 /**
  * Validate scanner pass token
  */
-export async function validateScannerPass(
-  token: string
-): Promise<{
+export async function validateScannerPass(token: string): Promise<{
   valid: boolean;
   organizerId?: string;
   eventId?: string;
@@ -310,7 +322,8 @@ export async function validateScannerPass(
  * Generate a secure random token for invites and scanner passes
  */
 export function generateSecureToken(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let token = "";
   for (let i = 0; i < 32; i++) {
     token += chars.charAt(Math.floor(Math.random() * chars.length));

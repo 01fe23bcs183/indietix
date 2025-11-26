@@ -24,17 +24,17 @@ export default function TeamSettingsPage() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showScannerPassDialog, setShowScannerPassDialog] = useState(false);
 
-  const { data: team, isLoading, refetch } = trpc.organizer.team.list.useQuery({});
-
   const {
-    data: invites,
-    refetch: refetchInvites,
-  } = trpc.organizer.invite.list.useQuery({ status: "PENDING" });
+    data: team,
+    isLoading,
+    refetch,
+  } = trpc.organizer.team.list.useQuery({});
 
-  const {
-    data: scannerPasses,
-    refetch: refetchPasses,
-  } = trpc.organizer.scanner.listPasses.useQuery({});
+  const { data: invites, refetch: refetchInvites } =
+    trpc.organizer.invite.list.useQuery({ status: "PENDING" });
+
+  const { data: scannerPasses, refetch: refetchPasses } =
+    trpc.organizer.scanner.listPasses.useQuery({});
 
   const removeMutation = trpc.organizer.team.remove.useMutation({
     onSuccess: () => refetch(),
@@ -65,10 +65,15 @@ export default function TeamSettingsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Team Management</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowScannerPassDialog(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setShowScannerPassDialog(true)}
+          >
             Create Scanner Pass
           </Button>
-          <Button onClick={() => setShowInviteDialog(true)}>Invite Member</Button>
+          <Button onClick={() => setShowInviteDialog(true)}>
+            Invite Member
+          </Button>
         </div>
       </div>
 
@@ -81,7 +86,9 @@ export default function TeamSettingsPage() {
               className="border rounded-lg p-4 flex justify-between items-center"
             >
               <div>
-                <div className="font-semibold">{member.name || member.email}</div>
+                <div className="font-semibold">
+                  {member.name || member.email}
+                </div>
                 <div className="text-sm text-gray-500">{member.email}</div>
                 <div className="mt-1">
                   <span
@@ -118,7 +125,9 @@ export default function TeamSettingsPage() {
                   </select>
                   <Button
                     variant="outline"
-                    onClick={() => removeMutation.mutate({ memberId: member.id })}
+                    onClick={() =>
+                      removeMutation.mutate({ memberId: member.id })
+                    }
                     disabled={removeMutation.isPending}
                   >
                     Remove
@@ -151,14 +160,18 @@ export default function TeamSettingsPage() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => resendInviteMutation.mutate({ inviteId: invite.id })}
+                    onClick={() =>
+                      resendInviteMutation.mutate({ inviteId: invite.id })
+                    }
                     disabled={resendInviteMutation.isPending}
                   >
                     Resend
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => cancelInviteMutation.mutate({ inviteId: invite.id })}
+                    onClick={() =>
+                      cancelInviteMutation.mutate({ inviteId: invite.id })
+                    }
                     disabled={cancelInviteMutation.isPending}
                   >
                     Cancel
@@ -180,7 +193,9 @@ export default function TeamSettingsPage() {
                 className="border rounded-lg p-4 flex justify-between items-center"
               >
                 <div>
-                  <div className="font-mono text-sm">{pass.token.slice(0, 8)}...</div>
+                  <div className="font-mono text-sm">
+                    {pass.token.slice(0, 8)}...
+                  </div>
                   <div className="text-sm text-gray-500">
                     {pass.isExpired ? (
                       <span className="text-red-500">Expired</span>
@@ -196,7 +211,9 @@ export default function TeamSettingsPage() {
                 {!pass.isExpired && (
                   <Button
                     variant="outline"
-                    onClick={() => revokePassMutation.mutate({ passId: pass.id })}
+                    onClick={() =>
+                      revokePassMutation.mutate({ passId: pass.id })
+                    }
                     disabled={revokePassMutation.isPending}
                   >
                     Revoke
@@ -367,7 +384,8 @@ function ScannerPassDialog({
                 Share this link with your scanner:
               </p>
               <code className="block p-2 bg-white rounded text-sm break-all">
-                {window.location.origin}{createdPass.scannerUrl}
+                {window.location.origin}
+                {createdPass.scannerUrl}
               </code>
             </div>
 
@@ -383,7 +401,13 @@ function ScannerPassDialog({
               have access to check-in attendees.
             </p>
 
-            <Button onClick={() => { onSuccess(); onClose(); }} className="w-full">
+            <Button
+              onClick={() => {
+                onSuccess();
+                onClose();
+              }}
+              className="w-full"
+            >
               Done
             </Button>
           </div>

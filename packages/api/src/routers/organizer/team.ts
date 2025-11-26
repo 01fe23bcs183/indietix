@@ -2,13 +2,8 @@ import { z } from "zod";
 import { router, publicProcedure } from "../../trpc";
 import { prisma } from "@indietix/db";
 import { TRPCError } from "@trpc/server";
-import {
-  requireOrgPerm,
-  getOrgRole,
-  generateSecureToken,
-  canManageRole,
-  type OrgRole,
-} from "@indietix/auth";
+import { requireOrgPerm } from "@indietix/auth";
+import type { OrgRole } from "@indietix/auth";
 
 const requireAuth = (ctx: {
   session?: { user?: { id: string; email: string; role: string } };
@@ -328,7 +323,11 @@ export const organizerTeamRouter = router({
       const organizerId = input.organizerId ?? organizer.id;
 
       // Check permission
-      const perm = await requireOrgPerm(user.id, organizerId, "team.updateRole");
+      const perm = await requireOrgPerm(
+        user.id,
+        organizerId,
+        "team.updateRole"
+      );
       if (!perm.allowed) {
         throw new TRPCError({
           code: "FORBIDDEN",

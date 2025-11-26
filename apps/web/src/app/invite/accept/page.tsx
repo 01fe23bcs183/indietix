@@ -11,7 +11,11 @@ function AcceptInviteContent() {
   const token = searchParams.get("token");
   const [accepted, setAccepted] = useState(false);
 
-  const { data: invite, isLoading, error } = trpc.organizer.invite.getByToken.useQuery(
+  const {
+    data: invite,
+    isLoading,
+    error,
+  } = trpc.organizer.invite.getByToken.useQuery(
     { token: token || "" },
     { enabled: !!token }
   );

@@ -111,14 +111,12 @@ export function calculateDiscount(
   let discount = config.minDiscount;
 
   // Increase discount based on time urgency (closer to event = higher discount)
-  const timeUrgency =
-    1 - timeToStartHours / config.maxTimeToStart;
+  const timeUrgency = 1 - timeToStartHours / config.maxTimeToStart;
   const timeBonus =
     (config.maxDiscount - config.minDiscount) * timeUrgency * 0.5;
 
   // Increase discount based on low sell-through (lower = higher discount)
-  const sellThroughUrgency =
-    1 - sellThrough / config.sellThroughThreshold;
+  const sellThroughUrgency = 1 - sellThrough / config.sellThroughThreshold;
   const sellThroughBonus =
     (config.maxDiscount - config.minDiscount) * sellThroughUrgency * 0.5;
 
@@ -139,7 +137,10 @@ export function calculateMaxSeats(
   remainingSeats: number,
   config: FlashRuleConfig
 ): number {
-  return Math.max(1, Math.floor(remainingSeats * (config.maxInventoryCap / 100)));
+  return Math.max(
+    1,
+    Math.floor(remainingSeats * (config.maxInventoryCap / 100))
+  );
 }
 
 /**
@@ -177,7 +178,10 @@ export function evaluateFlashRules(
   now: Date = new Date(),
   config: FlashRuleConfig = DEFAULT_FLASH_CONFIG
 ): FlashSuggestion {
-  const sellThrough = calculateSellThrough(metrics.bookedSeats, metrics.totalSeats);
+  const sellThrough = calculateSellThrough(
+    metrics.bookedSeats,
+    metrics.totalSeats
+  );
   const timeToStartHours = calculateTimeToStart(metrics.eventDate, now);
   const remainingSeats = metrics.totalSeats - metrics.bookedSeats;
 
