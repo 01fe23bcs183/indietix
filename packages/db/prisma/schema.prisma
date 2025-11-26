@@ -1,0 +1,148 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm, vector]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookings      Booking[]
+  organizer     Organizer?
+}
+
+enum UserRole {
+  USER
+  ORGANIZER
+  ADMIN
+}
+
+model Organizer {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  companyName String
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  events      Event[]
+}
+
+model Event {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  title         String
+  description   String
+  venue         String
+  address       String
+  city          String
+  area          String?
+  category      String
+  tags          String[]
+  imageUrl      String?
+  startDate     DateTime
+  endDate       DateTime?
+  startTime     String?
+  price         Int
+  totalSeats    Int
+  bookedSeats   Int            @default(0)
+  status        EventStatus    @default(DRAFT)
+  organizerId   String
+  organizer     Organizer      @relation(fields: [organizerId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  bookings      Booking[]
+  embedding     EventEmbedding?
+  
+  // Full-text search vector (computed column in migration)
+  // searchVector Unsupported("tsvector")?
+
+  @@index([city])
+  @@index([category])
+  @@index([startDate])
+  @@index([status])
+  @@index([area])
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  SOLD_OUT
+  COMPLETED
+  CANCELLED
+}
+
+model EventEmbedding {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  // Vector stored as float array - pgvector extension handles this
+  // vec       Unsupported("vector(384)")?
+  vecData   Float[]
+  updatedAt DateTime @updatedAt
+
+  @@index([eventId])
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  eventId       String
+  event         Event         @relation(fields: [eventId], references: [id])
+  quantity      Int
+  totalAmount   Int
+  status        BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentId     String?
+  qrCode        String?
+  holdExpiresAt DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// Category synonyms for NL parser
+model CategorySynonym {
+  id       String @id @default(cuid())
+  synonym  String @unique
+  category String
+
+  @@index([synonym])
+}
+
+// Area aliases for NL parser
+model AreaAlias {
+  id       String @id @default(cuid())
+  alias    String @unique
+  area     String
+  city     String
+
+  @@index([alias])
+}

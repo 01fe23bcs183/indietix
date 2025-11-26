@@ -1,0 +1,47 @@
+{
+  "name": "indietix",
+  "version": "1.0.0",
+  "private": true,
+  "description": "All-in-one event booking platform for India (web + mobile + admin)",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @indietix/db generate",
+    "db:push": "pnpm --filter @indietix/db push",
+    "db:migrate": "pnpm --filter @indietix/db migrate",
+    "db:seed": "pnpm --filter @indietix/db seed"
+  },
+  "keywords": [
+    "event",
+    "booking",
+    "platform",
+    "india"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
