@@ -1,7 +1,28 @@
 'use client';
 
 import Link from 'next/link';
-import type { SearchResult } from '@indietix/search';
+
+// Search result interface (matches API router)
+interface ScoreComponents {
+  ftsRank: number;
+  trigramSimilarity: number;
+  recencyBoost: number;
+  embeddingSimilarity?: number;
+}
+
+interface SearchResult {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  venue: string;
+  city: string;
+  category: string;
+  date: string;
+  price: number;
+  score: number;
+  scoreComponents?: ScoreComponents;
+}
 
 interface EventCardProps {
   event: SearchResult;
@@ -9,7 +30,7 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, showDebug }: EventCardProps) {
-  const formattedDate = new Date(event.startDate).toLocaleDateString('en-IN', {
+  const formattedDate = new Date(event.date).toLocaleDateString('en-IN', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -26,15 +47,13 @@ export function EventCard({ event, showDebug }: EventCardProps) {
       href={`/events/${event.slug}`}
       className="block bg-white rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden"
     >
-      {event.imageUrl && (
-        <div className="aspect-video bg-gray-200 relative">
-          <img
-            src={event.imageUrl}
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
+      <div className="aspect-video bg-gray-200 relative">
+        <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
         </div>
-      )}
+      </div>
       
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-2">
@@ -95,23 +114,9 @@ export function EventCard({ event, showDebug }: EventCardProps) {
           </svg>
           <span>
             {event.venue}
-            {event.area && `, ${event.area}`}
             {event.city && `, ${event.city}`}
           </span>
         </div>
-        
-        {event.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {event.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
         
         {showDebug && event.scoreComponents && (
           <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500">

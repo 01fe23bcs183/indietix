@@ -1,6 +1,17 @@
 'use client';
 
-import type { SearchFilters } from '@indietix/search';
+// Search filters interface (matches API router)
+interface SearchFilters {
+  category?: string;
+  dateStart?: string;
+  dateEnd?: string;
+  maxPrice?: number;
+  minPrice?: number;
+  area?: string;
+  city?: string;
+  startTimeWindow?: 'morning' | 'afternoon' | 'evening' | 'night';
+  freeTextQuery?: string;
+}
 
 interface FilterChipsProps {
   filters: SearchFilters;

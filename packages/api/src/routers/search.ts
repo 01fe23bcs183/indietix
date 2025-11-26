@@ -1,19 +1,224 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '../index.js';
+import { router, publicProcedure } from '../trpc';
 import { prisma } from '@indietix/db';
-import {
-  parseNaturalLanguageQuery,
-  normalizeFilters,
-  mergeFilters,
-  calculateRecencyBoost,
-  calculateCombinedScore,
-  cosineSimilarity,
-  WEIGHTS_NO_EMBEDDINGS,
-  DEFAULT_WEIGHTS,
-  isEmbeddingsEnabled,
-  generateEmbedding,
-} from '@indietix/search';
-import type { SearchFilters, SearchResult, ScoreComponents, SuggestResult } from '@indietix/search';
+
+/**
+ * Search filters interface
+ */
+export interface SearchFilters {
+  category?: string;
+  dateStart?: string;
+  dateEnd?: string;
+  maxPrice?: number;
+  minPrice?: number;
+  area?: string;
+  city?: string;
+  startTimeWindow?: 'morning' | 'afternoon' | 'evening' | 'night';
+  freeTextQuery?: string;
+}
+
+/**
+ * Score components interface
+ */
+export interface ScoreComponents {
+  ftsRank: number;
+  trigramSimilarity: number;
+  recencyBoost: number;
+  embeddingSimilarity?: number;
+}
+
+/**
+ * Search result interface
+ */
+export interface SearchResult {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  venue: string;
+  city: string;
+  category: string;
+  date: Date;
+  price: number;
+  score: number;
+  scoreComponents?: ScoreComponents;
+}
+
+/**
+ * Suggest result interface
+ */
+export interface SuggestResult {
+  type: 'event' | 'venue' | 'city';
+  value: string;
+  slug?: string;
+}
+
+/**
+ * Weights for scoring without embeddings
+ */
+const WEIGHTS_NO_EMBEDDINGS = {
+  fts: 0.4,
+  trigram: 0.3,
+  recency: 0.3,
+  embedding: 0,
+};
+
+/**
+ * Parse natural language query into filters
+ */
+function parseNaturalLanguageQuery(query: string): SearchFilters {
+  const filters: SearchFilters = {};
+  const lowerQuery = query.toLowerCase();
+  
+  // Category detection
+  const categoryMap: Record<string, string> = {
+    'comedy': 'COMEDY',
+    'standup': 'COMEDY',
+    'stand-up': 'COMEDY',
+    'music': 'MUSIC',
+    'concert': 'MUSIC',
+    'live music': 'MUSIC',
+    'sports': 'SPORTS',
+    'tech': 'TECH',
+    'technology': 'TECH',
+    'food': 'FOOD',
+    'art': 'ART',
+  };
+  
+  for (const [keyword, category] of Object.entries(categoryMap)) {
+    if (lowerQuery.includes(keyword)) {
+      filters.category = category;
+      break;
+    }
+  }
+  
+  // Date detection
+  const today = new Date();
+  if (lowerQuery.includes('today')) {
+    filters.dateStart = today.toISOString().split('T')[0];
+    filters.dateEnd = today.toISOString().split('T')[0];
+  } else if (lowerQuery.includes('tonight')) {
+    filters.dateStart = today.toISOString().split('T')[0];
+    filters.dateEnd = today.toISOString().split('T')[0];
+    filters.startTimeWindow = 'evening';
+  } else if (lowerQuery.includes('tomorrow')) {
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    filters.dateStart = tomorrow.toISOString().split('T')[0];
+    filters.dateEnd = tomorrow.toISOString().split('T')[0];
+  } else if (lowerQuery.includes('this weekend')) {
+    const dayOfWeek = today.getDay();
+    const saturday = new Date(today);
+    saturday.setDate(today.getDate() + (6 - dayOfWeek));
+    const sunday = new Date(saturday);
+    sunday.setDate(saturday.getDate() + 1);
+    filters.dateStart = saturday.toISOString().split('T')[0];
+    filters.dateEnd = sunday.toISOString().split('T')[0];
+  }
+  
+  // Price detection
+  const priceMatch = lowerQuery.match(/under\s*(?:₹|rs\.?|inr)?\s*(\d+)/i);
+  if (priceMatch && priceMatch[1]) {
+    filters.maxPrice = parseInt(priceMatch[1], 10);
+  }
+  
+  const priceRangeMatch = lowerQuery.match(/(?:₹|rs\.?|inr)?\s*(\d+)\s*[-–]\s*(?:₹|rs\.?|inr)?\s*(\d+)/i);
+  if (priceRangeMatch && priceRangeMatch[1] && priceRangeMatch[2]) {
+    filters.minPrice = parseInt(priceRangeMatch[1], 10);
+    filters.maxPrice = parseInt(priceRangeMatch[2], 10);
+  }
+  
+  // City detection (Bengaluru areas)
+  const areaAliases: Record<string, string> = {
+    'indiranagar': 'Bengaluru',
+    'koramangala': 'Bengaluru',
+    'hsr': 'Bengaluru',
+    'whitefield': 'Bengaluru',
+    'jp nagar': 'Bengaluru',
+    'jayanagar': 'Bengaluru',
+    'malleshwaram': 'Bengaluru',
+    'bangalore': 'Bengaluru',
+    'bengaluru': 'Bengaluru',
+  };
+  
+  for (const [area, city] of Object.entries(areaAliases)) {
+    if (lowerQuery.includes(area)) {
+      filters.city = city;
+      break;
+    }
+  }
+  
+  // Extract remaining text as free text query
+  let freeText = query;
+  // Remove detected keywords
+  for (const keyword of Object.keys(categoryMap)) {
+    freeText = freeText.replace(new RegExp(keyword, 'gi'), '');
+  }
+  freeText = freeText.replace(/today|tonight|tomorrow|this weekend/gi, '');
+  freeText = freeText.replace(/under\s*(?:₹|rs\.?|inr)?\s*\d+/gi, '');
+  freeText = freeText.replace(/(?:₹|rs\.?|inr)?\s*\d+\s*[-–]\s*(?:₹|rs\.?|inr)?\s*\d+/gi, '');
+  for (const area of Object.keys(areaAliases)) {
+    freeText = freeText.replace(new RegExp(area, 'gi'), '');
+  }
+  freeText = freeText.replace(/near|in|at/gi, '').trim();
+  
+  if (freeText.length > 2) {
+    filters.freeTextQuery = freeText;
+  }
+  
+  return filters;
+}
+
+/**
+ * Normalize filters
+ */
+function normalizeFilters(filters: SearchFilters): SearchFilters {
+  return { ...filters };
+}
+
+/**
+ * Merge filters (explicit takes precedence)
+ */
+function mergeFilters(parsed: SearchFilters, explicit: SearchFilters): SearchFilters {
+  return { ...parsed, ...explicit };
+}
+
+/**
+ * Calculate recency boost for events
+ */
+function calculateRecencyBoost(eventDate: Date): number {
+  const now = new Date();
+  const diffDays = (eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+  
+  if (diffDays < 0) {
+    // Past events get no boost
+    return 0;
+  } else if (diffDays <= 7) {
+    // Events within a week get high boost
+    return 1 - (diffDays / 14);
+  } else if (diffDays <= 14) {
+    // Events within 2 weeks get moderate boost
+    return 0.5 - ((diffDays - 7) / 14);
+  } else {
+    // Events further out get minimal boost
+    return Math.max(0, 0.2 - (diffDays / 100));
+  }
+}
+
+/**
+ * Calculate combined score
+ */
+function calculateCombinedScore(
+  components: ScoreComponents,
+  weights: typeof WEIGHTS_NO_EMBEDDINGS
+): number {
+  return (
+    components.ftsRank * weights.fts +
+    components.trigramSimilarity * weights.trigram +
+    components.recencyBoost * weights.recency +
+    (components.embeddingSimilarity || 0) * weights.embedding
+  );
+}
 
 /**
  * Search filters schema
@@ -56,14 +261,14 @@ function buildWhereConditions(filters: SearchFilters): {
   }
   
   if (filters.dateStart || filters.dateEnd) {
-    where.startDate = {};
+    where.date = {};
     if (filters.dateStart) {
-      (where.startDate as Record<string, unknown>).gte = new Date(filters.dateStart);
+      (where.date as Record<string, unknown>).gte = new Date(filters.dateStart);
     }
     if (filters.dateEnd) {
       const endDate = new Date(filters.dateEnd);
       endDate.setHours(23, 59, 59, 999);
-      (where.startDate as Record<string, unknown>).lte = endDate;
+      (where.date as Record<string, unknown>).lte = endDate;
     }
   }
   
@@ -77,9 +282,7 @@ function buildWhereConditions(filters: SearchFilters): {
     }
   }
   
-  if (filters.area) {
-    where.area = { equals: filters.area, mode: 'insensitive' };
-  }
+  // Note: area field doesn't exist in the Event model, so we skip area filtering
   
   if (filters.city) {
     where.city = { equals: filters.city, mode: 'insensitive' };
@@ -128,32 +331,28 @@ function calculateTrigramSimilarity(text: string, query: string): number {
 /**
  * Calculate FTS rank (simplified - actual implementation uses ts_rank)
  */
-function calculateFtsRank(event: { title: string; description: string; tags: string[]; venue: string }, query: string): number {
+function calculateFtsRank(event: { title: string; description: string; venue: string }, query: string): number {
   if (!query) return 0;
   
   const queryLower = query.toLowerCase();
   const queryWords = queryLower.split(/\s+/);
   
   let score = 0;
-  const searchText = `${event.title} ${event.description} ${event.tags.join(' ')} ${event.venue}`.toLowerCase();
+  const searchText = `${event.title} ${event.description} ${event.venue}`.toLowerCase();
   
   for (const word of queryWords) {
     if (searchText.includes(word)) {
       // Title matches are worth more
       if (event.title.toLowerCase().includes(word)) {
-        score += 0.4;
+        score += 0.5;
       }
       // Description matches
       if (event.description.toLowerCase().includes(word)) {
-        score += 0.2;
-      }
-      // Tag matches
-      if (event.tags.some(tag => tag.toLowerCase().includes(word))) {
         score += 0.3;
       }
       // Venue matches
       if (event.venue.toLowerCase().includes(word)) {
-        score += 0.1;
+        score += 0.2;
       }
     }
   }
@@ -194,21 +393,11 @@ export const searchRouter = router({
       // Fetch events from database
       const events = await prisma.event.findMany({
         where,
-        include: {
-          embedding: true,
-        },
         take: 100, // Fetch more for re-ranking
       });
       
-      // Check if embeddings are enabled
-      const useEmbeddings = isEmbeddingsEnabled();
-      const weights = useEmbeddings ? DEFAULT_WEIGHTS : WEIGHTS_NO_EMBEDDINGS;
-      
-      // Generate query embedding if needed
-      let queryEmbedding: number[] | null = null;
-      if (useEmbeddings && (ftsQuery || input.q)) {
-        queryEmbedding = await generateEmbedding(ftsQuery || input.q || '');
-      }
+      // Use weights without embeddings (embeddings disabled for simplicity)
+      const weights = WEIGHTS_NO_EMBEDDINGS;
       
       // Score and rank events
       const scoredEvents = events.map((event) => {
@@ -216,7 +405,6 @@ export const searchRouter = router({
           {
             title: event.title,
             description: event.description,
-            tags: event.tags,
             venue: event.venue,
           },
           ftsQuery || input.q || ''
@@ -227,21 +415,12 @@ export const searchRouter = router({
           ftsQuery || input.q || ''
         );
         
-        const recencyBoost = calculateRecencyBoost(event.startDate);
-        
-        let embeddingSimilarity = 0;
-        if (queryEmbedding && event.embedding?.vecData) {
-          embeddingSimilarity = cosineSimilarity(
-            queryEmbedding,
-            event.embedding.vecData
-          );
-        }
+        const recencyBoost = calculateRecencyBoost(event.date);
         
         const components: ScoreComponents = {
           ftsRank,
           trigramSimilarity,
           recencyBoost,
-          embeddingSimilarity: useEmbeddings ? embeddingSimilarity : undefined,
         };
         
         const score = calculateCombinedScore(components, weights);
@@ -270,12 +449,9 @@ export const searchRouter = router({
         description: event.description,
         venue: event.venue,
         city: event.city,
-        area: event.area,
         category: event.category,
-        tags: event.tags,
-        startDate: event.startDate,
+        date: event.date,
         price: event.price,
-        imageUrl: event.imageUrl,
         score,
         scoreComponents: input.debug ? components : undefined,
       }));
@@ -289,7 +465,7 @@ export const searchRouter = router({
           ? {
               appliedFilters,
               queryTime,
-              embeddingsUsed: useEmbeddings,
+              embeddingsUsed: false,
             }
           : undefined,
       };
