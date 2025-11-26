@@ -14,6 +14,7 @@ const navigation = [
   { name: "Payouts", href: "/payouts" },
   { name: "Fraud Detection", href: "/fraud" },
   { name: "Communication", href: "/comm" },
+  { name: "Experiments", href: "/experiments" },
   { name: "CMS", href: "/cms" },
   { name: "Settings", href: "/settings" },
 ];

@@ -801,3 +801,70 @@ model Post {
   @@index([publishedAt])
   @@index([tags])
 }
+
+// Feature Flags & Experiments
+
+enum ExperimentStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  STOPPED
+}
+
+model FeatureFlag {
+  key         String    @id
+  description String?
+  enabled     Boolean   @default(false)
+  rollout     Int       @default(100) // Percentage 0-100
+  rules       Json?     // Targeting rules: { roles, cities, categories, allowList, denyList }
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([enabled])
+}
+
+model Experiment {
+  key         String           @id
+  description String?
+  variants    Json             // [{ name: "A", weight: 50 }, { name: "B", weight: 50 }]
+  status      ExperimentStatus @default(DRAFT)
+  startAt     DateTime?
+  stopAt      DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  assignments ExperimentAssignment[]
+  exposures   ExperimentExposure[]
+
+  @@index([status])
+  @@index([startAt, stopAt])
+}
+
+model ExperimentAssignment {
+  id            String     @id @default(cuid())
+  experimentKey String
+  userId        String
+  variant       String
+  assignedAt    DateTime   @default(now())
+
+  experiment    Experiment @relation(fields: [experimentKey], references: [key], onDelete: Cascade)
+
+  @@unique([experimentKey, userId])
+  @@index([experimentKey])
+  @@index([userId])
+}
+
+model ExperimentExposure {
+  id            String     @id @default(cuid())
+  experimentKey String
+  userId        String
+  variant       String
+  ts            DateTime   @default(now())
+
+  experiment    Experiment @relation(fields: [experimentKey], references: [key], onDelete: Cascade)
+
+  @@index([experimentKey])
+  @@index([userId])
+  @@index([ts])
+  @@index([experimentKey, variant])
+}
