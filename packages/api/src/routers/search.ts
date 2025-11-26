@@ -262,7 +262,8 @@ function buildWhereConditions(filters: SearchFilters): {
   };
 
   if (filters.category) {
-    where.category = { equals: filters.category, mode: "insensitive" };
+    // Category is an enum, so we use direct equality (no mode option)
+    where.category = filters.category;
   }
 
   if (filters.dateStart || filters.dateEnd) {

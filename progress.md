@@ -42,6 +42,9 @@
 - Updated COMEDY event dates in seed.ts to be in the future:
   - "Stand-Up Comedy Night with Zakir Khan": 2025-11-20 → 2026-01-20
   - "Biswa Kalyan Rath Live in Mumbai": 2025-05-20 → 2026-02-20
+- Fixed category filter in search router:
+  - Changed from `{ equals: filters.category, mode: "insensitive" }` to direct equality
+  - `mode: "insensitive"` doesn't work with Prisma enums, only strings
 
 ### Android E2E Failure
 - Downgraded expo-calendar from ^15.0.7 to ~12.0.0 (SDK 50 compatible)
