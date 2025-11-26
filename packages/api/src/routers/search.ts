@@ -318,14 +318,34 @@ function calculateTrigramSimilarity(text: string, query: string): number {
 
   let matches = 0;
   for (const word of queryWords) {
+    // Skip very short words (less than 3 chars) for matching
+    if (word.length < 3) continue;
+
     if (textWords.has(word)) {
       matches++;
     } else {
-      // Check for partial matches
-      for (const textWord of textWords) {
-        if (textWord.includes(word) || word.includes(textWord)) {
-          matches += 0.5;
-          break;
+      // Check for partial matches only if query word is a standalone word
+      // Don't match if the query word is a long gibberish string that happens
+      // to contain a common word like "event"
+      // Only do partial matching for reasonable query words (< 20 chars)
+      if (word.length <= 20) {
+        for (const textWord of textWords) {
+          // Only match if the text word is contained in the query word
+          // AND the text word is at least 4 chars (meaningful word)
+          // AND the query word is similar in length (not gibberish)
+          if (
+            textWord.length >= 4 &&
+            word.includes(textWord) &&
+            word.length <= textWord.length * 3
+          ) {
+            matches += 0.5;
+            break;
+          }
+          // Or if query word is contained in text word (prefix/suffix match)
+          if (textWord.includes(word) && word.length >= 4) {
+            matches += 0.5;
+            break;
+          }
         }
       }
     }
@@ -347,21 +367,33 @@ function calculateFtsRank(
   const queryWords = queryLower.split(/\s+/);
 
   let score = 0;
-  const searchText =
-    `${event.title} ${event.description} ${event.venue}`.toLowerCase();
+
+  // Get words from event fields for word-boundary matching
+  const titleWords = new Set(event.title.toLowerCase().split(/\s+/));
+  const descWords = new Set(event.description.toLowerCase().split(/\s+/));
+  const venueWords = new Set(event.venue.toLowerCase().split(/\s+/));
 
   for (const word of queryWords) {
-    if (searchText.includes(word)) {
+    // Skip very short words and very long words (gibberish)
+    if (word.length < 3 || word.length > 30) continue;
+
+    // Only match if the query word matches a complete word in the text
+    // This prevents "xyznonexistentevent12345" from matching "event"
+    const matchesTitle = titleWords.has(word);
+    const matchesDesc = descWords.has(word);
+    const matchesVenue = venueWords.has(word);
+
+    if (matchesTitle || matchesDesc || matchesVenue) {
       // Title matches are worth more
-      if (event.title.toLowerCase().includes(word)) {
+      if (matchesTitle) {
         score += 0.5;
       }
       // Description matches
-      if (event.description.toLowerCase().includes(word)) {
+      if (matchesDesc) {
         score += 0.3;
       }
       // Venue matches
-      if (event.venue.toLowerCase().includes(word)) {
+      if (matchesVenue) {
         score += 0.2;
       }
     }
