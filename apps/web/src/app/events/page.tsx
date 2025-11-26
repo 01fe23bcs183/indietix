@@ -198,12 +198,12 @@ export default function EventsPage() {
                       href={`/events/${event.slug}`}
                       className="block group"
                     >
-                      <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white">
+                      <div className="card border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white">
                         <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                           <span className="text-4xl">🎉</span>
                         </div>
                         <div className="p-4">
-                          <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                          <h3 className="card-title font-semibold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
                             {event.title}
                           </h3>
                           <p className="text-sm text-gray-500 mb-2">
