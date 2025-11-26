@@ -8,23 +8,16 @@ test.describe("Flash Sale Feature", () => {
 
     await page.waitForLoadState("networkidle");
 
-    // Wait for the page to fully load and API to respond
-    await page.waitForTimeout(3000);
-
-    // Check if flash sale banner is visible (it depends on pricing API returning flash sale data)
+    // Use Playwright's auto-wait to check for flash sale banner
+    // The seed creates an active flash sale for this event
     const flashBanner = page.locator("text=FLASH SALE");
-    const hasFlashSale = await flashBanner.isVisible().catch(() => false);
 
-    // If flash sale is visible, verify the expected elements
-    if (hasFlashSale) {
-      await expect(flashBanner).toBeVisible();
-      await expect(page.locator("text=/\\d+% OFF/")).toBeVisible();
-      await expect(page.locator("text=Time remaining")).toBeVisible();
-    } else {
-      // Flash sale might not be active yet or API didn't return it
-      // This is acceptable as the seed creates flash sale but pricing API may not return it
-      expect(true).toBe(true);
-    }
+    // Wait up to 15 seconds for the flash sale banner to appear
+    await expect(flashBanner).toBeVisible({ timeout: 15000 });
+
+    // Verify discount percentage and countdown are shown
+    await expect(page.locator("text=/\\d+% OFF/")).toBeVisible();
+    await expect(page.locator("text=Time remaining")).toBeVisible();
   });
 
   test("should show discounted price with original price crossed out", async ({
