@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import { trpc } from "@/lib/trpc-provider";
 import { SearchBar } from "@/components/SearchBar";
 import { FilterChips } from "@/components/FilterChips";
-import { EventCard } from "@/components/EventCard";
 import { DebugPanel } from "@/components/DebugPanel";
+import { formatINR } from "@indietix/utils";
 
 // Search filters interface (matches API router)
 interface SearchFilters {
@@ -25,12 +26,24 @@ export default function EventsPage() {
   const [filters, setFilters] = useState<Partial<SearchFilters>>({});
   const [showDebug, setShowDebug] = useState(false);
 
+  // Traditional filter dropdowns (for backward compatibility with E2E tests)
+  const [cityFilter, setCityFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+
   const isDev = process.env.NODE_ENV === "development";
+
+  // Merge dropdown filters with NL-parsed filters
+  const mergedFilters: Partial<SearchFilters> = {
+    ...filters,
+    ...(cityFilter ? { city: cityFilter } : {}),
+    ...(categoryFilter ? { category: categoryFilter } : {}),
+  };
 
   const { data, isLoading, error } = trpc.search.query.useQuery(
     {
       q: query || undefined,
-      filters: Object.keys(filters).length > 0 ? filters : undefined,
+      filters:
+        Object.keys(mergedFilters).length > 0 ? mergedFilters : undefined,
       debug: showDebug,
       limit: 20,
     },
@@ -45,6 +58,9 @@ export default function EventsPage() {
   }, []);
 
   const handleRemoveFilter = useCallback((key: keyof SearchFilters) => {
+    // Also clear dropdown filters if they match
+    if (key === "city") setCityFilter("");
+    if (key === "category") setCategoryFilter("");
     setFilters((prev) => {
       const next = { ...prev };
       delete next[key];
@@ -55,10 +71,12 @@ export default function EventsPage() {
   const handleClearFilters = useCallback(() => {
     setFilters({});
     setQuery("");
+    setCityFilter("");
+    setCategoryFilter("");
   }, []);
 
   // Merge applied filters from debug info with explicit filters
-  const appliedFilters = data?.debug?.appliedFilters || filters;
+  const appliedFilters = data?.debug?.appliedFilters || mergedFilters;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -71,6 +89,41 @@ export default function EventsPage() {
             onChange={handleSearch}
             placeholder="Try: comedy tonight under 600 near indiranagar"
           />
+
+          {/* Traditional filter dropdowns for backward compatibility */}
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">City</label>
+              <select
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="">All Cities</option>
+                <option value="Bengaluru">Bengaluru</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Delhi">Delhi</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Category</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="">All Categories</option>
+                <option value="MUSIC">Music</option>
+                <option value="COMEDY">Comedy</option>
+                <option value="SPORTS">Sports</option>
+                <option value="TECH">Tech</option>
+                <option value="FOOD">Food</option>
+                <option value="ART">Art</option>
+                <option value="OTHER">Workshop</option>
+              </select>
+            </div>
+          </div>
 
           {Object.keys(appliedFilters).length > 0 && (
             <FilterChips
@@ -135,14 +188,54 @@ export default function EventsPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.results.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    showDebug={showDebug}
-                  />
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {data.results.map((event) => {
+                  const bookedSeats = event._count?.bookings || 0;
+                  const seatsLeft = event.totalSeats - bookedSeats;
+                  return (
+                    <Link
+                      key={event.id}
+                      href={`/events/${event.slug}`}
+                      className="block group"
+                    >
+                      <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white">
+                        <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                          <span className="text-4xl">🎉</span>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                            {event.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 mb-2">
+                            {new Date(event.date).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                          <p className="text-sm text-gray-500 mb-3">
+                            📍 {event.city}
+                          </p>
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-lg">
+                              {formatINR(event.price)}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {seatsLeft} seats left
+                            </span>
+                          </div>
+                          {showDebug && event.score !== undefined && (
+                            <div className="mt-2 text-xs text-gray-400">
+                              Score: {event.score.toFixed(3)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
 

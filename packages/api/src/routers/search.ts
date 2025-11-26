@@ -40,6 +40,10 @@ export interface SearchResult {
   category: string;
   date: Date;
   price: number;
+  totalSeats: number;
+  _count?: {
+    bookings: number;
+  };
   score: number;
   scoreComponents?: ScoreComponents;
 }
@@ -397,6 +401,13 @@ export const searchRouter = router({
       const events = await prisma.event.findMany({
         where,
         take: 100, // Fetch more for re-ranking
+        include: {
+          _count: {
+            select: {
+              bookings: true,
+            },
+          },
+        },
       });
 
       // Use weights without embeddings (embeddings disabled for simplicity)
@@ -445,21 +456,21 @@ export const searchRouter = router({
       );
 
       // Transform to response format
-      const results: SearchResult[] = paginatedEvents.map(
-        ({ event, score, components }) => ({
-          id: event.id,
-          slug: event.slug,
-          title: event.title,
-          description: event.description,
-          venue: event.venue,
-          city: event.city,
-          category: event.category,
-          date: event.date,
-          price: event.price,
-          score,
-          scoreComponents: input.debug ? components : undefined,
-        })
-      );
+      const results = paginatedEvents.map(({ event, score, components }) => ({
+        id: event.id,
+        slug: event.slug,
+        title: event.title,
+        description: event.description,
+        venue: event.venue,
+        city: event.city,
+        category: event.category,
+        date: event.date,
+        price: event.price,
+        totalSeats: event.totalSeats,
+        _count: event._count,
+        score,
+        scoreComponents: input.debug ? components : undefined,
+      }));
 
       const queryTime = Date.now() - startTime;
 
