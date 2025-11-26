@@ -7,8 +7,9 @@
 
 ## Current Status
 - Branch: `devin/1764180959-flash-sales-rbac`
-- PR: Not yet created
-- Building Flash Sales engine and Multi-User Organizer Teams with RBAC
+- PR: https://github.com/01fe23bcs183/indietix/pull/131
+- CI Status: All non-mobile checks passing (Lint, TypeCheck, Unit Tests, Build, Code Coverage)
+- android-e2e: Failing due to pre-existing Gradle plugin resolution issue (expo-module-gradle-plugin not found in expo-sharing)
 
 ## Task Overview
 Implementing two major platform features:
