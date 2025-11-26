@@ -32,7 +32,7 @@
         "@indietix/utils": "workspace:*",
     "@trpc/server": "^10.45.0",
     "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^3.0.3",
     "next-auth": "5.0.0-beta.30",
     "zod": "^3.22.4"
   },
