@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { trpc } from "../../../lib/trpc";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@indietix/ui";
 
@@ -42,6 +43,20 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold">Platform Settings</h1>
         <p className="text-gray-600">Configure platform-wide settings</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Feature Flags</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-500 mb-4">
+            Manage feature flags, kill-switches, and rollout percentages.
+          </p>
+          <Link href="/settings/flags">
+            <Button>Manage Feature Flags</Button>
+          </Link>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
