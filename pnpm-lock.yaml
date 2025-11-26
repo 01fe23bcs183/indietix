@@ -351,6 +351,9 @@ importers:
       '@indietix/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@indietix/comm':
+        specifier: workspace:*
+        version: link:../../packages/comm
       '@indietix/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -386,7 +389,7 @@ importers:
         version: 14.2.18(@babel/core@7.28.5)(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
       next-auth:
         specifier: 5.0.0-beta.30
-        version: 5.0.0-beta.30(next@14.2.18(@babel/core@7.28.5)(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        version: 5.0.0-beta.30(next@14.2.18(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react@18.2.0)
       qrcode.react:
         specifier: ^4.2.0
         version: 4.2.0(react@18.2.0)
@@ -445,6 +448,9 @@ importers:
       '@auth/core':
         specifier: ^0.34.3
         version: 0.34.3
+      '@indietix/comm':
+        specifier: workspace:*
+        version: link:../comm
       '@indietix/db':
         specifier: workspace:*
         version: link:../db
@@ -474,7 +480,7 @@ importers:
         version: 3.0.2
       next-auth:
         specifier: 5.0.0-beta.30
-        version: 5.0.0-beta.30(next@14.2.18(@babel/core@7.28.5)(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react@18.2.0)
+        version: 5.0.0-beta.30(next@14.2.18(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react@18.2.0)
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -488,6 +494,37 @@ importers:
       '@types/bcryptjs':
         specifier: ^3.0.0
         version: 3.0.0
+      '@types/node':
+        specifier: ^20.11.5
+        version: 20.19.24
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^1.2.1
+        version: 1.6.1(@types/node@20.19.24)(jsdom@27.1.0)(terser@5.44.0)
+
+  packages/comm:
+    dependencies:
+      '@indietix/db':
+        specifier: workspace:*
+        version: link:../db
+      '@indietix/marketing':
+        specifier: workspace:*
+        version: link:../marketing
+      '@indietix/notify':
+        specifier: workspace:*
+        version: link:../notify
+      jsonwebtoken:
+        specifier: ^9.0.0
+        version: 9.0.2
+    devDependencies:
+      '@indietix/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/jsonwebtoken':
+        specifier: ^9.0.0
+        version: 9.0.10
       '@types/node':
         specifier: ^20.11.5
         version: 20.19.24
@@ -3069,9 +3106,15 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
+  '@types/jsonwebtoken@9.0.10':
+    resolution: {integrity: sha512-asx5hIG9Qmf/1oStypjanR7iKTv0gXQ1Ov/jfrX6kS/EO0OFni8orbmGCn0672NHR3kXHwpAwR+B368ZGN/2rA==}
+
   '@types/minimatch@6.0.0':
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
     deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
+
+  '@types/ms@2.1.0':
+    resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
   '@types/node@20.19.24':
     resolution: {integrity: sha512-FE5u0ezmi6y9OZEzlJfg37mqqf6ZDSF2V/NLjUyGrR9uTZ7Sb9F7bLNZ03S4XVUNRWGA7Ck4c1kK+YnuWjl+DA==}
@@ -11866,9 +11909,16 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
+  '@types/jsonwebtoken@9.0.10':
+    dependencies:
+      '@types/ms': 2.1.0
+      '@types/node': 24.9.2
+
   '@types/minimatch@6.0.0':
     dependencies:
       minimatch: 10.1.1
+
+  '@types/ms@2.1.0': {}
 
   '@types/node@20.19.24':
     dependencies:
@@ -16333,7 +16383,7 @@ snapshots:
       next: 14.1.0(@babel/core@7.28.5)(react-dom@18.3.1(react@18.2.0))(react@18.2.0)
       react: 18.2.0
 
-  next-auth@5.0.0-beta.30(next@14.2.18(@babel/core@7.28.5)(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react@18.2.0):
+  next-auth@5.0.0-beta.30(next@14.2.18(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0))(react@18.2.0):
     dependencies:
       '@auth/core': 0.41.0
       next: 14.2.18(@babel/core@7.28.5)(@playwright/test@1.56.1)(react-dom@18.3.1(react@18.2.0))(react@18.2.0)

@@ -1,0 +1,35 @@
+{
+  "name": "@indietix/comm",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@indietix/db": "workspace:*",
+    "@indietix/notify": "workspace:*",
+    "@indietix/marketing": "workspace:*",
+    "jsonwebtoken": "^9.0.0"
+  },
+  "devDependencies": {
+    "@indietix/config": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.0",
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.1"
+  }
+}
