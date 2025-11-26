@@ -1,6 +1,12 @@
 import PostHog from "posthog-react-native";
 
-type JsonType = string | number | boolean | null | JsonType[] | { [key: string]: JsonType };
+type JsonType =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonType[]
+  | { [key: string]: JsonType };
 type EventProperties = Record<string, JsonType>;
 
 let posthogClient: PostHog | null = null;
@@ -41,10 +47,7 @@ export function trackEvent(
   }
 }
 
-export function identifyUser(
-  userId: string,
-  traits?: EventProperties
-): void {
+export function identifyUser(userId: string, traits?: EventProperties): void {
   try {
     if (posthogClient) {
       posthogClient.identify(userId, traits);
