@@ -15,7 +15,7 @@
     "@indietix/db": "workspace:*",
     "@indietix/ui": "workspace:*",
     "@indietix/utils": "workspace:*",
-    "@tanstack/react-query": "^4.36.1",
+    "@tanstack/react-query": "^5.90.11",
     "@tiptap/extension-link": "^2.1.13",
     "@tiptap/extension-placeholder": "^2.1.13",
     "@tiptap/pm": "^2.1.13",
