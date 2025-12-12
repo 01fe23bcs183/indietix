@@ -319,7 +319,7 @@ export const bookingRouter = router({
         reason: z.string().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const booking = await prisma.booking.findUnique({
         where: { id: input.bookingId },
         include: { event: true },
@@ -352,7 +352,15 @@ export const bookingRouter = router({
       const existingRefund = await prisma.refund.findFirst({
         where: {
           bookingId: input.bookingId,
-          status: { in: ["PENDING", "APPROVED", "PROCESSING", "SUCCEEDED"] },
+          status: {
+            in: [
+              "PENDING_APPROVAL",
+              "PENDING",
+              "APPROVED",
+              "PROCESSING",
+              "SUCCEEDED",
+            ],
+          },
         },
       });
 
@@ -396,126 +404,28 @@ export const bookingRouter = router({
 
       const paymentProvider = getPaymentProvider();
 
+      // Create refund with PENDING_APPROVAL status - requires both organizer and admin approval
       const refund = await prisma.refund.create({
         data: {
           bookingId: input.bookingId,
           amount: refundCalc.refundableAmount,
           currency: "INR",
-          status: "APPROVED",
+          status: "PENDING_APPROVAL",
           reason: input.reason,
           provider: paymentProvider.kind,
+          requestedBy: ctx.session?.user?.id || booking.userId,
+          organizerId: booking.event.organizerId,
         },
       });
 
-      if (refundCalc.refundableAmount > 0 && booking.razorpayPaymentId) {
-        try {
-          await prisma.refund.update({
-            where: { id: refund.id },
-            data: { status: "PROCESSING" },
-          });
-
-          const refundResult = await paymentProvider.createRefund!({
-            paymentId: booking.razorpayPaymentId,
-            amountPaise: refundCalc.refundableAmount,
-            speed: "normal",
-          });
-
-          await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-            await tx.refund.update({
-              where: { id: refund.id },
-              data: {
-                status: "SUCCEEDED",
-                providerRefundId: refundResult.refundId,
-                processedAt: new Date(),
-              },
-            });
-
-            await tx.booking.update({
-              where: { id: input.bookingId },
-              data: {
-                status: "CANCELLED",
-                paymentStatus: "REFUNDED",
-                cancelledAt: new Date(),
-              },
-            });
-
-            await tx.event.update({
-              where: { id: booking.eventId },
-              data: {
-                bookedSeats: {
-                  decrement: booking.seats,
-                },
-              },
-            });
-          });
-
-          const { issueWaitlistOffers } = await import("../lib/waitlist");
-          await issueWaitlistOffers(booking.eventId, booking.seats);
-
-          return {
-            success: true,
-            refundId: refund.id,
-            refundAmount: refundCalc.refundableAmount,
-            message: refundCalc.message,
-          };
-        } catch (error) {
-          await prisma.refund.update({
-            where: { id: refund.id },
-            data: {
-              status: "FAILED",
-              failedAt: new Date(),
-              failureReason:
-                error instanceof Error ? error.message : "Unknown error",
-            },
-          });
-
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to process refund",
-          });
-        }
-      } else {
-        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-          await tx.refund.update({
-            where: { id: refund.id },
-            data: {
-              status: "SUCCEEDED",
-              processedAt: new Date(),
-            },
-          });
-
-          await tx.booking.update({
-            where: { id: input.bookingId },
-            data: {
-              status: "CANCELLED",
-              paymentStatus:
-                refundCalc.refundableAmount > 0
-                  ? "REFUNDED"
-                  : booking.paymentStatus,
-              cancelledAt: new Date(),
-            },
-          });
-
-          await tx.event.update({
-            where: { id: booking.eventId },
-            data: {
-              bookedSeats: {
-                decrement: booking.seats,
-              },
-            },
-          });
-        });
-
-        const { issueWaitlistOffers } = await import("../lib/waitlist");
-        await issueWaitlistOffers(booking.eventId, booking.seats);
-
-        return {
-          success: true,
-          refundId: refund.id,
-          refundAmount: refundCalc.refundableAmount,
-          message: refundCalc.message,
-        };
-      }
+      return {
+        success: true,
+        refundId: refund.id,
+        refundAmount: refundCalc.refundableAmount,
+        message:
+          "Refund request submitted. Awaiting organizer and admin approval.",
+        status: "PENDING_APPROVAL",
+      };
     }),
 
   getRefundPreview: publicProcedure

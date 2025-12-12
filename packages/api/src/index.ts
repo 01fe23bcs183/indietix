@@ -28,6 +28,7 @@ import { flagsRouter } from "./routers/flags";
 import { experimentsRouter } from "./routers/experiments";
 import { loyaltyRouter } from "./routers/loyalty";
 import { recoRouter } from "./routers/reco";
+import { refundApprovalsRouter } from "./routers/refund-approvals";
 
 export const appRouter = router({
   health: healthRouter,
@@ -49,6 +50,7 @@ export const appRouter = router({
   experiments: experimentsRouter,
   loyalty: loyaltyRouter,
   reco: recoRouter,
+  refundApprovals: refundApprovalsRouter,
   organizer: router({
     events: organizerEventsRouter,
     attendees: organizerAttendeesRouter,

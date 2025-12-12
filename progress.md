@@ -1,83 +1,82 @@
-# Hybrid Recommendations v1 Progress
+# Refund Approval System Progress
 
 ## Progress Bar
 ```
-[####..............] 20% Complete - Setting up infrastructure
+[####################] 100% Complete - PR Created & CI Passing
 ```
 
 ## Current Status
-- Branch: `devin/1764169732-reco-hybrid-recommendations`
-- PR: Not yet created
-- Building low-cost recommendation system with rule-based + lightweight CF
+- Branch: `devin/1765533754-refund-approval-system`
+- PR: https://github.com/01fe23bcs183/indietix/pull/136
+- All web/API CI checks passing
+- android-e2e failing (pre-existing issue, also fails on main and PR #130)
 
 ## Task Overview
-Building a hybrid recommendation system that:
-1. Computes user profile vectors from views, bookings, categories, price band, city, time-of-day
-2. Generates candidates via Jaccard/cosine similarity on user profiles
-3. Scores candidates with configurable weights
-4. Batch computes UserReco table nightly via cron
-5. Falls back to popularity-by-segment for cold-start users
-6. Optionally uses local matrix factorization behind a flag
+Implementing a refund approval system that:
+1. Updates database schema with new fields for approval tracking
+2. Modifies `requestCancellation` to create refunds with `PENDING_APPROVAL` status
+3. Creates new refund-approvals router with approval procedures
+4. Adds Admin UI components for refund approvals
+5. Adds Organizer UI components for refund approvals
 
 ## Completed Tasks
-- [x] Checkout git branch for reco feature
-- [x] Explore codebase structure - understand existing models, API patterns, and packages
-- [x] Create RECO_HYBRID_RECOMMENDATIONS_DOCUMENT.md
+- [x] Explore codebase structure and understand existing patterns
+- [x] Create documentation files (progress.md, REFUND_APPROVAL_SYSTEM_DOCUMENT.md)
+- [x] Update database schema - add fields to Refund model and update RefundStatus enum
+- [x] Run prisma generate to update client
+- [x] Modify requestCancellation procedure in booking router to use PENDING_APPROVAL status
+- [x] Create new refund-approvals.ts router with organizer.approve, admin.approve, and list procedures
+- [x] Create processApprovedRefund function with atomic transactions and waitlist integration
+- [x] Register refund-approvals router in main router
+- [x] Add Admin UI components for refund approvals
+- [x] Add Organizer UI components for refund approvals
+- [x] Run lint, build, and test checks
+- [x] Create PR with changes
+- [x] Wait for CI checks to pass
 
-## In Progress
-- [ ] Create progress.md documentation
-- [ ] Create Prisma schema for UserReco model
-
-## Pending Tasks
-- [ ] Create packages/reco package with engine.ts and config.ts
-- [ ] Implement user profile vector computation
-- [ ] Implement candidate generation (Jaccard/cosine similarity)
-- [ ] Implement scoring function with configurable weights
-- [ ] Implement batch compute for UserReco table
-- [ ] Implement cold-start fallback (popularity-by-segment)
-- [ ] Add optional local MF behind RECO_MF_PROVIDER flag
-- [ ] Create tRPC reco.forUser endpoint
-- [ ] Create cron API endpoint /api/cron/reco
-- [ ] Create GitHub workflow for nightly cron
-- [ ] Update Web/Mobile home to show "Recommended for you" row
-- [ ] Write unit tests
-- [ ] Write Playwright test
-- [ ] Create docs/reco.md
-- [ ] Run lint, typecheck, build, and tests
-- [ ] Create PR and wait for CI
+## CI Status
+- Lint & Type Check: PASS
+- Unit Tests: PASS
+- lint-typecheck-test-build: PASS
+- Code Coverage: PASS
+- SonarCloud Analysis: PASS
+- Secret Scanning: PASS
+- GitGuardian Security Checks: PASS
+- android-e2e: FAIL (pre-existing issue - same failure on main and PR #130)
 
 ## Architecture
 
-### User Profile Vector
-```typescript
-interface UserProfile {
-  catFreq: Record<Category, number>;  // Category frequency
-  priceP50: number;                    // Median price
-  preferredAreas: string[];            // Top cities
-  timeSlots: string[];                 // Preferred times
-}
-```
-
-### Scoring Formula
-```
-score = w_cat*catSim + w_price*priceBandSim + w_area*areaMatch + w_recency*recencyBoost + w_pop*popularity
-```
-
-### Database Model
+### Refund Model Changes
 ```prisma
-model UserReco {
-  userId    String
-  eventId   String
-  score     Float
-  reason    Json
-  createdAt DateTime @default(now())
-
-  @@id([userId, eventId])
+model Refund {
+  // Existing fields...
+  requestedBy         String?      // User ID who initiated the refund
+  organizerId         String?      // Event organizer ID
+  organizerApprovedAt DateTime?    // Timestamp for organizer approval
+  adminApprovedAt     DateTime?    // Timestamp for admin approval
 }
 ```
+
+### RefundStatus Enum Update
+```prisma
+enum RefundStatus {
+  PENDING_APPROVAL  // NEW - waiting for approvals
+  PENDING
+  APPROVED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REJECTED
+}
+```
+
+### Approval Flow
+1. User requests cancellation -> Refund created with `PENDING_APPROVAL` status
+2. Organizer approves -> `organizerApprovedAt` set
+3. Admin approves -> `adminApprovedAt` set
+4. Both approved -> `processApprovedRefund` triggers actual refund
 
 ## Notes
-- No external ML - all computation in Postgres SQL
-- Nightly refresh via cron
-- Top 50 recommendations per user
-- RECO_MF_PROVIDER flag controls optional local MF
+- Using existing authorization patterns: `requireAuth`, `requireOrganizer`, `checkEventOwnership`
+- Using atomic transactions with `prisma.$transaction` for data consistency
+- Maintaining existing waitlist offer logic after successful refunds
